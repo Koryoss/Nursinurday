@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=800">
+<title>CareFlow 인포그래픽</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap');
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Noto Sans KR', -apple-system, sans-serif;
+    background: #fff;
+    width: 800px;
+    margin: 0 auto;
+  }
+
+  /* ─── 헤더 ─── */
+  .header {
+    background: linear-gradient(160deg, #1A3A2A 0%, #28C840 60%, #4AE860 100%);
+    padding: 52px 48px 44px;
+    color: white;
+    position: relative;
+    overflow: hidden;
+  }
+  .header::before {
+    content: '';
+    position: absolute;
+    right: -40px; top: -40px;
+    width: 260px; height: 260px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.07);
+  }
+  .header::after {
+    content: '';
+    position: absolute;
+    right: 60px; bottom: -60px;
+    width: 180px; height: 180px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.05);
+  }
+  .header-badge {
+    display: inline-block;
+    background: rgba(255,255,255,0.2);
+    border: 1px solid rgba(255,255,255,0.3);
+    border-radius: 20px;
+    padding: 4px 14px;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 1px;
+    margin-bottom: 16px;
+    text-transform: uppercase;
+  }
+  .header h1 {
+    font-size: 44px;
+    font-weight: 900;
+    letter-spacing: -1px;
+    line-height: 1.1;
+    margin-bottom: 10px;
+  }
+  .header h1 span { color: #C8FFD0; }
+  .header .tagline {
+    font-size: 16px;
+    font-weight: 300;
+    opacity: 0.9;
+    line-height: 1.6;
+    max-width: 420px;
+  }
+  .header-icon {
+    position: absolute;
+    right: 48px; top: 44px;
+    font-size: 88px;
+    opacity: 0.9;
+  }
+
+  /* ─── 섹션 공통 ─── */
+  section {
+    padding: 44px 48px;
+  }
+  section:nth-child(even) { background: #FAFAF8; }
+  section:nth-child(odd)  { background: #fff; }
+
+  .section-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #28C840;
+    margin-bottom: 8px;
+  }
+  .section-title {
+    font-size: 26px;
+    font-weight: 800;
+    color: #1A2A1A;
+    margin-bottom: 24px;
+    letter-spacing: -0.5px;
+    line-height: 1.3;
+  }
+
+  /* ─── 섹션 1: 대상 ─── */
+  .persona-card {
+    background: linear-gradient(135deg, #F0FFF4 0%, #E8F8FF 100%);
+    border-radius: 20px;
+    padding: 28px 32px;
+    display: flex;
+    gap: 28px;
+    align-items: center;
+    border: 1px solid #D0EFD8;
+  }
+  .persona-avatar {
+    font-size: 72px;
+    line-height: 1;
+    flex-shrink: 0;
+  }
+  .persona-info h3 {
+    font-size: 20px;
+    font-weight: 800;
+    color: #1A2A1A;
+    margin-bottom: 8px;
+  }
+  .persona-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 12px;
+  }
+  .ptag {
+    background: white;
+    border: 1.5px solid #B8DFC4;
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #2A5A3A;
+  }
+  .symptom-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-top: 20px;
+  }
+  .symptom-item {
+    background: white;
+    border-radius: 14px;
+    padding: 16px 18px;
+    border-left: 4px solid #28C840;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  }
+  .symptom-item .emoji { font-size: 22px; margin-bottom: 6px; display: block; }
+  .symptom-item .name { font-size: 13px; font-weight: 700; color: #1A2A1A; }
+  .symptom-item .desc { font-size: 11px; color: #6A7A6A; margin-top: 2px; }
+
+  /* ─── 섹션 2: 기기 ─── */
+  .device-flow {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    justify-content: center;
+  }
+  .device-card {
+    background: white;
+    border-radius: 20px;
+    padding: 24px 20px;
+    text-align: center;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    flex: 1;
+    border: 2px solid transparent;
+    position: relative;
+  }
+  .device-card.watch  { border-color: #4A90D9; }
+  .device-card.iphone { border-color: #28C840; }
+  .device-card.server { border-color: #9B59B6; }
+  .device-card.web    { border-color: #E67E22; }
+
+  .device-icon { font-size: 44px; margin-bottom: 10px; display: block; }
+  .device-name { font-size: 14px; font-weight: 800; color: #1A2A1A; margin-bottom: 6px; }
+  .device-role { font-size: 11px; color: #6A7A6A; line-height: 1.5; }
+  .device-badge {
+    position: absolute;
+    top: -10px; left: 50%;
+    transform: translateX(-50%);
+    font-size: 10px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 10px;
+    white-space: nowrap;
+    letter-spacing: 0.5px;
+  }
+  .device-card.watch  .device-badge { background: #4A90D9; color: white; }
+  .device-card.iphone .device-badge { background: #28C840; color: white; }
+  .device-card.server .device-badge { background: #9B59B6; color: white; }
+  .device-card.web    .device-badge { background: #E67E22; color: white; }
+
+  .arrow-between {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0 8px;
+    flex-shrink: 0;
+  }
+  .arrow-between .arrow-icon { font-size: 18px; color: #B0C0B0; }
+  .arrow-between .arrow-text { font-size: 9px; color: #9AAA9A; text-align: center; margin-top: 4px; font-weight: 600; }
+
+  /* ─── 섹션 3: 작동 흐름 ─── */
+  .flow-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+  .flow-step {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+    position: relative;
+  }
+  .flow-step:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    left: 22px;
+    top: 52px;
+    width: 2px;
+    height: calc(100% - 12px);
+    background: linear-gradient(to bottom, #28C840, #E8F8EC);
+  }
+  .step-num {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    font-weight: 900;
+    color: white;
+    flex-shrink: 0;
+    position: relative;
+    z-index: 1;
+  }
+  .step-content {
+    background: white;
+    border-radius: 16px;
+    padding: 18px 20px;
+    flex: 1;
+    margin-bottom: 16px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    border: 1px solid #EEF4EE;
+  }
+  .step-title {
+    font-size: 15px;
+    font-weight: 800;
+    color: #1A2A1A;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .step-desc { font-size: 12px; color: #5A6A5A; line-height: 1.7; }
+  .step-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+  .stag {
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 8px;
+    letter-spacing: 0.3px;
+  }
+
+  /* ─── 섹션 4: 신호등 ─── */
+  .traffic-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+  .traffic-card {
+    border-radius: 16px;
+    padding: 20px 22px;
+    border: 2px solid transparent;
+  }
+  .traffic-card.green  { background: #F0FFF4; border-color: #A8DFB8; }
+  .traffic-card.yellow { background: #FFFEF0; border-color: #E8D878; }
+  .traffic-card.orange { background: #FFF8F0; border-color: #F0C888; }
+  .traffic-card.red    { background: #FFF0F0; border-color: #F0B8B8; }
+
+  .traffic-light { font-size: 28px; margin-bottom: 8px; display: block; }
+  .traffic-name  { font-size: 13px; font-weight: 800; color: #1A2A1A; margin-bottom: 4px; }
+  .traffic-nanda { font-size: 10px; font-weight: 600; color: #6A7A6A; margin-bottom: 6px; font-style: italic; }
+  .traffic-desc  { font-size: 11px; color: #5A6A5A; line-height: 1.6; }
+  .traffic-example {
+    margin-top: 8px;
+    padding: 6px 10px;
+    background: rgba(255,255,255,0.6);
+    border-radius: 8px;
+    font-size: 11px;
+    color: #3A4A3A;
+  }
+
+  /* ─── 섹션 5: 데이터 ─── */
+  .data-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 14px;
+  }
+  .data-card {
+    background: white;
+    border-radius: 14px;
+    padding: 18px 16px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+    border-top: 3px solid #28C840;
+    text-align: center;
+  }
+  .data-icon { font-size: 28px; margin-bottom: 8px; display: block; }
+  .data-name { font-size: 12px; font-weight: 800; color: #1A2A1A; margin-bottom: 6px; }
+  .data-items { font-size: 11px; color: #6A7A6A; line-height: 1.8; }
+  .data-storage {
+    margin-top: 8px;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 8px;
+    background: #F0FFF4;
+    color: #2A6A3A;
+    display: inline-block;
+  }
+
+  /* ─── 섹션 6: 원칙 ─── */
+  .principle-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .principle-card {
+    border-radius: 14px;
+    padding: 18px 20px;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+  .principle-card.yes { background: #F0FFF4; border: 1.5px solid #A8DFB8; }
+  .principle-card.no  { background: #FFF4F4; border: 1.5px solid #F0B8B8; }
+  .principle-icon { font-size: 22px; flex-shrink: 0; }
+  .principle-title { font-size: 13px; font-weight: 800; margin-bottom: 4px; }
+  .principle-card.yes .principle-title { color: #2A7A3A; }
+  .principle-card.no  .principle-title { color: #8A2A2A; }
+  .principle-desc { font-size: 11px; color: #5A6A5A; line-height: 1.6; }
+
+  /* ─── 섹션 7: 데이터 안전 ─── */
+  .safety-row {
+    display: flex;
+    gap: 14px;
+  }
+  .safety-card {
+    flex: 1;
+    background: white;
+    border-radius: 14px;
+    padding: 18px 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    text-align: center;
+    border-top: 3px solid #4A90D9;
+  }
+  .safety-icon { font-size: 26px; margin-bottom: 8px; display: block; }
+  .safety-name { font-size: 12px; font-weight: 800; color: #1A2A1A; margin-bottom: 4px; }
+  .safety-desc { font-size: 11px; color: #6A7A6A; line-height: 1.6; }
+
+  /* ─── 푸터 ─── */
+  .footer {
+    background: #1A2A1A;
+    padding: 28px 48px;
+    color: rgba(255,255,255,0.7);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .footer-logo { font-size: 22px; font-weight: 900; color: #28C840; }
+  .footer-note { font-size: 11px; line-height: 1.7; text-align: right; }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════ -->
+<!-- 헤더                          -->
+<!-- ══════════════════════════════ -->
+<div class="header">
+  <div class="header-badge">🌼 Digital Health · 2026</div>
+  <h1>Care<span>Flow</span></h1>
+  <p class="tagline">어지럼증이 있어도 일상이 흔들리지 않도록.<br>Apple Watch로 신체 신호를 관찰하고, AI가 곁에서 심리적으로 지원합니다.</p>
+  <div class="header-icon">🌼</div>
+</div>
+
+<!-- ══════════════════════════════ -->
+<!-- 섹션 1: 누구를 위한 앱?        -->
+<!-- ══════════════════════════════ -->
+<section>
+  <p class="section-label">01 · 대상</p>
+  <h2 class="section-title">어지럼증을 안고 살아가는 분들을 위해</h2>
+
+  <div class="persona-card">
+    <div class="persona-avatar">👩</div>
+    <div class="persona-info">
+      <h3>메니에르병 환자 · 58세 여성</h3>
+      <p style="font-size:13px; color:#5A6A5A; line-height:1.7;">
+        갑작스럽게 어지러워지는 순간, 혼자 두렵습니다.<br>
+        언제, 어디서, 왜 어지러운지 기록이 없어 병원에서 설명하기 어렵고,<br>
+        일상의 작은 선택들도 불안해집니다.
+      </p>
+      <div class="persona-tags">
+        <span class="ptag">🌀 어지럼증</span>
+        <span class="ptag">🔔 이명</span>
+        <span class="ptag">👂 이충만감</span>
+        <span class="ptag">📉 청력 변동</span>
+        <span class="ptag">😰 불안 · 고립감</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="symptom-grid" style="margin-top:20px;">
+    <div class="symptom-item">
+      <span class="emoji">😵</span>
+      <div class="name">예측 불가 발작</div>
+      <div class="desc">언제 어지러울지 알 수 없어 외출이 두렵습니다</div>
+    </div>
+    <div class="symptom-item">
+      <span class="emoji">🏥</span>
+      <div class="name">병원 설명의 어려움</div>
+      <div class="desc">60일 데이터가 없으면 의사에게 전달하기 어렵습니다</div>
+    </div>
+    <div class="symptom-item">
+      <span class="emoji">🔕</span>
+      <div class="name">이명으로 인한 소통 문제</div>
+      <div class="desc">큰 목소리로 말하게 되는 보상 행동이 나타납니다</div>
+    </div>
+    <div class="symptom-item">
+      <span class="emoji">💊</span>
+      <div class="name">약 복용 관리</div>
+      <div class="desc">약 복용 여부가 증상 패턴에 영향을 줍니다</div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════ -->
+<!-- 섹션 2: 어떤 기기?             -->
+<!-- ══════════════════════════════ -->
+<section>
+  <p class="section-label">02 · 구성</p>
+  <h2 class="section-title">Apple Watch 하나면 시작할 수 있습니다</h2>
+
+  <div class="device-flow">
+    <div class="device-card watch">
+      <span class="device-badge">착용</span>
+      <span class="device-icon">⌚</span>
+      <div class="device-name">Apple Watch</div>
+      <div class="device-role">신체 신호 수집<br>자이로 · 심박 · 음성</div>
+    </div>
+    <div class="arrow-between">
+      <div class="arrow-icon">→</div>
+      <div class="arrow-text">무선<br>전송</div>
+    </div>
+    <div class="device-card iphone">
+      <span class="device-badge">페어링</span>
+      <span class="device-icon">📱</span>
+      <div class="device-name">iPhone</div>
+      <div class="device-role">데이터 중계<br>HealthKit · 위치</div>
+    </div>
+    <div class="arrow-between">
+      <div class="arrow-icon">→</div>
+      <div class="arrow-text">WiFi<br>전송</div>
+    </div>
+    <div class="device-card server">
+      <span class="device-badge">분석</span>
+      <span class="device-icon">🖥</span>
+      <div class="device-name">CareFlow 서버</div>
+      <div class="device-role">NANDA 분류<br>AI 챗봇</div>
+    </div>
+    <div class="arrow-between">
+      <div class="arrow-icon">→</div>
+      <div class="arrow-text">웹<br>표시</div>
+    </div>
+    <div class="device-card web">
+      <span class="device-badge">확인</span>
+      <span class="device-icon">📊</span>
+      <div class="device-name">웹 대시보드</div>
+      <div class="device-role">기록 조회<br>AI 대화</div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════ -->
+<!-- 섹션 3: 어떻게 작동?           -->
+<!-- ══════════════════════════════ -->
+<section>
+  <p class="section-label">03 · 작동 방식</p>
+  <h2 class="section-title">3단계로 조용히, 자동으로 작동합니다</h2>
+
+  <div class="flow-steps">
+
+    <div class="flow-step">
+      <div class="step-num" style="background: linear-gradient(135deg,#2D6EA8,#5A9FD8);">1</div>
+      <div class="step-content">
+        <div class="step-title"><span>⌚</span> Apple Watch가 신체 신호를 수집합니다</div>
+        <div class="step-desc">
+          손목에서 초당 10회, 자이로스코프·가속도계·심박수를 측정합니다.<br>
+          이명 환자 특유의 목소리 크기도 마이크로 모니터링합니다.<br>
+          배터리를 아끼면서도 24시간 조용히 작동합니다.
+        </div>
+        <div class="step-tags">
+          <span class="stag" style="background:#EBF3FF;color:#2D6EA8;">자이로스코프 4.5 rad/s 기준</span>
+          <span class="stag" style="background:#EBF3FF;color:#2D6EA8;">심박 ±10 bpm 변화 감지</span>
+          <span class="stag" style="background:#EBF3FF;color:#2D6EA8;">기울기 22° 기준</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="flow-step">
+      <div class="step-num" style="background: linear-gradient(135deg,#28A840,#28C840);">2</div>
+      <div class="step-content">
+        <div class="step-title"><span>🧠</span> AI 알고리즘이 어지럼증 가능성을 판단합니다</div>
+        <div class="step-desc">
+          심박수 변화(35%)·회전 속도(25%)·기울기(15%)·움직임 정지(10%)·<br>
+          목소리 크기(5%)·시간대/약 복용(10%)을 종합해 신뢰도를 계산합니다.<br>
+          메니에르 특유 패턴 — "심박은 오르는데 몸은 가만히 있는" 상황도 감지합니다.
+        </div>
+        <div class="step-tags">
+          <span class="stag" style="background:#EBF5EC;color:#2A6A3A;">신뢰도 60% 이상 시 알림</span>
+          <span class="stag" style="background:#EBF5EC;color:#2A6A3A;">메니에르 역설 패턴 감지</span>
+          <span class="stag" style="background:#EBF5EC;color:#2A6A3A;">10초+ 지속 시 에피소드 기록</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="flow-step">
+      <div class="step-num" style="background: linear-gradient(135deg,#9B59B6,#C07AD0);">3</div>
+      <div class="step-content">
+        <div class="step-title"><span>💬</span> AI가 심리적으로 곁에서 지원합니다</div>
+        <div class="step-desc">
+          에피소드 발생 시 Watch에서 즉시 알림을 보내고, iPhone·웹 대시보드에 기록됩니다.<br>
+          AI 챗봇이 "언제, 어디서, 어떤 상황에서" 맥락을 이해하며 공감 대화를 나눕니다.<br>
+          60일 데이터를 병원 방문 시 의사에게 보여줄 수 있습니다.
+        </div>
+        <div class="step-tags">
+          <span class="stag" style="background:#F5EBFF;color:#6040A0;">AI 심리 지원 챗봇</span>
+          <span class="stag" style="background:#F5EBFF;color:#6040A0;">60일 에피소드 타임라인</span>
+          <span class="stag" style="background:#F5EBFF;color:#6040A0;">병원 방문용 기록 출력</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ══════════════════════════════ -->
+<!-- 섹션 4: 신호등 분류            -->
+<!-- ══════════════════════════════ -->
+<section>
+  <p class="section-label">04 · 상태 표시</p>
+  <h2 class="section-title">🚦 신호등으로 상태를 한눈에 알려줍니다</h2>
+  <p style="font-size:13px; color:#6A7A6A; margin-bottom:20px; line-height:1.7;">
+    간호학 NANDA-I 분류 체계를 신호등에 매핑해, 의료 전문 용어 없이도 상태를 직관적으로 이해할 수 있습니다.
+  </p>
+
+  <div class="traffic-grid">
+    <div class="traffic-card green">
+      <span class="traffic-light">🟢</span>
+      <div class="traffic-name">정상 · 안정</div>
+      <div class="traffic-nanda">Readiness for enhanced balance</div>
+      <div class="traffic-desc">신체 신호가 기준 범위 안에 있습니다. 지금 이 상태를 유지하세요.</div>
+      <div class="traffic-example">💬 "지금은 안정적입니다. 오늘 산책 어떠세요?"</div>
+    </div>
+    <div class="traffic-card yellow">
+      <span class="traffic-light">🟡</span>
+      <div class="traffic-name">주의 · 위험 신호</div>
+      <div class="traffic-nanda">Risk for falls</div>
+      <div class="traffic-desc">이상 신호가 감지되기 시작했습니다. 천천히 움직이세요.</div>
+      <div class="traffic-example">💬 "조금 주의가 필요해요. 급하게 일어서지 마세요."</div>
+    </div>
+    <div class="traffic-card orange">
+      <span class="traffic-light">🟠</span>
+      <div class="traffic-name">감지됨 · 현상 발생</div>
+      <div class="traffic-nanda">Actual impaired balance Related To vestibular input</div>
+      <div class="traffic-desc">어지럼증 패턴이 관찰됩니다. 안전한 자세를 취하세요.</div>
+      <div class="traffic-example">💬 "지금 앉거나 벽을 짚고 계세요. 기록할게요."</div>
+    </div>
+    <div class="traffic-card red">
+      <span class="traffic-light">🔴</span>
+      <div class="traffic-name">즉시 대응 필요</div>
+      <div class="traffic-nanda">PC: Vestibular disorder complication</div>
+      <div class="traffic-desc">5분 이상 지속되는 강한 신호입니다. 즉시 앉거나 누우세요.</div>
+      <div class="traffic-example">💬 "지금 바로 안전한 곳에 앉으세요. 필요시 1339"</div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════ -->
+<!-- 섹션 5: 수집 데이터            -->
+<!-- ══════════════════════════════ -->
+<section>
+  <p class="section-label">05 · 관찰 데이터</p>
+  <h2 class="section-title">일상의 데이터가 60일 기록이 됩니다</h2>
+
+  <div class="data-grid">
+    <div class="data-card" style="border-top-color:#4A90D9;">
+      <span class="data-icon">🔄</span>
+      <div class="data-name">움직임 신호</div>
+      <div class="data-items">회전 각속도<br>기울기 각도<br>가속도 변화<br>자세 추정</div>
+      <span class="data-storage">Watch 자동 수집</span>
+    </div>
+    <div class="data-card" style="border-top-color:#E74C3C;">
+      <span class="data-icon">🫀</span>
+      <div class="data-name">심박 · 건강</div>
+      <div class="data-items">실시간 심박수<br>안정 심박수<br>심박 변동성<br>혈중 산소</div>
+      <span class="data-storage">HealthKit 연동</span>
+    </div>
+    <div class="data-card" style="border-top-color:#27AE60;">
+      <span class="data-icon">😴</span>
+      <div class="data-name">수면 · 활동</div>
+      <div class="data-items">수면 시간·질<br>걸음 수<br>운동 시간<br>활동 에너지</div>
+      <span class="data-storage">HealthKit 연동</span>
+    </div>
+    <div class="data-card" style="border-top-color:#9B59B6;">
+      <span class="data-icon">🎙</span>
+      <div class="data-name">음성 데시벨</div>
+      <div class="data-items">환경음 크기<br>이명 보상행동<br>80dB+ 알림<br>발화 패턴</div>
+      <span class="data-storage">마이크 실시간</span>
+    </div>
+    <div class="data-card" style="border-top-color:#E67E22;">
+      <span class="data-icon">📍</span>
+      <div class="data-name">장소 · 맥락</div>
+      <div class="data-items">자주 방문 장소<br>에피소드 발생 위치<br>업무일/집/외출<br>시간대 기록</div>
+      <span class="data-storage">기기 내부 보관</span>
+    </div>
+    <div class="data-card" style="border-top-color:#1ABC9C;">
+      <span class="data-icon">💊</span>
+      <div class="data-name">일상 맥락</div>
+      <div class="data-items">약 복용 여부<br>오늘의 하루 유형<br>사용자 메모<br>병원 방문일</div>
+      <span class="data-storage">수동 입력</span>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════ -->
+<!-- 섹션 6: 원칙                   -->
+<!-- ══════════════════════════════ -->
+<section>
+  <p class="section-label">06 · 원칙</p>
+  <h2 class="section-title">CareFlow가 하는 것 · 하지 않는 것</h2>
+
+  <div class="principle-grid">
+    <div class="principle-card yes">
+      <div class="principle-icon">✅</div>
+      <div>
+        <div class="principle-title">관찰된 패턴을 공유합니다</div>
+        <div class="principle-desc">"기상 직후 균형감각 변화 패턴이 관찰됩니다"처럼 현상을 중립적으로 기록합니다.</div>
+      </div>
+    </div>
+    <div class="principle-card no">
+      <div class="principle-icon">❌</div>
+      <div>
+        <div class="principle-title">의료 진단은 하지 않습니다</div>
+        <div class="principle-desc">"어지럼증입니다", "메니에르 발작입니다"처럼 진단명을 내리지 않습니다.</div>
+      </div>
+    </div>
+    <div class="principle-card yes">
+      <div class="principle-icon">✅</div>
+      <div>
+        <div class="principle-title">항상 전문의 상담을 권합니다</div>
+        <div class="principle-desc">60일 기록을 가지고 이비인후과·신경과 전문의와 상담하도록 안내합니다.</div>
+      </div>
+    </div>
+    <div class="principle-card no">
+      <div class="principle-icon">❌</div>
+      <div>
+        <div class="principle-title">처방·투약 권고는 하지 않습니다</div>
+        <div class="principle-desc">"약을 줄이세요", "이 약을 드세요"처럼 의료 조언은 제공하지 않습니다.</div>
+      </div>
+    </div>
+    <div class="principle-card yes">
+      <div class="principle-icon">✅</div>
+      <div>
+        <div class="principle-title">위기 상황에 즉시 연결합니다</div>
+        <div class="principle-desc">심리적 위기 시 자살예방상담전화 1393, 정신건강위기상담 1577-0199를 안내합니다.</div>
+      </div>
+    </div>
+    <div class="principle-card no">
+      <div class="principle-icon">❌</div>
+      <div>
+        <div class="principle-title">위치 데이터를 서버로 보내지 않습니다</div>
+        <div class="principle-desc">장소 기록은 기기 내부(UserDefaults)에만 저장되며 외부로 전송되지 않습니다.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════ -->
+<!-- 푸터                          -->
+<!-- ══════════════════════════════ -->
+<div class="footer">
+  <div>
+    <div class="footer-logo">🌼 CareFlow</div>
+    <div style="font-size:11px;margin-top:4px;color:rgba(255,255,255,0.5);">v3.1 · 2026</div>
+  </div>
+  <div class="footer-note">
+    본 앱은 의료기기가 아닙니다. 의료 진단·처방의 근거로 사용할 수 없습니다.<br>
+    ICD-10 R42 (어지럼증) · H81.0 (메니에르병) · NANDA-I 분류 참조<br>
+    신체 신호 패턴 관찰 및 심리적 지원 목적으로만 사용됩니다.
+  </div>
+</div>
+
+</body>
+</html>

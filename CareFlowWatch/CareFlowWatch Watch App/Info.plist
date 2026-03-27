@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>CareFlow Watch가 마이크를 사용하여 음성 크기를 측정합니다. 이명으로 인해 무의식적으로 목소리가 커질 때 진동으로 알려드립니다. 음성 내용은 녹음되지 않습니다.</string>
+	<key>NSHealthShareUsageDescription</key>
+	<string>CareFlow Watch가 심박수와 활동 데이터를 읽어 어지럼증 감지에 활용합니다.</string>
+	<key>NSMotionUsageDescription</key>
+	<string>CareFlow Watch가 자이로스코프와 가속도계를 사용하여 어지럼증을 실시간으로 감지합니다.</string>
+	<key>WKApplication</key>
+	<true/>
+	<key>WKCompanionAppBundleIdentifier</key>
+	<string>com.careflow.watch</string>
+	<key>WKWatchOnly</key>
+	<false/>
+</dict>
+</plist>
