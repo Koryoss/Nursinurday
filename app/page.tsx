@@ -203,30 +203,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 기능 카드 */}
-      <section style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
-        gap: '20px',
-        maxWidth: '1000px',
-        margin: '0 auto',
-        padding: '60px 24px',
-      }}>
-        {features.map((f, i) => (
-          <div key={i} style={{
-            background: 'rgba(255,255,255,0.7)',
-            backdropFilter: 'blur(10px)',
-            border: '1px solid rgba(61,43,31,0.08)',
-            borderRadius: '20px',
-            padding: '28px',
-          }}>
-            <div style={{ fontSize: '36px', marginBottom: '14px' }}>{f.icon}</div>
-            <div style={{ fontSize: '18px', fontWeight: 700, marginBottom: '8px' }}>{f.title}</div>
-            <div style={{ fontSize: '14px', color: '#6B5344', lineHeight: 1.6 }}>{f.desc}</div>
-          </div>
-        ))}
-      </section>
-
       {/* 푸터 */}
       <footer style={{
         textAlign: 'center',
