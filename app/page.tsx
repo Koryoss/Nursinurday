@@ -58,7 +58,7 @@ export default function HomePage() {
           borderRadius: '20px',
           marginBottom: '24px',
         }}>
-          🌿 메니에르병 일상 관리 솔루션
+          🌿 일상 기록 솔루션
         </div>
 
         <h1 style={{
@@ -68,7 +68,7 @@ export default function HomePage() {
           marginBottom: '20px',
           letterSpacing: '-1px',
         }}>
-          어지럼증과 이명,<br />매일 함께 관리하세요
+          어지럼증과 이명,<br />매일 함께 기록하세요
         </h1>
 
         <p style={{
