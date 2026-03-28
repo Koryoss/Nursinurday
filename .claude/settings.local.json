@@ -9,7 +9,16 @@
       "Bash(git fetch:*)",
       "Bash(curl -s \"https://api.github.com/repos/Koryoss/Nursinurday/git/trees/main?recursive=1\")",
       "Bash(git rm:*)",
-      "Bash(npm run:*)"
+      "Bash(npm run:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(vercel whoami:*)",
+      "Bash(vercel project:*)",
+      "Bash(vercel inspect:*)",
+      "Bash(head -15 grep -n \"<title\\\\|class=\"\"page-title\"\"\\\\|<h1\\\\|<h2\" /Users/jeong-yujin/Desktop/Nursinurday/careflow/public/careflow_chat_states.html)",
+      "Bash(sed -n '348,356p' /Users/jeong-yujin/Desktop/Nursinurday/careflow/public/careflow_calendar.html)",
+      "Bash(sed -n '354,362p' /Users/jeong-yujin/Desktop/Nursinurday/careflow/public/careflow_chat_states.html)"
     ]
   }
 }

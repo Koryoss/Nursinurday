@@ -188,9 +188,9 @@
     font-size: 10px; font-weight: 700; color: #fff; margin-bottom: 3px;
   }
   .day-circle.empty { background: transparent; border: 1.5px dashed #EAD9BA; color: #EAD9BA; }
-  .dc-safe    { background: #28C840; }
-  .dc-monitor { background: #f59e0b; }
-  .dc-urgent  { background: #ef4444; }
+  .dc-safe    { background: #5BA88A; }
+  .dc-monitor { background: rgba(91,168,138,0.4); }
+  .dc-urgent  { background: rgba(91,168,138,0.18); }
 
   .mini-dots { display: flex; gap: 2px; justify-content: center; }
   .mini-dot  { width: 4px; height: 4px; border-radius: 50%; }
@@ -561,25 +561,25 @@
 
         <!-- 달력 — 신호등 3색 -->
         <div class="month-grid">
-          <div class="month-cell" style="background:#dcfce7;color:#16a34a">1<div class="cell-dot" style="background:#F5A87C"></div></div>
+          <div class="month-cell" style="background:#5BA88A;color:#fff">1<div class="cell-dot" style="background:#F5A87C"></div></div>
           <div class="month-cell" style="background:#FFFBF3;color:#A08866">2</div>
           <div class="month-cell" style="background:#FFFBF3;color:#A08866">3</div>
-          <div class="month-cell" style="background:#dcfce7;color:#16a34a">4<div class="cell-dot" style="background:#EE9FB8"></div></div>
-          <div class="month-cell" style="background:#dcfce7;color:#16a34a">5<div class="cell-dot" style="background:#E8C86E"></div></div>
+          <div class="month-cell" style="background:#5BA88A;color:#fff">4<div class="cell-dot" style="background:#EE9FB8"></div></div>
+          <div class="month-cell" style="background:#5BA88A;color:#fff">5<div class="cell-dot" style="background:#E8C86E"></div></div>
           <div class="month-cell" style="background:#FFFBF3;color:#A08866">6</div>
           <div class="month-cell" style="background:#FFFBF3;color:#A08866">7</div>
-          <div class="month-cell" style="background:#fef9c3;color:#a16207">8<div class="cell-dot" style="background:#EE9FB8"></div></div>
-          <div class="month-cell" style="background:#dcfce7;color:#16a34a">9<div class="cell-dot" style="background:#F5A87C"></div></div>
+          <div class="month-cell" style="background:rgba(91,168,138,0.25);color:#1e5c44">8<div class="cell-dot" style="background:#EE9FB8"></div></div>
+          <div class="month-cell" style="background:#5BA88A;color:#fff">9<div class="cell-dot" style="background:#F5A87C"></div></div>
           <div class="month-cell" style="background:#FFFBF3;color:#A08866">10</div>
           <div class="month-cell" style="background:#FFFBF3;color:#A08866">11</div>
-          <div class="month-cell" style="background:#dcfce7;color:#16a34a">12<div class="cell-dot" style="background:#B8A8D4"></div></div>
-          <div class="month-cell" style="background:#fef9c3;color:#a16207">13<div class="cell-dot" style="background:#EE9FB8"></div></div>
+          <div class="month-cell" style="background:#5BA88A;color:#fff">12<div class="cell-dot" style="background:#B8A8D4"></div></div>
+          <div class="month-cell" style="background:rgba(91,168,138,0.25);color:#1e5c44">13<div class="cell-dot" style="background:#EE9FB8"></div></div>
           <div class="month-cell" style="background:#FFFBF3;color:#A08866">14</div>
-          <div class="month-cell" style="background:#fef9c3;color:#a16207">15<div class="cell-dot" style="background:#EE9FB8"></div></div>
-          <div class="month-cell" style="background:#dcfce7;color:#16a34a">16<div class="cell-dot" style="background:#F5A87C"></div></div>
-          <div class="month-cell" style="background:#fef9c3;color:#a16207">17<div class="cell-dot" style="background:#B8A8D4"></div></div>
+          <div class="month-cell" style="background:rgba(91,168,138,0.25);color:#1e5c44">15<div class="cell-dot" style="background:#EE9FB8"></div></div>
+          <div class="month-cell" style="background:#5BA88A;color:#fff">16<div class="cell-dot" style="background:#F5A87C"></div></div>
+          <div class="month-cell" style="background:rgba(91,168,138,0.25);color:#1e5c44">17<div class="cell-dot" style="background:#B8A8D4"></div></div>
           <div class="month-cell" style="background:#FFFBF3;color:#A08866">18</div>
-          <div class="month-cell today-cell" style="background:#dcfce7;color:#16a34a">19<div class="cell-dot" style="background:#EE9FB8"></div></div>
+          <div class="month-cell today-cell" style="background:#5BA88A;color:#fff">19<div class="cell-dot" style="background:#EE9FB8"></div></div>
           <div class="month-cell" style="background:#FFFBF3;color:#EAD9BA">20</div>
           <div class="month-cell" style="background:#FFFBF3;color:#EAD9BA">21</div>
           <div class="month-cell" style="background:#FFFBF3;color:#EAD9BA">22</div>
@@ -596,8 +596,8 @@
 
         <!-- 달력 범례 -->
         <div style="display:flex;flex-wrap:wrap;gap:6px 12px;margin-bottom:10px">
-          <span style="display:flex;align-items:center;gap:4px;font-size:9.5px;color:#8B6F57"><span style="width:10px;height:10px;border-radius:3px;background:#dcfce7;display:inline-block"></span>3회+ 기록</span>
-          <span style="display:flex;align-items:center;gap:4px;font-size:9.5px;color:#8B6F57"><span style="width:10px;height:10px;border-radius:3px;background:#fef9c3;display:inline-block"></span>1-2회 기록</span>
+          <span style="display:flex;align-items:center;gap:4px;font-size:9.5px;color:#8B6F57"><span style="width:10px;height:10px;border-radius:3px;background:#5BA88A;display:inline-block"></span>3회+ 기록</span>
+          <span style="display:flex;align-items:center;gap:4px;font-size:9.5px;color:#8B6F57"><span style="width:10px;height:10px;border-radius:3px;background:rgba(91,168,138,0.35);display:inline-block"></span>1-2회 기록</span>
           <span style="display:flex;align-items:center;gap:4px;font-size:9.5px;color:#8B6F57"><span style="width:10px;height:10px;border-radius:3px;background:#FFFBF3;border:1px solid #EAD9BA;display:inline-block"></span>미기록</span>
         </div>
 
@@ -637,9 +637,9 @@
     <div class="color-row"><div class="color-swatch" style="background:#EE9FB8"></div>감정 — 로즈</div>
     <div class="color-row"><div class="color-swatch" style="background:#B8A8D4"></div>관계 — 라벤더</div>
     <div class="color-row"><div class="color-swatch" style="background:#E8C86E"></div>의미 — 골드</div>
-    <div class="color-divider" style="margin-top:10px">기록 달성</div>
-    <div class="color-row"><div class="color-swatch" style="background:#dcfce7;border:1px solid #86efac"></div>3회+ 기록</div>
-    <div class="color-row"><div class="color-swatch" style="background:#fef9c3;border:1px solid #fde047"></div>1-2회 기록</div>
+    <div class="color-divider" style="margin-top:10px">기록 달성 (Heatmap)</div>
+    <div class="color-row"><div class="color-swatch" style="background:#5BA88A"></div>3회+ 기록 (진한 녹)</div>
+    <div class="color-row"><div class="color-swatch" style="background:rgba(91,168,138,0.35);border:1px solid rgba(91,168,138,0.4)"></div>1-2회 기록 (연한 녹)</div>
     <div class="color-row"><div class="color-swatch" style="background:#FFFBF3;border:1px solid #EAD9BA"></div>미기록</div>
   </div>
 

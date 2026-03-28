@@ -3,7 +3,7 @@
 import { useState } from 'react'
 
 const PREVIEW_TABS = [
-  { id: 'measurement',  label: '📏 측정',    src: '/careflow_measurement.html' },
+  { id: 'measurement',  label: '📝 기록',    src: '/careflow_measurement.html' },
   { id: 'notification', label: '🔔 알림',    src: '/careflow_notification.html' },
   { id: 'chat',         label: '💬 채팅',    src: '/careflow_chat_states.html' },
   { id: 'dashboard',    label: '📊 대시보드', src: '/careflow_dashboard_mockup.html' },

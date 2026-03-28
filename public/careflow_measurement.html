@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CareFlow — 측정</title>
+<title>CareFlow — 기록</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
@@ -249,20 +249,17 @@
 
   <!-- PHONE 1 — 이명 측정 -->
   <div class="screen-wrap">
-    <div class="screen-label">이명 측정</div>
+    <div class="screen-label">이명 기록</div>
     <div class="phone">
       <div class="phone-header">
         <div class="header-left">
           <div class="header-dot"></div>
-          <span class="header-title">이명 측정</span>
+          <span class="header-title">이명 기록</span>
         </div>
-        <span class="status-badge status-watch">
-          <span class="status-dot dot-y"></span>주의
-        </span>
       </div>
 
       <div class="phone-body">
-        <p class="sec-title">실시간 소음 파형</p>
+        <p class="sec-title">실시간 소음 기록</p>
 
         <!-- 사운드 웨이브 -->
         <div class="wave-container">
@@ -297,35 +294,32 @@
           <p class="gauge-sub">⚠️ 평소보다 6 dB 높아졌습니다</p>
         </div>
 
-        <!-- 이명 유발 위험도 -->
+        <!-- 오늘 소음 노출 기록 -->
         <div class="gauge-card">
           <div class="gauge-label">
-            <span class="gauge-name">이명 유발 위험도</span>
-            <span class="gauge-value" style="font-size:13px;color:#f59e0b">중간</span>
+            <span class="gauge-name">오늘 소음 노출 기록</span>
+            <span><span class="gauge-value">2:18</span><span class="gauge-unit"> h</span></span>
           </div>
           <div class="gauge-track">
-            <div class="gauge-fill fill-warn" style="width:55%"></div>
+            <div class="gauge-fill" style="width:55%;background:#F5A87C"></div>
           </div>
-          <p class="gauge-sub">오늘 소음 노출 누적: 2시간 18분</p>
+          <p class="gauge-sub">오늘 누적 소음 노출 시간 · 3월 29일 기준</p>
         </div>
 
-        <button class="measure-btn btn-stop">■ 측정 중지</button>
+        <button class="measure-btn btn-stop">■ 기록 중지</button>
       </div>
     </div>
   </div>
 
   <!-- PHONE 2 — 어지러움 측정 -->
   <div class="screen-wrap">
-    <div class="screen-label">어지러움 측정</div>
+    <div class="screen-label">어지러움 일지</div>
     <div class="phone">
       <div class="phone-header">
         <div class="header-left">
           <div class="header-dot"></div>
-          <span class="header-title">어지러움 측정</span>
+          <span class="header-title">어지러움 일지</span>
         </div>
-        <span class="status-badge status-normal">
-          <span class="status-dot dot-g"></span>정상
-        </span>
       </div>
 
       <div class="phone-body">
@@ -394,19 +388,19 @@
           </div>
         </div>
 
-        <!-- 어지러움 위험도 -->
+        <!-- 오늘 이상 기록 -->
         <div class="gauge-card" style="margin-top:4px">
           <div class="gauge-label">
-            <span class="gauge-name">어지러움 위험도</span>
-            <span class="gauge-value" style="font-size:13px;color:#28C840">낮음</span>
+            <span class="gauge-name">오늘 이상 기록</span>
+            <span class="gauge-value" style="font-size:13px;color:#5BA88A">0회</span>
           </div>
           <div class="gauge-track">
-            <div class="gauge-fill fill-ok" style="width:18%"></div>
+            <div class="gauge-fill" style="width:5%;background:#5BA88A"></div>
           </div>
-          <p class="gauge-sub">최근 이상 감지: 없음</p>
+          <p class="gauge-sub">오늘 어지러움 기록: 없음 · 3월 29일 기준</p>
         </div>
 
-        <button class="measure-btn btn-start">▶ 측정 시작</button>
+        <button class="measure-btn btn-start">▶ 기록 시작</button>
       </div>
     </div>
   </div>
@@ -427,27 +421,27 @@
 
     <!-- Watch 1 — 이명 측정 -->
     <div class="watch-wrap">
-      <div class="watch-label">이명 측정</div>
+      <div class="watch-label">이명 기록</div>
       <div class="watch">
         <div class="watch-icon">🎙</div>
         <div class="watch-reading">
           <strong>72 dB</strong>
           현재 소음 수준
         </div>
-        <button class="watch-btn watch-btn-body">측정 시작</button>
+        <button class="watch-btn watch-btn-body">기록 시작</button>
       </div>
     </div>
 
     <!-- Watch 2 — 어지러움 측정 -->
     <div class="watch-wrap">
-      <div class="watch-label">어지러움 측정</div>
+      <div class="watch-label">어지러움 기록</div>
       <div class="watch">
         <div class="watch-icon">❤️</div>
         <div class="watch-reading">
           <strong>74 BPM</strong>
           심박수 안정
         </div>
-        <button class="watch-btn watch-btn-relation">측정 시작</button>
+        <button class="watch-btn watch-btn-relation">기록 시작</button>
       </div>
     </div>
 
@@ -472,11 +466,11 @@
 ════════════════════════════════ -->
 <div class="info-row">
   <div class="info-card">
-    <h3>🎙 이명 측정 원리</h3>
+    <h3>🎙 이명 기록 원리</h3>
     <p>iPhone 내장 마이크(AVFoundation)로 주변 소음을 실시간 측정. 환경 소음이 높거나 내 목소리 레벨이 평소보다 올라가면 햅틱으로 즉시 알림.</p>
   </div>
   <div class="info-card">
-    <h3>🔄 어지러움 측정 원리</h3>
+    <h3>🔄 어지러움 기록 원리</h3>
     <p>CoreMotion API로 자이로스코프(회전) · 가속도계(기울기)를 실시간 수집. HealthKit 심박수와 결합해 어지러움 발생 패턴 분석.</p>
   </div>
   <div class="info-card">

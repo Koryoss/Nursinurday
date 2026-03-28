@@ -1,9 +1,32 @@
 import Link from 'next/link'
 
 const whyNeeded = [
-  { icon: '🔄', title: '예측 불가능한 반복',  desc: '어지럼증과 이명은 언제 발생할지 모르기 때문에 일상적인 기록이 치료의 핵심이에요.' },
+  { icon: '🔄', title: '예측 불가능한 반복',  desc: '어지럼증과 이명은 언제 발생할지 모르기 때문에 일상적인 기록을 통해 자신의 패턴을 파악하고 더 나은 자기 관리를 할 수 있어요.' },
   { icon: '🏥', title: '진료실 밖의 시간',    desc: '증상은 대부분 일상에서 발생해요. 의사를 만나는 짧은 시간에 6개월치 패턴을 기억하긴 어렵죠.' },
   { icon: '📈', title: '기록이 치료를 바꾼다', desc: '어떤 상황에서 증상이 심해지는지 데이터로 파악하면 생활 습관 조정과 치료 방향 결정에 도움이 돼요.' },
+]
+
+const axes = [
+  {
+    color: '#F5A87C', bg: 'rgba(245,168,124,0.12)', label: '몸', sub: '신체 증상 · 에너지',
+    items: ['이명이 있었나요?', '어지러움이 있었나요?', '피로감을 느꼈나요?', '두통이 있었나요?'],
+    maxPts: 4,
+  },
+  {
+    color: '#EE9FB8', bg: 'rgba(238,159,184,0.12)', label: '감정', sub: '불안 · 긴장 · 감정 기복',
+    items: ['불안감을 느꼈나요?', '예민하거나 짜증이 났나요?', '두려움이 있었나요?', '기분 변화가 심했나요?'],
+    maxPts: 4,
+  },
+  {
+    color: '#B8A8D4', bg: 'rgba(184,168,212,0.12)', label: '관계', sub: '연결 · 고립 · 사회 참여',
+    items: ['사람들과 함께했나요?', '고립감을 느꼈나요?', '소통이 힘들었나요?'],
+    maxPts: 3,
+  },
+  {
+    color: '#E8C86E', bg: 'rgba(232,200,110,0.12)', label: '의미', sub: '방향 · 성취 · 삶의 질',
+    items: ['성취감을 느꼈나요?', '하루가 의미 있었나요?', '계획한 일을 했나요?'],
+    maxPts: 3,
+  },
 ]
 
 export default function HomePage() {
@@ -123,27 +146,59 @@ export default function HomePage() {
             gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
             gap: '16px',
           }}>
-            {[
-              { color: '#F5A87C', bg: 'rgba(245,168,124,0.12)', label: '몸', sub: '신체 증상 · 에너지', desc: '이명, 어지러움, 피로감 등 몸에서 느껴지는 신호를 기록해요. 언제, 어떤 강도로 나타나는지 파악할 수 있어요.' },
-              { color: '#EE9FB8', bg: 'rgba(238,159,184,0.12)', label: '감정', sub: '불안 · 긴장 · 감정 기복', desc: '증상으로 인한 불안, 예민함, 두려움을 기록해요. 감정 패턴이 보이면 더 잘 대처할 수 있어요.' },
-              { color: '#B8A8D4', bg: 'rgba(184,168,212,0.12)', label: '관계', sub: '연결 · 고립 · 사회 참여', desc: '이명과 어지러움이 사회적 활동을 얼마나 제한하는지 살펴봐요. 고립감을 인식하면 연결을 찾을 수 있어요.' },
-              { color: '#E8C86E', bg: 'rgba(232,200,110,0.12)', label: '의미', sub: '방향 · 성취 · 삶의 질', desc: '증상 속에서도 의미 있는 활동을 했는지 돌아봐요. 작은 성취가 치료 동기를 유지하는 데 중요해요.' },
-            ].map((axis, i) => (
+            {axes.map((axis, i) => (
               <div key={i} style={{
                 background: axis.bg,
                 borderRadius: '20px',
-                padding: '28px 24px',
+                padding: '24px',
                 border: `1px solid ${axis.color}40`,
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '0',
               }}>
                 <div style={{
                   width: '36px', height: '36px', borderRadius: '50%',
-                  background: axis.color, marginBottom: '14px',
+                  background: axis.color, marginBottom: '12px',
                 }} />
-                <div style={{ fontSize: '18px', fontWeight: 800, color: '#3D2B1F', marginBottom: '4px' }}>{axis.label}</div>
-                <div style={{ fontSize: '12px', fontWeight: 600, color: axis.color, marginBottom: '10px' }}>{axis.sub}</div>
-                <div style={{ fontSize: '13px', color: '#6B5344', lineHeight: 1.65 }}>{axis.desc}</div>
+                <div style={{ fontSize: '18px', fontWeight: 800, color: '#3D2B1F', marginBottom: '3px' }}>{axis.label}</div>
+                <div style={{ fontSize: '12px', fontWeight: 600, color: axis.color, marginBottom: '14px' }}>{axis.sub}</div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '7px', marginBottom: '16px' }}>
+                  {axis.items.map((item, j) => (
+                    <div key={j} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: '#6B5344' }}>
+                      <div style={{
+                        width: '16px', height: '16px', borderRadius: '5px', flexShrink: 0,
+                        background: `${axis.color}30`, border: `1.5px solid ${axis.color}80`,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        fontSize: '9px', color: axis.color, fontWeight: 700,
+                      }}>✓</div>
+                      {item}
+                    </div>
+                  ))}
+                </div>
+                <div style={{
+                  marginTop: 'auto',
+                  display: 'inline-flex', alignItems: 'center', gap: '6px',
+                  background: `${axis.color}20`, borderRadius: '8px',
+                  padding: '5px 10px', alignSelf: 'flex-start',
+                }}>
+                  <span style={{ fontSize: '11px', fontWeight: 700, color: axis.color }}>최대 {axis.maxPts}점 / 일</span>
+                </div>
               </div>
             ))}
+          </div>
+
+          {/* 점수 안내 */}
+          <div style={{
+            marginTop: '24px',
+            background: 'rgba(61,43,31,0.04)',
+            borderRadius: '16px',
+            padding: '18px 22px',
+            fontSize: '13px',
+            color: '#6B5344',
+            lineHeight: 1.7,
+          }}>
+            <strong style={{ color: '#3D2B1F' }}>📊 주간 · 월간 통계</strong>는 일일 점수의 단순 평균으로 계산돼요.
+            예를 들어 주간 몸 점수 = 7일 점수 합 ÷ 기록한 날 수. 기록이 쌓일수록 나만의 패턴이 선명하게 보여요.
           </div>
         </div>
       </section>
