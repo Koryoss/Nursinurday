@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:api.github.com)",
+      "Bash(git checkout:*)",
+      "Bash(git rebase:*)",
+      "Bash(git restore:*)",
+      "Bash(git pull:*)",
+      "Bash(git fetch:*)",
+      "Bash(curl -s \"https://api.github.com/repos/Koryoss/Nursinurday/git/trees/main?recursive=1\")",
+      "Bash(git rm:*)",
+      "Bash(npm run:*)"
+    ]
+  }
+}
