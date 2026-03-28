@@ -336,54 +336,51 @@
               </div>
               <p style="font-size:10px;color:#A08866">정상 범위 · 안정</p>
             </div>
-            <div style="margin-left:auto">
-              <span class="status-badge status-normal" style="font-size:10px">정상</span>
+          </div>
+        </div>
+
+        <!-- 보행 안정성 — HealthKit -->
+        <p class="sec-title" style="margin-top:10px">보행 안정성 추이 — Apple 건강 데이터 연동</p>
+        <div class="sensor-card">
+          <div class="sensor-header">
+            <span class="sensor-name">🚶 보행 안정성</span>
+            <span class="sensor-live" style="color:#5BA88A">● HealthKit</span>
+          </div>
+          <div class="sensor-grid">
+            <div class="sensor-val">
+              <div class="val-num" style="color:#5BA88A">높음</div>
+              <div class="val-axis">현재 안정성</div>
+            </div>
+            <div class="sensor-val">
+              <div class="val-num" style="color:#F5A87C">1.12</div>
+              <div class="val-axis">보행속도 (m/s)</div>
+            </div>
+            <div class="sensor-val">
+              <div class="val-num" style="color:#B8A8D4">3%</div>
+              <div class="val-axis">비대칭성</div>
             </div>
           </div>
         </div>
 
-        <!-- 자이로스코프 -->
-        <p class="sec-title" style="margin-top:10px">자이로스코프 — CoreMotion</p>
+        <!-- 걸음 비대칭 기록 — HealthKit -->
+        <p class="sec-title" style="margin-top:10px">걸음 비대칭 기록 — Apple 건강 데이터 연동</p>
         <div class="sensor-card">
           <div class="sensor-header">
-            <span class="sensor-name">🔄 회전 감지</span>
-            <span class="sensor-live">● LIVE</span>
+            <span class="sensor-name">📐 걸음 패턴</span>
+            <span class="sensor-live" style="color:#5BA88A">● HealthKit</span>
           </div>
           <div class="sensor-grid">
             <div class="sensor-val">
-              <div class="val-num" style="color:#F5A87C">0.12</div>
-              <div class="val-axis">X (°/s)</div>
+              <div class="val-num" style="color:#EE9FB8">0.68</div>
+              <div class="val-axis">보폭 (m)</div>
             </div>
             <div class="sensor-val">
-              <div class="val-num" style="color:#EE9FB8">−0.03</div>
-              <div class="val-axis">Y (°/s)</div>
+              <div class="val-num" style="color:#E8C86E">22%</div>
+              <div class="val-axis">이중지지시간</div>
             </div>
             <div class="sensor-val">
-              <div class="val-num" style="color:#B8A8D4">0.07</div>
-              <div class="val-axis">Z (°/s)</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- 가속도계 -->
-        <p class="sec-title" style="margin-top:10px">가속도계 — CoreMotion</p>
-        <div class="sensor-card">
-          <div class="sensor-header">
-            <span class="sensor-name">📐 가속도 감지</span>
-            <span class="sensor-live">● LIVE</span>
-          </div>
-          <div class="sensor-grid">
-            <div class="sensor-val">
-              <div class="val-num" style="color:#F5A87C">0.01</div>
-              <div class="val-axis">X (g)</div>
-            </div>
-            <div class="sensor-val">
-              <div class="val-num" style="color:#EE9FB8">−0.98</div>
-              <div class="val-axis">Y (g)</div>
-            </div>
-            <div class="sensor-val">
-              <div class="val-num" style="color:#B8A8D4">0.14</div>
-              <div class="val-axis">Z (g)</div>
+              <div class="val-num" style="color:#5BA88A">안정</div>
+              <div class="val-axis">종합 평가</div>
             </div>
           </div>
         </div>
@@ -471,13 +468,13 @@
   </div>
   <div class="info-card">
     <h3>🔄 어지러움 기록 원리</h3>
-    <p>CoreMotion API로 자이로스코프(회전) · 가속도계(기울기)를 실시간 수집. HealthKit 심박수와 결합해 어지러움 발생 패턴 분석.</p>
+    <p>Apple HealthKit의 보행 데이터를 활용해요. 어지러움 발생 시점과 <strong style="color:#3D2B1F">보행 안정성 추이</strong> · <strong style="color:#3D2B1F">걸음 비대칭성</strong>을 나란히 기록해 패턴을 파악해요. "보행 데이터가 나쁘다"가 아닌, <em>"당시 기록된 보행 데이터입니다"</em>로만 미러링해요.</p>
   </div>
   <div class="info-card">
     <h3>⌚ 워치 연동 센서</h3>
     <div class="sensor-row"><div class="sensor-badge" style="background:#F5A87C"></div>심박수 — HealthKit 자동 수집</div>
-    <div class="sensor-row"><div class="sensor-badge" style="background:#EE9FB8"></div>자이로스코프 — CoreMotion</div>
-    <div class="sensor-row"><div class="sensor-badge" style="background:#B8A8D4"></div>가속도계 — CoreMotion</div>
+    <div class="sensor-row"><div class="sensor-badge" style="background:#5BA88A"></div>보행 안정성 추이 — HealthKit</div>
+    <div class="sensor-row"><div class="sensor-badge" style="background:#B8A8D4"></div>걸음 비대칭 기록 — HealthKit</div>
     <div class="sensor-row"><div class="sensor-badge" style="background:#E8C86E"></div>주변 소음 — AVFoundation</div>
   </div>
   <div class="info-card">
