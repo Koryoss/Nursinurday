@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CareFlow — careflow_dashboard_mockup (수국 버터크림)</title>
+<title>CareFlow — Dashboard Mockup</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -16,23 +16,6 @@
   }
 
   /* ── 레이아웃 ── */
-  .page-title {
-    text-align: center;
-    margin-bottom: 48px;
-  }
-  .page-title h1 {
-    font-size: 13px;
-    letter-spacing: 3px;
-    text-transform: uppercase;
-    color: #28C840;
-    font-weight: 600;
-    margin-bottom: 6px;
-  }
-  .page-title p {
-    color: #8B6F57;
-    font-size: 12px;
-  }
-
   .screens {
     display: flex;
     gap: 32px;
@@ -64,13 +47,9 @@
     border: 2px solid #EAD9BA;
     overflow: hidden;
     position: relative;
-    box-shadow: 0 24px 60px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05);
+    box-shadow: 0 24px 60px rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,0.6);
     display: flex;
     flex-direction: column;
-  }
-  .phone.wide {
-    width: 360px;
-    height: 680px;
   }
 
   /* 상단 노치 */
@@ -90,7 +69,7 @@
   /* ── 공통 헤더 ── */
   .phone-header {
     background: #FFF8EC;
-    border-bottom: 1px solid #e9f0eb;
+    border-bottom: 1px solid #EAD9BA;
     padding: 20px 16px 12px;
     display: flex;
     align-items: center;
@@ -117,7 +96,7 @@
   .tab-bar {
     display: flex;
     gap: 1px;
-    background: #f1f5f2;
+    background: rgba(61,43,31,0.06);
     border-radius: 10px;
     padding: 3px;
     margin: 12px 14px 0;
@@ -149,7 +128,7 @@
 
   /* ── 섹션 제목 ── */
   .section-title {
-    font-size: 11px;
+    font-size: 10px;
     font-weight: 700;
     letter-spacing: 1px;
     text-transform: uppercase;
@@ -159,16 +138,19 @@
   }
   .section-title:first-child { margin-top: 0; }
 
+  /* ── 4축 색 (단일 계열) ── */
+  /* 몸·감정·관계·의미 모두 #5BA88A 단색으로 통일 */
+  /* crisis(신호등) 색은 아래 별도 정의 */
+
   /* ══════════════════════════════
-     SCREEN 1: 4축 시각화
+     SCREEN 1: 오늘의 관찰
   ══════════════════════════════ */
 
-  /* 레이더 컨테이너 */
   .radar-wrap {
     background: #FFF8EC;
     border-radius: 16px;
     padding: 16px;
-    border: 1px solid #e9f0eb;
+    border: 1px solid #EAD9BA;
     margin-bottom: 10px;
   }
   .radar-title {
@@ -182,14 +164,13 @@
     color: #A08866;
     margin-bottom: 12px;
   }
-
   .radar-svg-wrap {
     display: flex;
     justify-content: center;
     margin-bottom: 12px;
   }
 
-  /* 4축 텍스트 범례 */
+  /* 4축 범례 */
   .axis-legend {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -206,6 +187,7 @@
   .axis-dot {
     width: 8px; height: 8px;
     border-radius: 50%;
+    background: #5BA88A;
     flex-shrink: 0;
   }
   .axis-info { flex: 1; min-width: 0; }
@@ -214,16 +196,17 @@
   .axis-bar-track {
     width: 100%;
     height: 3px;
-    background: #e9f0eb;
+    background: #EAD9BA;
     border-radius: 2px;
     margin-top: 3px;
   }
   .axis-bar-fill {
     height: 100%;
     border-radius: 2px;
+    background: #5BA88A;
   }
 
-  /* 활성 도메인 태그 */
+  /* 도메인 태그 (4개) */
   .domain-tags {
     display: flex;
     flex-wrap: wrap;
@@ -233,17 +216,19 @@
   .domain-tag {
     font-size: 10.5px;
     font-weight: 600;
-    padding: 4px 9px;
+    padding: 4px 10px;
     border-radius: 99px;
-    color: #3D2B1F;
+    background: rgba(91,168,138,0.12);
+    color: #3D8A70;
+    border: 1px solid rgba(91,168,138,0.25);
   }
 
-  /* 오늘의 요약 카드 */
+  /* 요약 카드 */
   .summary-card {
     background: #FFF8EC;
     border-radius: 14px;
     padding: 13px 14px;
-    border: 1px solid #e9f0eb;
+    border: 1px solid #EAD9BA;
     margin-bottom: 8px;
   }
   .summary-header {
@@ -253,40 +238,41 @@
     margin-bottom: 8px;
   }
   .summary-date { font-size: 11px; font-weight: 700; color: #3D2B1F; }
+
+  /* 신호등 — crisis level 전용 */
   .crisis-badge {
     font-size: 10px;
     font-weight: 700;
     padding: 3px 8px;
     border-radius: 99px;
   }
-  .crisis-none     { background: #dcfce7; color: #16a34a; }
-  .crisis-monitor  { background: #fef9c3; color: #b45309; }
-  .crisis-urgent   { background: #fee2e2; color: #dc2626; }
+  .crisis-none    { background: #dcfce7; color: #16a34a; }
+  .crisis-monitor { background: #fef9c3; color: #a16207; }
+  .crisis-urgent  { background: #fee2e2; color: #dc2626; }
 
   .summary-quote {
     font-size: 11.5px;
-    color: #4b5563;
+    color: #6B5344;
     line-height: 1.6;
-    border-left: 2px solid #28C840;
+    border-left: 2px solid #5BA88A;
     padding-left: 9px;
     margin-bottom: 8px;
     font-style: italic;
   }
   .summary-action {
-    background: #f0fdf4;
+    background: rgba(91,168,138,0.08);
     border-radius: 8px;
     padding: 8px 10px;
     font-size: 11px;
     color: #3D2B1F;
     line-height: 1.5;
   }
-  .summary-action strong { color: #16a34a; }
+  .summary-action strong { color: #3D8A70; }
 
   /* ══════════════════════════════
-     SCREEN 2: 히스토리 대시보드
+     SCREEN 2·3: 히스토리
   ══════════════════════════════ */
 
-  /* 주간 스트립 */
   .week-strip {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
@@ -299,17 +285,15 @@
     align-items: center;
     padding: 6px 2px;
     border-radius: 10px;
-    cursor: pointer;
   }
   .day-cell.today { background: #FFF8EC; box-shadow: 0 0 0 1.5px #28C840; }
-  .day-cell.selected { background: #FFF8EC; box-shadow: 0 0 0 1.5px #28C840; }
   .day-label { font-size: 9.5px; color: #A08866; margin-bottom: 4px; font-weight: 600; }
   .day-label.today-label { color: #28C840; }
   .day-circle {
     width: 28px; height: 28px;
     border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
-    font-size: 10px; font-weight: 700; color: #FFF8EC;
+    font-size: 10px; font-weight: 700; color: #fff;
     margin-bottom: 3px;
   }
   .day-circle.empty {
@@ -317,8 +301,14 @@
     border: 1.5px dashed #EAD9BA;
     color: #EAD9BA;
   }
+  /* 날짜 원: 신호등만 사용 */
+  .dc-safe    { background: #28C840; }
+  .dc-monitor { background: #f59e0b; }
+  .dc-urgent  { background: #ef4444; }
+
+  /* 미니닷: 4축을 단일 색으로 */
   .mini-dots { display: flex; gap: 2px; justify-content: center; }
-  .mini-dot { width: 4px; height: 4px; border-radius: 50%; }
+  .mini-dot  { width: 4px; height: 4px; border-radius: 50%; background: #5BA88A; }
 
   /* 월별 그리드 */
   .month-grid {
@@ -342,16 +332,16 @@
     position: relative;
   }
   .month-cell.empty { background: transparent; }
-  .month-cell.has-record { cursor: pointer; }
   .month-cell.today-cell { box-shadow: 0 0 0 1.5px #28C840; }
   .month-cell .cell-dot {
     position: absolute;
     bottom: 2px; right: 2px;
     width: 4px; height: 4px;
     border-radius: 50%;
+    background: #5BA88A;
   }
 
-  /* 통계 미니 카드 */
+  /* 통계 카드 */
   .stat-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -363,29 +353,29 @@
     border-radius: 12px;
     padding: 10px 8px;
     text-align: center;
-    border: 1px solid #e9f0eb;
+    border: 1px solid #EAD9BA;
   }
   .stat-value { font-size: 18px; font-weight: 800; color: #3D2B1F; }
   .stat-label { font-size: 9px; color: #A08866; margin-top: 1px; font-weight: 500; }
 
-  /* 도메인 빈도 바 */
+  /* 빈도 바 */
   .freq-row {
     display: flex;
     align-items: center;
     gap: 7px;
-    margin-bottom: 5px;
+    margin-bottom: 6px;
   }
-  .freq-name { font-size: 10px; color: #4b5563; width: 54px; flex-shrink: 0; font-weight: 500; }
-  .freq-track { flex: 1; height: 6px; background: #f1f5f2; border-radius: 3px; overflow: hidden; }
-  .freq-fill  { height: 100%; border-radius: 3px; }
+  .freq-name  { font-size: 10px; color: #6B5344; width: 36px; flex-shrink: 0; font-weight: 600; }
+  .freq-track { flex: 1; height: 6px; background: rgba(61,43,31,0.08); border-radius: 3px; overflow: hidden; }
+  .freq-fill  { height: 100%; border-radius: 3px; background: #5BA88A; }
   .freq-count { font-size: 10px; color: #A08866; width: 12px; text-align: right; }
 
-  /* 상세 선택 패널 */
+  /* 상세 패널 */
   .detail-panel {
     background: #FFF8EC;
     border-radius: 14px;
     padding: 12px;
-    border: 1px solid #e9f0eb;
+    border: 1px solid #EAD9BA;
   }
   .detail-header {
     display: flex;
@@ -400,20 +390,22 @@
     font-weight: 600;
     padding: 3px 8px;
     border-radius: 99px;
-    color: #3D2B1F;
+    background: rgba(91,168,138,0.12);
+    color: #3D8A70;
+    border: 1px solid rgba(91,168,138,0.2);
   }
   .detail-axis-row {
     display: flex;
     align-items: center;
     gap: 6px;
-    margin-bottom: 4px;
+    margin-bottom: 5px;
   }
-  .detail-axis-name { font-size: 10px; color: #8B6F57; width: 22px; }
-  .detail-axis-track { flex: 1; height: 4px; background: #f1f5f2; border-radius: 2px; overflow: hidden; }
-  .detail-axis-fill { height: 100%; border-radius: 2px; background: #28C840; }
-  .detail-axis-val { font-size: 10px; color: #A08866; width: 10px; text-align: right; }
+  .detail-axis-name { font-size: 10px; color: #8B6F57; width: 22px; font-weight: 600; }
+  .detail-axis-track { flex: 1; height: 4px; background: rgba(61,43,31,0.08); border-radius: 2px; overflow: hidden; }
+  .detail-axis-fill  { height: 100%; border-radius: 2px; background: #5BA88A; }
+  .detail-axis-val   { font-size: 10px; color: #A08866; width: 10px; text-align: right; }
 
-  /* ── 우측 패널 설명 ── */
+  /* 우측 주석 패널 */
   .annotations {
     width: 200px;
     display: flex;
@@ -422,7 +414,6 @@
     padding-top: 60px;
   }
   .annotation {
-    background: rgba(255,255,255,0.04);
     border: 1px solid #EAD9BA;
     border-radius: 12px;
     padding: 14px 16px;
@@ -430,7 +421,7 @@
   .annotation h3 {
     font-size: 11px;
     font-weight: 700;
-    color: #28C840;
+    color: #5BA88A;
     margin-bottom: 6px;
     letter-spacing: 0.5px;
   }
@@ -440,28 +431,25 @@
     line-height: 1.7;
   }
   .annotation code {
-    font-family: -apple-system, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
+    font-family: inherit;
     font-size: 10px;
-    background: rgba(76,175,130,0.12);
+    background: rgba(91,168,138,0.12);
     padding: 1px 5px;
     border-radius: 4px;
-    color: #28C840;
+    color: #3D8A70;
   }
 </style>
 </head>
 <body>
-<!-- 수국 테마 / Warm Butter Cream Palette: #FFFBF3 #28C840 #FFF8EC #3D2B1F -->
-
 
 <div class="screens">
 
   <!-- ════════════════════════════
-       SCREEN 1: 오늘의 관찰 (4축 시각화)
+       SCREEN 1: 오늘의 관찰
   ════════════════════════════ -->
   <div class="screen-wrap">
     <div class="screen-label">오늘의 관찰</div>
     <div class="phone">
-      <!-- 헤더 -->
       <div class="phone-header">
         <div class="header-brand">
           <div class="brand-dot"></div>
@@ -483,88 +471,80 @@
           <div class="radar-svg-wrap">
             <svg width="160" height="160" viewBox="0 0 160 160">
               <!-- 배경 그리드 -->
-              <polygon points="80,20 140,80 80,140 20,80" fill="none" stroke="#e9f0eb" stroke-width="1"/>
-              <polygon points="80,35 125,80 80,125 35,80" fill="none" stroke="#e9f0eb" stroke-width="1"/>
-              <polygon points="80,50 110,80 80,110 50,80" fill="none" stroke="#e9f0eb" stroke-width="1"/>
-              <polygon points="80,65 95,80 80,95 65,80"  fill="none" stroke="#e9f0eb" stroke-width="1"/>
+              <polygon points="80,20 140,80 80,140 20,80" fill="none" stroke="#EAD9BA" stroke-width="1"/>
+              <polygon points="80,35 125,80 80,125 35,80" fill="none" stroke="#EAD9BA" stroke-width="1"/>
+              <polygon points="80,50 110,80 80,110 50,80" fill="none" stroke="#EAD9BA" stroke-width="1"/>
+              <polygon points="80,65 95,80 80,95 65,80"  fill="none" stroke="#EAD9BA" stroke-width="1"/>
               <!-- 축 선 -->
-              <line x1="80" y1="80" x2="80" y2="20"  stroke="#EAD9BA" stroke-width="1"/>
-              <line x1="80" y1="80" x2="140" y2="80" stroke="#EAD9BA" stroke-width="1"/>
-              <line x1="80" y1="80" x2="80" y2="140" stroke="#EAD9BA" stroke-width="1"/>
-              <line x1="80" y1="80" x2="20" y2="80"  stroke="#EAD9BA" stroke-width="1"/>
-
-              <!-- 데이터 영역 (Body↑ Emotion→ Connection↓ Meaning←, 각 0~60 범위) -->
-              <!-- Body:70%, Emotion:85%, Connection:30%, Meaning:45% -->
-              <!-- Body  : 80 - 60*0.70 = 38 -->
-              <!-- Emotion: 80 + 60*0.85 = 131 -->
-              <!-- Connection: 80 + 60*0.30 = 98 -->
-              <!-- Meaning: 80 - 60*0.45 = 53 -->
+              <line x1="80" y1="80" x2="80"  y2="20"  stroke="#EAD9BA" stroke-width="1"/>
+              <line x1="80" y1="80" x2="140" y2="80"  stroke="#EAD9BA" stroke-width="1"/>
+              <line x1="80" y1="80" x2="80"  y2="140" stroke="#EAD9BA" stroke-width="1"/>
+              <line x1="80" y1="80" x2="20"  y2="80"  stroke="#EAD9BA" stroke-width="1"/>
+              <!-- 데이터 영역 — 몸:70% 감정:85% 관계:30% 의미:45% -->
               <polygon
                 points="80,38 131,80 98,140 53,80"
-                fill="rgba(76,175,130,0.2)"
-                stroke="#28C840"
+                fill="rgba(91,168,138,0.2)"
+                stroke="#5BA88A"
                 stroke-width="2"
                 stroke-linejoin="round"
               />
-              <!-- 데이터 점 -->
-              <circle cx="80"  cy="38"  r="4" fill="#28C840"/>
-              <circle cx="131" cy="80"  r="4" fill="#ec4899"/>
-              <circle cx="98"  cy="140" r="4" fill="#14b8a6"/>
-              <circle cx="53"  cy="80"  r="4" fill="#8b5cf6"/>
-
+              <!-- 데이터 점 — 단일 색 -->
+              <circle cx="80"  cy="38"  r="4" fill="#5BA88A"/>
+              <circle cx="131" cy="80"  r="4" fill="#5BA88A"/>
+              <circle cx="98"  cy="140" r="4" fill="#5BA88A"/>
+              <circle cx="53"  cy="80"  r="4" fill="#5BA88A"/>
               <!-- 축 레이블 -->
-              <text x="80"  y="14"  text-anchor="middle" font-size="10" font-weight="700" fill="#3D2B1F">몸</text>
-              <text x="153" y="84"  text-anchor="start"  font-size="10" font-weight="700" fill="#3D2B1F">감정</text>
-              <text x="80"  y="154" text-anchor="middle" font-size="10" font-weight="700" fill="#3D2B1F">관계</text>
-              <text x="7"   y="84"  text-anchor="start"  font-size="10" font-weight="700" fill="#3D2B1F">의미</text>
+              <text x="80"  y="13"  text-anchor="middle" font-size="10" font-weight="700" fill="#3D2B1F">몸</text>
+              <text x="154" y="84"  text-anchor="start"  font-size="10" font-weight="700" fill="#3D2B1F">감정</text>
+              <text x="80"  y="155" text-anchor="middle" font-size="10" font-weight="700" fill="#3D2B1F">관계</text>
+              <text x="6"   y="84"  text-anchor="start"  font-size="10" font-weight="700" fill="#3D2B1F">의미</text>
             </svg>
           </div>
 
-          <!-- 4축 범례 + 점수 바 -->
+          <!-- 4축 범례 -->
           <div class="axis-legend">
             <div class="axis-item">
-              <div class="axis-dot" style="background:#28C840"></div>
+              <div class="axis-dot"></div>
               <div class="axis-info">
                 <div class="axis-name">몸</div>
                 <div class="axis-score">이명 · 에너지</div>
-                <div class="axis-bar-track"><div class="axis-bar-fill" style="width:70%;background:#28C840"></div></div>
+                <div class="axis-bar-track"><div class="axis-bar-fill" style="width:70%"></div></div>
               </div>
             </div>
             <div class="axis-item">
-              <div class="axis-dot" style="background:#ec4899"></div>
+              <div class="axis-dot"></div>
               <div class="axis-info">
                 <div class="axis-name">감정</div>
                 <div class="axis-score">불안 · 긴장</div>
-                <div class="axis-bar-track"><div class="axis-bar-fill" style="width:85%;background:#ec4899"></div></div>
+                <div class="axis-bar-track"><div class="axis-bar-fill" style="width:85%"></div></div>
               </div>
             </div>
             <div class="axis-item">
-              <div class="axis-dot" style="background:#14b8a6"></div>
+              <div class="axis-dot"></div>
               <div class="axis-info">
                 <div class="axis-name">관계</div>
                 <div class="axis-score">연결 · 고립</div>
-                <div class="axis-bar-track"><div class="axis-bar-fill" style="width:30%;background:#14b8a6"></div></div>
+                <div class="axis-bar-track"><div class="axis-bar-fill" style="width:30%"></div></div>
               </div>
             </div>
             <div class="axis-item">
-              <div class="axis-dot" style="background:#8b5cf6"></div>
+              <div class="axis-dot"></div>
               <div class="axis-info">
                 <div class="axis-name">의미</div>
                 <div class="axis-score">방향 · 성장</div>
-                <div class="axis-bar-track"><div class="axis-bar-fill" style="width:45%;background:#8b5cf6"></div></div>
+                <div class="axis-bar-track"><div class="axis-bar-fill" style="width:45%"></div></div>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- 감지된 도메인 태그 -->
+        <!-- 오늘 감지된 영역 — 4축 태그 -->
         <div class="section-title">오늘 감지된 영역</div>
         <div class="domain-tags">
-          <span class="domain-tag" style="background:#ef4444">몸의 목소리</span>
-          <span class="domain-tag" style="background:#8b5cf6">불안과 긴장</span>
-          <span class="domain-tag" style="background:#ec4899">감정의 흐름</span>
-          <span class="domain-tag" style="background:#f59e0b">에너지</span>
-          <span class="domain-tag" style="background:#6366f1">잠과 회복</span>
+          <span class="domain-tag">몸</span>
+          <span class="domain-tag">감정</span>
+          <span class="domain-tag">관계</span>
+          <span class="domain-tag">의미</span>
         </div>
 
         <!-- 오늘 요약 -->
@@ -603,7 +583,6 @@
         </svg>
       </div>
 
-      <!-- 탭 -->
       <div class="tab-bar">
         <div class="tab active">주간</div>
         <div class="tab">월별</div>
@@ -611,7 +590,6 @@
 
       <div class="phone-body">
 
-        <!-- 통계 3개 -->
         <div class="stat-grid" style="margin-top:4px">
           <div class="stat-card">
             <div class="stat-value">5일</div>
@@ -619,7 +597,7 @@
           </div>
           <div class="stat-card">
             <div class="stat-value">감정</div>
-            <div class="stat-label">주요 영역</div>
+            <div class="stat-label">주요 축</div>
           </div>
           <div class="stat-card">
             <div class="stat-value">2회</div>
@@ -627,66 +605,43 @@
           </div>
         </div>
 
-        <!-- 7일 스트립 -->
+        <!-- 7일 스트립 — 날짜 원은 신호등만 -->
         <div class="section-title">이번 주</div>
         <div class="week-strip">
-          <!-- 월 -->
           <div class="day-cell">
             <div class="day-label">월</div>
-            <div class="day-circle" style="background:#ec4899">13</div>
-            <div class="mini-dots">
-              <div class="mini-dot" style="background:#ec4899"></div>
-              <div class="mini-dot" style="background:#8b5cf6"></div>
-            </div>
+            <div class="day-circle dc-monitor">13</div>
+            <div class="mini-dots"><div class="mini-dot"></div><div class="mini-dot"></div></div>
           </div>
-          <!-- 화 -->
           <div class="day-cell">
             <div class="day-label">화</div>
             <div class="day-circle empty">14</div>
             <div class="mini-dots"></div>
           </div>
-          <!-- 수 -->
           <div class="day-cell">
             <div class="day-label">수</div>
-            <div class="day-circle" style="background:#f59e0b">15</div>
-            <div class="mini-dots">
-              <div class="mini-dot" style="background:#f59e0b"></div>
-              <div class="mini-dot" style="background:#6366f1"></div>
-              <div class="mini-dot" style="background:#ec4899"></div>
-            </div>
+            <div class="day-circle dc-monitor">15</div>
+            <div class="mini-dots"><div class="mini-dot"></div><div class="mini-dot"></div></div>
           </div>
-          <!-- 목 -->
           <div class="day-cell">
             <div class="day-label">목</div>
-            <div class="day-circle" style="background:#28C840">16</div>
-            <div class="mini-dots">
-              <div class="mini-dot" style="background:#28C840"></div>
-            </div>
+            <div class="day-circle dc-safe">16</div>
+            <div class="mini-dots"><div class="mini-dot"></div></div>
           </div>
-          <!-- 금 -->
           <div class="day-cell">
             <div class="day-label">금</div>
-            <div class="day-circle" style="background:#8b5cf6">17</div>
-            <div class="mini-dots">
-              <div class="mini-dot" style="background:#8b5cf6"></div>
-              <div class="mini-dot" style="background:#ec4899"></div>
-            </div>
+            <div class="day-circle dc-monitor">17</div>
+            <div class="mini-dots"><div class="mini-dot"></div><div class="mini-dot"></div></div>
           </div>
-          <!-- 토 -->
           <div class="day-cell">
             <div class="day-label">토</div>
             <div class="day-circle empty">18</div>
             <div class="mini-dots"></div>
           </div>
-          <!-- 일 (오늘) -->
           <div class="day-cell today">
             <div class="day-label today-label">오늘</div>
-            <div class="day-circle" style="background:#ef4444">19</div>
-            <div class="mini-dots">
-              <div class="mini-dot" style="background:#ef4444"></div>
-              <div class="mini-dot" style="background:#8b5cf6"></div>
-              <div class="mini-dot" style="background:#ec4899"></div>
-            </div>
+            <div class="day-circle dc-urgent">19</div>
+            <div class="mini-dots"><div class="mini-dot"></div><div class="mini-dot"></div></div>
           </div>
         </div>
 
@@ -698,39 +653,38 @@
             <span class="crisis-badge crisis-monitor">모니터링</span>
           </div>
           <div class="detail-domains">
-            <span class="detail-domain-tag" style="background:#ef4444">몸의 목소리</span>
-            <span class="detail-domain-tag" style="background:#8b5cf6">불안과 긴장</span>
-            <span class="detail-domain-tag" style="background:#ec4899">감정의 흐름</span>
+            <span class="detail-domain-tag">몸</span>
+            <span class="detail-domain-tag">감정</span>
+            <span class="detail-domain-tag">관계</span>
           </div>
           <div class="detail-axis-row">
             <span class="detail-axis-name">몸</span>
-            <div class="detail-axis-track"><div class="detail-axis-fill" style="width:70%;background:#28C840"></div></div>
+            <div class="detail-axis-track"><div class="detail-axis-fill" style="width:70%"></div></div>
             <span class="detail-axis-val">7</span>
           </div>
           <div class="detail-axis-row">
             <span class="detail-axis-name">감정</span>
-            <div class="detail-axis-track"><div class="detail-axis-fill" style="width:85%;background:#ec4899"></div></div>
+            <div class="detail-axis-track"><div class="detail-axis-fill" style="width:85%"></div></div>
             <span class="detail-axis-val">9</span>
           </div>
           <div class="detail-axis-row">
             <span class="detail-axis-name">관계</span>
-            <div class="detail-axis-track"><div class="detail-axis-fill" style="width:25%;background:#14b8a6"></div></div>
+            <div class="detail-axis-track"><div class="detail-axis-fill" style="width:25%"></div></div>
             <span class="detail-axis-val">2</span>
           </div>
           <div class="detail-axis-row">
             <span class="detail-axis-name">의미</span>
-            <div class="detail-axis-track"><div class="detail-axis-fill" style="width:40%;background:#8b5cf6"></div></div>
+            <div class="detail-axis-track"><div class="detail-axis-fill" style="width:40%"></div></div>
             <span class="detail-axis-val">4</span>
           </div>
         </div>
 
-        <!-- 도메인 빈도 -->
-        <div class="section-title">이번 주 관찰 영역</div>
-        <div class="freq-row"><span class="freq-name">불안과 긴장</span><div class="freq-track"><div class="freq-fill" style="width:100%;background:#8b5cf6"></div></div><span class="freq-count">4</span></div>
-        <div class="freq-row"><span class="freq-name">감정의 흐름</span><div class="freq-track"><div class="freq-fill" style="width:75%;background:#ec4899"></div></div><span class="freq-count">3</span></div>
-        <div class="freq-row"><span class="freq-name">몸의 목소리</span><div class="freq-track"><div class="freq-fill" style="width:50%;background:#ef4444"></div></div><span class="freq-count">2</span></div>
-        <div class="freq-row"><span class="freq-name">에너지</span><div class="freq-track"><div class="freq-fill" style="width:50%;background:#f59e0b"></div></div><span class="freq-count">2</span></div>
-        <div class="freq-row"><span class="freq-name">잠과 회복</span><div class="freq-track"><div class="freq-fill" style="width:25%;background:#6366f1"></div></div><span class="freq-count">1</span></div>
+        <!-- 이번 주 4축 빈도 -->
+        <div class="section-title">이번 주 관찰 축</div>
+        <div class="freq-row"><span class="freq-name">감정</span><div class="freq-track"><div class="freq-fill" style="width:100%"></div></div><span class="freq-count">5</span></div>
+        <div class="freq-row"><span class="freq-name">몸</span><div class="freq-track"><div class="freq-fill" style="width:80%"></div></div><span class="freq-count">4</span></div>
+        <div class="freq-row"><span class="freq-name">의미</span><div class="freq-track"><div class="freq-fill" style="width:60%"></div></div><span class="freq-count">3</span></div>
+        <div class="freq-row"><span class="freq-name">관계</span><div class="freq-track"><div class="freq-fill" style="width:40%"></div></div><span class="freq-count">2</span></div>
 
       </div>
     </div>
@@ -752,7 +706,6 @@
         </svg>
       </div>
 
-      <!-- 탭 -->
       <div class="tab-bar">
         <div class="tab">주간</div>
         <div class="tab active">월별</div>
@@ -760,57 +713,38 @@
 
       <div class="phone-body">
 
-        <!-- 월 네비게이션 -->
         <div style="display:flex;align-items:center;justify-content:space-between;margin:6px 0 10px;padding:0 2px">
           <span style="font-size:11px;color:#A08866">‹</span>
           <span style="font-size:13px;font-weight:700;color:#3D2B1F">2026년 3월</span>
           <span style="font-size:11px;color:#EAD9BA">›</span>
         </div>
 
-        <!-- 요일 헤더 -->
         <div class="month-grid" style="margin-bottom:3px">
           <div class="month-dow">일</div><div class="month-dow">월</div><div class="month-dow">화</div>
           <div class="month-dow">수</div><div class="month-dow">목</div><div class="month-dow">금</div><div class="month-dow">토</div>
         </div>
 
-        <!-- 3월 달력 (3월 1일 = 일요일) -->
+        <!-- 달력 — 배경색은 신호등 3색만 -->
         <div class="month-grid">
-          <!-- 1 -->
-          <div class="month-cell" style="background:#dcfce7;color:#16a34a">1<div class="cell-dot" style="background:#28C840"></div></div>
-          <!-- 2 -->
+          <div class="month-cell" style="background:#dcfce7;color:#16a34a">1<div class="cell-dot"></div></div>
           <div class="month-cell" style="background:#FFFBF3;color:#A08866">2</div>
-          <!-- 3 -->
           <div class="month-cell" style="background:#FFFBF3;color:#A08866">3</div>
-          <!-- 4 -->
-          <div class="month-cell" style="background:#dcfce7;color:#16a34a">4<div class="cell-dot" style="background:#ec4899"></div></div>
-          <!-- 5 -->
-          <div class="month-cell" style="background:#dcfce7;color:#16a34a">5<div class="cell-dot" style="background:#8b5cf6"></div></div>
-          <!-- 6 -->
+          <div class="month-cell" style="background:#dcfce7;color:#16a34a">4<div class="cell-dot"></div></div>
+          <div class="month-cell" style="background:#dcfce7;color:#16a34a">5<div class="cell-dot"></div></div>
           <div class="month-cell" style="background:#FFFBF3;color:#A08866">6</div>
-          <!-- 7 -->
           <div class="month-cell" style="background:#FFFBF3;color:#A08866">7</div>
-          <!-- 8 -->
-          <div class="month-cell" style="background:#fef9c3;color:#b45309">8<div class="cell-dot" style="background:#f59e0b"></div></div>
-          <!-- 9 -->
-          <div class="month-cell" style="background:#dcfce7;color:#16a34a">9<div class="cell-dot" style="background:#28C840"></div></div>
-          <!-- 10-14 빈칸들 -->
+          <div class="month-cell" style="background:#fef9c3;color:#a16207">8<div class="cell-dot"></div></div>
+          <div class="month-cell" style="background:#dcfce7;color:#16a34a">9<div class="cell-dot"></div></div>
           <div class="month-cell" style="background:#FFFBF3;color:#A08866">10</div>
           <div class="month-cell" style="background:#FFFBF3;color:#A08866">11</div>
-          <div class="month-cell" style="background:#dcfce7;color:#16a34a">12<div class="cell-dot" style="background:#14b8a6"></div></div>
-          <div class="month-cell" style="background:#fef9c3;color:#b45309">13<div class="cell-dot" style="background:#ec4899"></div></div>
-          <!-- 14 -->
+          <div class="month-cell" style="background:#dcfce7;color:#16a34a">12<div class="cell-dot"></div></div>
+          <div class="month-cell" style="background:#fef9c3;color:#a16207">13<div class="cell-dot"></div></div>
           <div class="month-cell" style="background:#FFFBF3;color:#A08866">14</div>
-          <!-- 15 -->
-          <div class="month-cell" style="background:#fef9c3;color:#b45309">15<div class="cell-dot" style="background:#f59e0b"></div></div>
-          <!-- 16 -->
-          <div class="month-cell" style="background:#dcfce7;color:#16a34a">16<div class="cell-dot" style="background:#28C840"></div></div>
-          <!-- 17 -->
-          <div class="month-cell" style="background:#fef9c3;color:#b45309">17<div class="cell-dot" style="background:#8b5cf6"></div></div>
-          <!-- 18 -->
+          <div class="month-cell" style="background:#fef9c3;color:#a16207">15<div class="cell-dot"></div></div>
+          <div class="month-cell" style="background:#dcfce7;color:#16a34a">16<div class="cell-dot"></div></div>
+          <div class="month-cell" style="background:#fef9c3;color:#a16207">17<div class="cell-dot"></div></div>
           <div class="month-cell" style="background:#FFFBF3;color:#A08866">18</div>
-          <!-- 19 (오늘) -->
-          <div class="month-cell today-cell" style="background:#fee2e2;color:#dc2626">19<div class="cell-dot" style="background:#ef4444"></div></div>
-          <!-- 20 이후 빈칸 -->
+          <div class="month-cell today-cell" style="background:#fee2e2;color:#dc2626">19<div class="cell-dot"></div></div>
           <div class="month-cell" style="background:#FFFBF3;color:#EAD9BA">20</div>
           <div class="month-cell" style="background:#FFFBF3;color:#EAD9BA">21</div>
           <div class="month-cell" style="background:#FFFBF3;color:#EAD9BA">22</div>
@@ -825,7 +759,7 @@
           <div class="month-cell" style="background:#FFFBF3;color:#EAD9BA">31</div>
         </div>
 
-        <!-- 범례 -->
+        <!-- 달력 범례 — 신호등 3색 -->
         <div style="display:flex;flex-wrap:wrap;gap:6px 12px;margin-bottom:10px">
           <span style="display:flex;align-items:center;gap:4px;font-size:9.5px;color:#8B6F57"><span style="width:10px;height:10px;border-radius:3px;background:#dcfce7;display:inline-block"></span>자기돌봄</span>
           <span style="display:flex;align-items:center;gap:4px;font-size:9.5px;color:#8B6F57"><span style="width:10px;height:10px;border-radius:3px;background:#fef9c3;display:inline-block"></span>모니터링</span>
@@ -841,7 +775,7 @@
           </div>
           <div class="stat-card">
             <div class="stat-value">감정</div>
-            <div class="stat-label">주요 영역</div>
+            <div class="stat-label">주요 축</div>
           </div>
           <div class="stat-card">
             <div class="stat-value">4회</div>
@@ -853,12 +787,12 @@
           </div>
         </div>
 
-        <!-- 이달 주요 영역 -->
-        <div class="section-title">이달 주요 영역</div>
-        <div class="freq-row"><span class="freq-name">불안과 긴장</span><div class="freq-track"><div class="freq-fill" style="width:100%;background:#8b5cf6"></div></div><span class="freq-count">8</span></div>
-        <div class="freq-row"><span class="freq-name">감정의 흐름</span><div class="freq-track"><div class="freq-fill" style="width:75%;background:#ec4899"></div></div><span class="freq-count">6</span></div>
-        <div class="freq-row"><span class="freq-name">몸의 목소리</span><div class="freq-track"><div class="freq-fill" style="width:62%;background:#ef4444"></div></div><span class="freq-count">5</span></div>
-        <div class="freq-row"><span class="freq-name">에너지</span><div class="freq-track"><div class="freq-fill" style="width:50%;background:#f59e0b"></div></div><span class="freq-count">4</span></div>
+        <!-- 이달 4축 빈도 -->
+        <div class="section-title">이달 주요 축</div>
+        <div class="freq-row"><span class="freq-name">감정</span><div class="freq-track"><div class="freq-fill" style="width:100%"></div></div><span class="freq-count">8</span></div>
+        <div class="freq-row"><span class="freq-name">몸</span><div class="freq-track"><div class="freq-fill" style="width:75%"></div></div><span class="freq-count">6</span></div>
+        <div class="freq-row"><span class="freq-name">의미</span><div class="freq-track"><div class="freq-fill" style="width:50%"></div></div><span class="freq-count">4</span></div>
+        <div class="freq-row"><span class="freq-name">관계</span><div class="freq-track"><div class="freq-fill" style="width:37%"></div></div><span class="freq-count">3</span></div>
 
       </div>
     </div>
@@ -868,16 +802,16 @@
   <div class="annotations">
     <div class="annotation">
       <h3>레이더 차트</h3>
-      <p>Body / Emotion / Connection / Meaning 4축을 다각형으로 시각화. 어느 축이 오늘 활성화됐는지 한눈에 파악.</p>
+      <p>몸 · 감정 · 관계 · 의미 4축을 단일 색으로 시각화. 어느 축이 오늘 활성화됐는지 한눈에 파악.</p>
     </div>
     <div class="annotation">
       <h3>색상 체계</h3>
       <p>
-        <code style="background:rgba(76,175,130,0.2);color:#28C840">몸</code> 초록<br>
-        <code style="background:rgba(236,72,153,0.15);color:#ec4899">감정</code> 핑크<br>
-        <code style="background:rgba(20,184,166,0.15);color:#14b8a6">관계</code> 틸<br>
-        <code style="background:rgba(139,92,246,0.15);color:#8b5cf6">의미</code> 바이올렛<br><br>
-        크라이시스: 초록→노랑→주황→빨강
+        <code>4축</code> #5BA88A 단색<br><br>
+        <code>자기돌봄</code> 초록<br>
+        <code>모니터링</code> 노랑<br>
+        <code>위기</code> 빨강<br><br>
+        신호등 색은 crisis level 전용
       </p>
     </div>
     <div class="annotation">
@@ -886,8 +820,7 @@
     </div>
     <div class="annotation">
       <h3>차별화 포인트</h3>
-      <p>이명·비문증 등 만성 감각 증상도 <code>BodySignals:3</code>로 감지. Quabble 등 타 멘탈헬스 앱이 전혀 다루지 않는 영역.<br><br>
-      "고치려는 게 아니라, 의료가 포기한 그 이후에도 오늘을 함께 들여다보는" 관찰 동행 — 나이 제한 없이 만성 증상을 안고 사는 모든 사람을 위한 도구.</p>
+      <p>"고치려는 게 아니라, 의료가 포기한 그 이후에도 오늘을 함께 들여다보는" 관찰 동행 — 나이 제한 없이 만성 증상을 안고 사는 모든 사람을 위한 도구.</p>
     </div>
   </div>
 
