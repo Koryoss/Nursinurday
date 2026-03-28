@@ -109,6 +109,45 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* 4축 섹션 */}
+      <section style={{ padding: '60px 24px' }}>
+        <div style={{ maxWidth: '900px', margin: '0 auto' }}>
+          <h2 style={{ fontSize: '26px', fontWeight: 800, textAlign: 'center', marginBottom: '8px' }}>
+            4축으로 나를 관찰해요
+          </h2>
+          <p style={{ textAlign: 'center', color: '#6B5344', fontSize: '15px', marginBottom: '40px' }}>
+            증상뿐 아니라 <strong>몸·감정·관계·의미</strong> 전체를 함께 들여다봐요
+          </p>
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+            gap: '16px',
+          }}>
+            {[
+              { color: '#F5A87C', bg: 'rgba(245,168,124,0.12)', label: '몸', sub: '신체 증상 · 에너지', desc: '이명, 어지러움, 피로감 등 몸에서 느껴지는 신호를 기록해요. 언제, 어떤 강도로 나타나는지 파악할 수 있어요.' },
+              { color: '#EE9FB8', bg: 'rgba(238,159,184,0.12)', label: '감정', sub: '불안 · 긴장 · 감정 기복', desc: '증상으로 인한 불안, 예민함, 두려움을 기록해요. 감정 패턴이 보이면 더 잘 대처할 수 있어요.' },
+              { color: '#B8A8D4', bg: 'rgba(184,168,212,0.12)', label: '관계', sub: '연결 · 고립 · 사회 참여', desc: '이명과 어지러움이 사회적 활동을 얼마나 제한하는지 살펴봐요. 고립감을 인식하면 연결을 찾을 수 있어요.' },
+              { color: '#E8C86E', bg: 'rgba(232,200,110,0.12)', label: '의미', sub: '방향 · 성취 · 삶의 질', desc: '증상 속에서도 의미 있는 활동을 했는지 돌아봐요. 작은 성취가 치료 동기를 유지하는 데 중요해요.' },
+            ].map((axis, i) => (
+              <div key={i} style={{
+                background: axis.bg,
+                borderRadius: '20px',
+                padding: '28px 24px',
+                border: `1px solid ${axis.color}40`,
+              }}>
+                <div style={{
+                  width: '36px', height: '36px', borderRadius: '50%',
+                  background: axis.color, marginBottom: '14px',
+                }} />
+                <div style={{ fontSize: '18px', fontWeight: 800, color: '#3D2B1F', marginBottom: '4px' }}>{axis.label}</div>
+                <div style={{ fontSize: '12px', fontWeight: 600, color: axis.color, marginBottom: '10px' }}>{axis.sub}</div>
+                <div style={{ fontSize: '13px', color: '#6B5344', lineHeight: 1.65 }}>{axis.desc}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* 푸터 */}
       <footer style={{
         textAlign: 'center',
