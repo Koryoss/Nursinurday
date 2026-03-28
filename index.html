@@ -93,11 +93,42 @@
     border-radius: 12px;
     font-size: 15px;
     font-weight: 600;
-    text-decoration: none;
+    border: none;
+    cursor: pointer;
     transition: background 0.2s;
+    font-family: inherit;
   }
 
   .btn-secondary:hover { background: rgba(61, 43, 31, 0.14); }
+
+  /* 앱 미리보기 패널 */
+  .preview-panel {
+    display: none;
+    margin-top: 24px;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .preview-panel.open { display: flex; }
+
+  .preview-link {
+    background: #fff;
+    border: 1px solid rgba(61,43,31,0.12);
+    color: #3D2B1F;
+    padding: 12px 22px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.2s;
+  }
+
+  .preview-link:hover {
+    background: #3D2B1F;
+    color: #fff;
+    border-color: #3D2B1F;
+  }
 
   /* 기능 카드 */
   .features {
@@ -209,8 +240,12 @@
     iPhone에서 패턴을 파악해 더 나은 일상을 만드세요.
   </p>
   <div class="cta-group">
-    <a href="careflow_mockup.html" class="btn-primary">앱 미리보기 →</a>
-    <a href="careflow_dashboard_mockup.html" class="btn-secondary">대시보드 보기</a>
+    <button class="btn-primary" onclick="togglePreview()">앱 미리보기 ▾</button>
+  </div>
+  <div class="preview-panel" id="previewPanel">
+    <a href="careflow_dashboard_mockup.html" class="preview-link">📊 대시보드</a>
+    <a href="careflow_calendar.html" class="preview-link">📅 캘린더</a>
+    <a href="careflow_chat_states.html" class="preview-link">💬 채팅 상태</a>
   </div>
 </section>
 
@@ -256,5 +291,13 @@
   © 2026 CareFlow · 메니에르병 환자를 위한 일상 관리 앱
 </footer>
 
+<script>
+  function togglePreview() {
+    const panel = document.getElementById('previewPanel');
+    const btn = document.querySelector('.btn-primary');
+    panel.classList.toggle('open');
+    btn.textContent = panel.classList.contains('open') ? '앱 미리보기 ▴' : '앱 미리보기 ▾';
+  }
+</script>
 </body>
 </html>
