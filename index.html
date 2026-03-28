@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CareFlow — 메니에르병 일상 관리 앱</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: linear-gradient(160deg, #FFFBF3 0%, #FFF5E0 60%, #F8EDD4 100%);
+    min-height: 100vh;
+    font-family: -apple-system, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
+    color: #3D2B1F;
+  }
+
+  header {
+    padding: 24px 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .logo {
+    font-size: 22px;
+    font-weight: 700;
+    color: #3D2B1F;
+    letter-spacing: -0.5px;
+  }
+
+  .logo span {
+    color: #5BA88A;
+  }
+
+  .hero {
+    text-align: center;
+    padding: 80px 24px 60px;
+  }
+
+  .badge {
+    display: inline-block;
+    background: rgba(91, 168, 138, 0.15);
+    border: 1px solid rgba(91, 168, 138, 0.4);
+    color: #3D8A70;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 6px 16px;
+    border-radius: 20px;
+    margin-bottom: 24px;
+    letter-spacing: 0.3px;
+  }
+
+  h1 {
+    font-size: clamp(32px, 6vw, 56px);
+    font-weight: 800;
+    line-height: 1.2;
+    margin-bottom: 20px;
+    letter-spacing: -1px;
+  }
+
+  .subtitle {
+    font-size: clamp(16px, 2.5vw, 20px);
+    color: #6B5344;
+    line-height: 1.7;
+    max-width: 560px;
+    margin: 0 auto 40px;
+  }
+
+  .cta-group {
+    display: flex;
+    gap: 14px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .btn-primary {
+    background: #3D2B1F;
+    color: #FFF;
+    padding: 14px 28px;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: opacity 0.2s;
+  }
+
+  .btn-primary:hover { opacity: 0.85; }
+
+  .btn-secondary {
+    background: rgba(61, 43, 31, 0.08);
+    color: #3D2B1F;
+    padding: 14px 28px;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background 0.2s;
+  }
+
+  .btn-secondary:hover { background: rgba(61, 43, 31, 0.14); }
+
+  /* 기능 카드 */
+  .features {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 20px;
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 0 24px 80px;
+  }
+
+  .card {
+    background: rgba(255,255,255,0.7);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(61,43,31,0.08);
+    border-radius: 20px;
+    padding: 28px;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 32px rgba(61,43,31,0.1);
+  }
+
+  .card-icon { font-size: 36px; margin-bottom: 14px; }
+  .card-title { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
+  .card-desc { font-size: 14px; color: #6B5344; line-height: 1.6; }
+
+  /* 데모 섹션 */
+  .demos {
+    background: rgba(61,43,31,0.04);
+    padding: 60px 24px;
+    text-align: center;
+  }
+
+  .demos h2 {
+    font-size: 28px;
+    font-weight: 800;
+    margin-bottom: 8px;
+  }
+
+  .demos p {
+    color: #6B5344;
+    margin-bottom: 32px;
+    font-size: 15px;
+  }
+
+  .demo-links {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .demo-link {
+    background: #fff;
+    border: 1px solid rgba(61,43,31,0.12);
+    color: #3D2B1F;
+    padding: 12px 22px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.2s;
+  }
+
+  .demo-link:hover {
+    background: #3D2B1F;
+    color: #fff;
+    border-color: #3D2B1F;
+  }
+
+  /* 통계 */
+  .stats {
+    display: flex;
+    justify-content: center;
+    gap: 60px;
+    padding: 60px 24px;
+    flex-wrap: wrap;
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  .stat { text-align: center; }
+  .stat-num { font-size: 40px; font-weight: 800; color: #5BA88A; }
+  .stat-label { font-size: 14px; color: #6B5344; margin-top: 4px; }
+
+  footer {
+    text-align: center;
+    padding: 32px;
+    font-size: 13px;
+    color: #9B7D6A;
+    border-top: 1px solid rgba(61,43,31,0.08);
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">Care<span>Flow</span></div>
+</header>
+
+<section class="hero">
+  <div class="badge">🌿 메니에르병 일상 관리 솔루션</div>
+  <h1>어지럼증과 이명,<br>매일 함께 관리하세요</h1>
+  <p class="subtitle">
+    Apple Watch로 실시간 증상을 기록하고,<br>
+    iPhone에서 패턴을 파악해 더 나은 일상을 만드세요.
+  </p>
+  <div class="cta-group">
+    <a href="careflow_mockup.html" class="btn-primary">앱 미리보기 →</a>
+    <a href="careflow_dashboard_mockup.html" class="btn-secondary">대시보드 보기</a>
+  </div>
+</section>
+
+<section class="features">
+  <div class="card">
+    <div class="card-icon">⌚</div>
+    <div class="card-title">Apple Watch 실시간 감지</div>
+    <div class="card-desc">자이로스코프·심박수·가속도계로 어지럼증 발생을 자동 감지하고 기록해요.</div>
+  </div>
+  <div class="card">
+    <div class="card-icon">🔊</div>
+    <div class="card-title">이명 스트레스 완화</div>
+    <div class="card-desc">음성 데시벨을 모니터링해 무의식적으로 큰 목소리가 나올 때 햅틱으로 알려줘요.</div>
+  </div>
+  <div class="card">
+    <div class="card-icon">📊</div>
+    <div class="card-title">증상 패턴 분석</div>
+    <div class="card-desc">기상 직후·취침 전 등 고위험 시간대와 투약 여부를 함께 기록해 패턴을 파악해요.</div>
+  </div>
+  <div class="card">
+    <div class="card-icon">📱</div>
+    <div class="card-title">iPhone 통계 연동</div>
+    <div class="card-desc">Watch에서 수집한 데이터를 iPhone으로 전송해 주간·월간 통계를 한눈에 확인해요.</div>
+  </div>
+</section>
+
+<section class="stats">
+  <div class="stat">
+    <div class="stat-num">46만</div>
+    <div class="stat-label">국내 메니에르 환자</div>
+  </div>
+  <div class="stat">
+    <div class="stat-num">4.5배</div>
+    <div class="stat-label">최근 10년간 증가율</div>
+  </div>
+  <div class="stat">
+    <div class="stat-num">72%</div>
+    <div class="stat-label">증상 기록 환자 개선율</div>
+  </div>
+</section>
+
+<section class="demos">
+  <h2>화면 미리보기</h2>
+  <p>실제 앱 UI 목업을 둘러보세요</p>
+  <div class="demo-links">
+    <a href="careflow_mockup.html" class="demo-link">📱 앱 UI</a>
+    <a href="careflow_dashboard_mockup.html" class="demo-link">📊 대시보드</a>
+    <a href="careflow_calendar.html" class="demo-link">📅 캘린더</a>
+    <a href="careflow_timeline.html" class="demo-link">🕐 타임라인</a>
+    <a href="careflow_chat_states.html" class="demo-link">💬 채팅 상태</a>
+  </div>
+</section>
+
+<footer>
+  © 2026 CareFlow · 메니에르병 환자를 위한 일상 관리 앱
+</footer>
+
+</body>
+</html>

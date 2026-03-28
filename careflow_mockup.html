@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CareFlow — careflow_mockup (수국 버터크림)</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: linear-gradient(160deg, #FFFBF3 0%, #FFF5E0 60%, #F8EDD4 100%);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-family: -apple-system, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
+    padding: 40px 20px;
+    gap: 60px;
+  }
+
+  /* ─── 타이틀 섹션 ─── */
+  .hero {
+    text-align: center;
+    color: #3D2B1F;
+  }
+  .hero-badge {
+    display: inline-block;
+    background: rgba(40, 200, 64, 0.12);
+    border: 1px solid rgba(40, 200, 64, 0.4);
+    color: #1A7030;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    padding: 6px 16px;
+    border-radius: 20px;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+  }
+  .hero h1 {
+    font-size: 52px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+    margin-bottom: 16px;
+  }
+  .hero h1 span { color: #28C840; }
+  .hero p {
+    font-size: 18px;
+    color: #8B6F57;
+    line-height: 1.6;
+    max-width: 480px;
+    margin: 0 auto;
+  }
+
+  /* ─── 목업 컨테이너 ─── */
+  .mockup-container {
+    display: flex;
+    align-items: flex-start;
+    gap: 40px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  /* ─── 모바일 프레임 ─── */
+  .phone-frame {
+    width: 320px;
+    background: #2C2018;
+    border-radius: 44px;
+    padding: 12px;
+    box-shadow:
+      0 0 0 2px rgba(255,255,255,0.1),
+      0 40px 80px rgba(0,0,0,0.6),
+      0 0 40px rgba(52, 211, 153, 0.1);
+    position: relative;
+  }
+  .phone-notch {
+    width: 100px;
+    height: 28px;
+    background: #2C2018;
+    border-radius: 0 0 18px 18px;
+    position: absolute;
+    top: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+  }
+  .phone-screen {
+    background: #FFFBF3;
+    border-radius: 34px;
+    overflow: hidden;
+    height: 620px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ─── 앱 헤더 ─── */
+  .app-header {
+    background: #FFF8EC;
+    padding: 44px 16px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid #EAD9BA;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+  }
+  .header-back { color: #A08866; font-size: 13px; }
+  .header-brand {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .header-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: #28C840;
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+  .header-name { font-weight: 700; font-size: 13px; color: #3D2B1F; }
+  .header-sub { font-size: 10px; color: #A08866; }
+  .header-spacer { width: 32px; }
+
+  /* ─── 채팅 영역 ─── */
+  .chat-area {
+    flex: 1;
+    overflow: hidden;
+    padding: 16px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  /* AI 메시지 */
+  .msg-ai {
+    display: flex;
+    gap: 8px;
+    align-items: flex-end;
+  }
+  .avatar-ai {
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    background: #28C840;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+  .bubble-ai {
+    background: #FFF8EC;
+    border-radius: 16px 16px 16px 4px;
+    padding: 10px 14px;
+    font-size: 12px;
+    line-height: 1.6;
+    color: #3D2B1F;
+    max-width: 220px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    border: 1px solid #EAD9BA;
+  }
+  .bubble-time {
+    font-size: 9px;
+    color: #A08866;
+    margin-top: 4px;
+  }
+
+  /* 사용자 메시지 */
+  .msg-user {
+    display: flex;
+    gap: 8px;
+    align-items: flex-end;
+    justify-content: flex-end;
+  }
+  .bubble-user {
+    background: #3D2B1F;
+    border-radius: 16px 16px 4px 16px;
+    padding: 10px 14px;
+    font-size: 12px;
+    line-height: 1.6;
+    color: #FFF8EC;
+    max-width: 200px;
+  }
+  .avatar-user {
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    background: #3D2B1F;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    color: #FFF8EC;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  /* 타이핑 인디케이터 */
+  .typing {
+    display: flex;
+    gap: 8px;
+    align-items: flex-end;
+  }
+  .typing-bubble {
+    background: #FFF8EC;
+    border-radius: 16px 16px 16px 4px;
+    padding: 12px 16px;
+    display: flex;
+    gap: 4px;
+    align-items: center;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    border: 1px solid #EAD9BA;
+  }
+  .typing-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: #A08866;
+  }
+  .typing-dot:nth-child(1) { animation: bounce 1.2s 0s infinite; }
+  .typing-dot:nth-child(2) { animation: bounce 1.2s 0.2s infinite; }
+  .typing-dot:nth-child(3) { animation: bounce 1.2s 0.4s infinite; }
+  @keyframes bounce {
+    0%, 60%, 100% { transform: translateY(0); }
+    30% { transform: translateY(-5px); }
+  }
+
+  /* ─── 입력창 ─── */
+  .input-area {
+    background: #FFF8EC;
+    border-top: 1px solid #EAD9BA;
+    padding: 10px 12px 14px;
+  }
+  .quick-prompts {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-bottom: 8px;
+  }
+  .quick-chip {
+    background: #FFFBF3;
+    border: 1px solid #EAD9BA;
+    border-radius: 20px;
+    padding: 4px 10px;
+    font-size: 10px;
+    color: #8B6F57;
+    #FFF8EC-space: nowrap;
+  }
+  .quick-label {
+    font-size: 9px;
+    color: #A08866;
+    margin-bottom: 5px;
+  }
+  .input-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+  .input-box {
+    flex: 1;
+    background: #FFF8EC;
+    border: 1px solid #EAD9BA;
+    border-radius: 20px;
+    padding: 8px 14px;
+    font-size: 11px;
+    color: #A08866;
+  }
+  .send-btn {
+    width: 36px; height: 36px;
+    border-radius: 12px;
+    background: #28C840;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #FFF8EC;
+    font-size: 16px;
+    font-weight: bold;
+    flex-shrink: 0;
+  }
+
+  /* ─── 오른쪽 패널: 시스템 다이어그램 ─── */
+  .info-panel {
+    width: 360px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .diagram-card {
+    background: #FFF8EC;
+    border: 1px solid #EAD9BA;
+    border-radius: 20px;
+    padding: 24px;
+  }
+  .diagram-title {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    color: #28C840;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+
+  /* 파이프라인 다이어그램 */
+  .pipeline {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .pipe-step {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .pipe-num {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: rgba(40, 200, 64, 0.12);
+    border: 1px solid rgba(40, 200, 64, 0.4);
+    color: #1A7030;
+    font-size: 12px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .pipe-content { flex: 1; }
+  .pipe-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #2C1C10;
+    margin-bottom: 2px;
+  }
+  .pipe-desc {
+    font-size: 10px;
+    color: #8B6F57;
+    line-height: 1.4;
+  }
+  .pipe-arrow {
+    width: 1px;
+    height: 12px;
+    background: rgba(40, 200, 64, 0.3);
+    margin-left: 14px;
+  }
+
+  /* 위기 레벨 */
+  .crisis-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .crisis-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    border-radius: 10px;
+    background: rgba(0,0,0,0.03);
+    border: 1px solid #EAD9BA;
+  }
+  .crisis-icon { font-size: 16px; }
+  .crisis-level { font-size: 11px; font-weight: 600; color: #2C1C10; flex: 1; }
+  .crisis-action { font-size: 10px; color: #8B6F57; text-align: right; }
+
+  /* 진단 태그 */
+  .diag-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .diag-tag {
+    background: #FFFBF3;
+    border: 1px solid #EAD9BA;
+    border-radius: 20px;
+    padding: 5px 12px;
+    font-size: 10px;
+    color: #8B6F57;
+  }
+  .diag-tag.active {
+    background: rgba(40, 200, 64, 0.10);
+    border-color: rgba(40, 200, 64, 0.45);
+    color: #1A7030;
+  }
+
+  /* ─── 하단 설명 ─── */
+  .footer-note {
+    text-align: center;
+    color: #B89A6A;
+    font-size: 11px;
+    padding-bottom: 20px;
+  }
+</style>
+</head>
+<body>
+
+  <!-- 타이틀 -->
+  <div class="hero">
+    <div style="font-size:48px;margin-bottom:12px;filter:drop-shadow(0 2px 8px rgba(212,168,67,0.3))">🌼</div>
+    <div class="hero-badge">오늘의 나를 위해</div>
+    <h1>나를 들여다보는<span> 일기장</span></h1>
+    <p>일상 속에서 함께 살아가야 하는 어려움이 있는<br>모든 분들을 위한 공간이에요</p>
+  </div>
+
+  <!-- 메인 목업 -->
+  <div class="mockup-container">
+
+    <!-- 모바일 앱 화면 -->
+    <div class="phone-frame">
+      <div class="phone-notch"></div>
+      <div class="phone-screen">
+
+        <!-- 헤더 -->
+        <div class="app-header">
+          <span class="header-back">← 홈</span>
+          <div class="header-brand">
+            <div class="header-dot"></div>
+            <span class="header-name">CareFlow</span>
+            <span class="header-sub">자기돌봄</span>
+          </div>
+          <div class="header-spacer"></div>
+        </div>
+
+        <!-- 채팅 -->
+        <div class="chat-area">
+
+          <div class="msg-ai">
+            <div class="avatar-ai">💚</div>
+            <div>
+              <div class="bubble-ai">안녕하세요 💚<br>저는 CareFlow예요. 오늘 어떤 하루를 보내고 계신가요?<br>편하게 이야기해주세요, 판단 없이 들을게요.</div>
+              <div class="bubble-time">오전 10:24</div>
+            </div>
+          </div>
+
+          <div class="msg-user">
+            <div>
+              <div class="bubble-user">오늘 아무것도 못 했어요 😔</div>
+              <div class="bubble-time" style="text-align:right; color:#A08866;">오전 10:25</div>
+            </div>
+            <div class="avatar-user">나</div>
+          </div>
+
+          <div class="msg-ai">
+            <div class="avatar-ai">💚</div>
+            <div>
+              <div class="bubble-ai">오늘 몸이 많이 무거웠나요?<br>그냥 있기도 버거운 날이 있어요.<br><br>💚 지금 딱 하나만 — 자리에서 일어나서 물 한 잔 마셔줄래요?</div>
+              <div class="bubble-time">오전 10:25</div>
+            </div>
+          </div>
+
+          <div class="typing">
+            <div class="avatar-ai">💚</div>
+            <div class="typing-bubble">
+              <div class="typing-dot"></div>
+              <div class="typing-dot"></div>
+              <div class="typing-dot"></div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- 입력창 -->
+        <div class="input-area">
+          <div class="quick-label">자주 하는 이야기</div>
+          <div class="quick-prompts">
+            <span class="quick-chip">오늘 아무것도 못 했어요 😔</span>
+            <span class="quick-chip">불안하고 이유를 모르겠어요</span>
+            <span class="quick-chip">너무 지쳤어요</span>
+            <span class="quick-chip">기분이 자꾸 바뀌어요</span>
+          </div>
+          <div class="input-row">
+            <div class="input-box">오늘 어떤 하루였나요? 편하게...</div>
+            <div class="send-btn">↑</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- 시스템 다이어그램 -->
+    <div class="info-panel">
+
+      <!-- 순환 다이어그램 (소비자 향) -->
+      <div class="diagram-card">
+        <div class="diagram-title">🌼 CareFlow 작동 방식</div>
+        <!-- 위기 감지 레이어 표시 -->
+        <div style="display:flex;align-items:center;gap:8px;background:rgba(40,200,64,0.08);border:1px solid rgba(40,200,64,0.25);border-radius:8px;padding:8px 10px;margin-bottom:14px;">
+          <span style="font-size:14px">🛡️</span>
+          <div>
+            <div style="font-size:11px;font-weight:700;color:#1A7030;">안전 우선 감지</div>
+            <div style="font-size:10px;color:#8B6F57;line-height:1.3">위험 신호가 감지되면 즉시 전문 기관으로 연결해요</div>
+          </div>
+        </div>
+        <!-- 순환 원형 다이어그램 -->
+        <div style="display:flex;justify-content:center;align-items:center;padding:10px 0 6px;">
+          <div style="position:relative;width:180px;height:180px;">
+            <!-- 원형 배경 -->
+            <svg viewBox="0 0 180 180" width="180" height="180" style="position:absolute;top:0;left:0;">
+              <circle cx="90" cy="90" r="72" fill="none" stroke="#EAD9BA" stroke-width="1.5" stroke-dasharray="6 4"/>
+              <!-- 화살표 호 3개 -->
+              <path d="M90,18 A72,72 0 0,1 152,126" fill="none" stroke="#28C840" stroke-width="2" stroke-linecap="round" marker-end="url(#arr)"/>
+              <path d="M152,126 A72,72 0 0,1 28,126" fill="none" stroke="#28C840" stroke-width="2" stroke-linecap="round" marker-end="url(#arr)"/>
+              <path d="M28,126 A72,72 0 0,1 90,18" fill="none" stroke="#28C840" stroke-width="2" stroke-linecap="round" marker-end="url(#arr)"/>
+              <defs>
+                <marker id="arr" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
+                  <path d="M0,0 L6,3 L0,6 Z" fill="#28C840"/>
+                </marker>
+              </defs>
+            </svg>
+            <!-- 노드 1: 사정 (상단) -->
+            <div style="position:absolute;top:2px;left:50%;transform:translateX(-50%);text-align:center;width:56px;">
+              <div style="width:44px;height:44px;border-radius:50%;background:#E8F8EC;border:2px solid #28C840;display:flex;align-items:center;justify-content:center;margin:0 auto;font-size:16px;">🔍</div>
+              <div style="font-size:9px;font-weight:700;color:#2C1C10;margin-top:2px;line-height:1.2">오늘<br>살펴보기</div>
+            </div>
+            <!-- 노드 2: 제안 (오른쪽 하단) -->
+            <div style="position:absolute;bottom:8px;right:-4px;text-align:center;width:56px;">
+              <div style="width:44px;height:44px;border-radius:50%;background:#E8F8EC;border:2px solid #28C840;display:flex;align-items:center;justify-content:center;margin:0 auto;font-size:16px;">💡</div>
+              <div style="font-size:9px;font-weight:700;color:#2C1C10;margin-top:2px;line-height:1.2">함께<br>제안하기</div>
+            </div>
+            <!-- 노드 3: 결과/다시 (왼쪽 하단) -->
+            <div style="position:absolute;bottom:8px;left:-4px;text-align:center;width:56px;">
+              <div style="width:44px;height:44px;border-radius:50%;background:#E8F8EC;border:2px solid #28C840;display:flex;align-items:center;justify-content:center;margin:0 auto;font-size:16px;">🌱</div>
+              <div style="font-size:9px;font-weight:700;color:#2C1C10;margin-top:2px;line-height:1.2">다시<br>들여다보기</div>
+            </div>
+            <!-- 중앙 텍스트 -->
+            <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;">
+              <div style="font-size:9px;font-weight:700;color:#1A7030;line-height:1.3">매일<br>순환</div>
+            </div>
+          </div>
+        </div>
+        <p style="font-size:9px;color:#B89A6A;text-align:center;margin-top:6px;line-height:1.4">기록이 쌓이면 내 패턴이 보여요</p>
+      </div>
+
+      <!-- 위기 대응 레벨 -->
+      <div class="diagram-card">
+        <div class="diagram-title">위기 대응 시스템</div>
+        <div class="crisis-grid">
+          <div class="crisis-row">
+            <span class="crisis-icon">🔴</span>
+            <span class="crisis-level">Critical</span>
+            <span class="crisis-action">1393 즉시 연결</span>
+          </div>
+          <div class="crisis-row">
+            <span class="crisis-icon">🟠</span>
+            <span class="crisis-level">Urgent</span>
+            <span class="crisis-action">1577-0199 안내</span>
+          </div>
+          <div class="crisis-row">
+            <span class="crisis-icon">🟡</span>
+            <span class="crisis-level">Monitor</span>
+            <span class="crisis-action">정신건강복지센터 연결</span>
+          </div>
+          <div class="crisis-row">
+            <span class="crisis-icon">🟢</span>
+            <span class="crisis-level">None</span>
+            <span class="crisis-action">일반 간호 상담</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- NANDA 진단 태그 -->
+      <div class="diagram-card">
+        <div class="diagram-title">관찰 영역 (8가지)</div>
+        <div class="diag-tags">
+          <span class="diag-tag active">에너지와 대처 방식</span>
+          <span class="diag-tag">불안과 긴장</span>
+          <span class="diag-tag">나를 대하는 방식</span>
+          <span class="diag-tag">감정의 흐름</span>
+          <span class="diag-tag">의미와 방향감</span>
+          <span class="diag-tag">연결과 관계</span>
+          <span class="diag-tag">수면과 회복</span>
+          <span class="diag-tag">성장 준비</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="footer-note">
+    🌼 CareFlow · 진단도 처방도 하지 않아요 · 의학적 판단은 꼭 병원을 가세요
+  </div>
+
+</body>
+</html>
