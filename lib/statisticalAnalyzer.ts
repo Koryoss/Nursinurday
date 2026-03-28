@@ -161,7 +161,7 @@ export class StatisticalAnalyzer {
       const intensities = reports.map(r => r.intensity);
 
       // 트리거가 한 번도 안 나왔거나 항상 나왔으면 계산 불가
-      const triggerSum = triggerPresence.reduce((a, b) => a + b, 0 as number);
+      const triggerSum = triggerPresence.reduce((a, b) => a + b, 0);
       if (triggerSum === 0 || triggerSum === reports.length) return;
 
       const coefficient = this.pearsonCorrelation(triggerPresence, intensities);

@@ -21,7 +21,7 @@
 // =====================================================
 
 import { NextRequest, NextResponse } from 'next/server'
-import { assessMessage, buildSystemPrompt, CareflowAssessment } from '@/lib/nursingLogic'
+import { assessMessage, buildSystemPrompt, CareflowAssessment, ConversationMode } from '@/lib/nursingLogic'
 import { getMockResponse, getCrisisResponse } from '@/lib/mockResponses'
 
 // ─── 요청/응답 타입 정의 ───
@@ -35,6 +35,7 @@ export interface ChatMessage {
 
 export interface ChatRequest {
   messages: ChatMessage[]
+  mode?: '친근' | '엄격'
 }
 
 export interface ChatResponse {
@@ -53,7 +54,7 @@ export interface ChatResponse {
 export async function POST(req: NextRequest) {
   try {
     const body: ChatRequest = await req.json()
-    const { messages } = body
+    const { messages, mode = '엄격' } = body
 
     if (!messages || messages.length === 0) {
       return NextResponse.json({ error: '메시지가 없습니다.' }, { status: 400 })
@@ -125,10 +126,10 @@ export async function POST(req: NextRequest) {
       const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
 
       // NANDA 평가 결과 기반 동적 시스템 프롬프트 생성
-      const systemPrompt = buildSystemPrompt(assessment)
+      const systemPrompt = buildSystemPrompt(assessment, mode as ConversationMode)
 
       const completion = await openai.chat.completions.create({
-        model: 'gpt-4o',
+        model: 'gpt-4o-mini',
         messages: [
           { role: 'system', content: systemPrompt },
           ...messages,
@@ -161,7 +162,7 @@ export async function POST(req: NextRequest) {
     // - NANDA 6단계 응답 구조로 포맷팅 지시
     if (mode === 'claude' && process.env.ANTHROPIC_API_KEY) {
       // NANDA 평가 결과 기반 동적 시스템 프롬프트 생성
-      const systemPrompt = buildSystemPrompt(assessment)
+      const systemPrompt = buildSystemPrompt(assessment, mode as ConversationMode)
 
       const response = await fetch('https://api.anthropic.com/v1/messages', {
         method: 'POST',
@@ -178,6 +179,10 @@ export async function POST(req: NextRequest) {
         }),
       })
 
+      if (!response.ok) {
+        const err = await response.text()
+        throw new Error(`Claude API 오류 ${response.status}: ${err}`)
+      }
       const data = await response.json()
       let reply = data.content?.[0]?.text ?? '응답을 생성하지 못했어요.'
 

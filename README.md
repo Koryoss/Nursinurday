@@ -1,5 +1,5 @@
 # CareFlow 🌿
-**일상 간호 플랫폼**
+**NANDA-I 간호학 기반 일상 심리 간호 AI 플랫폼**
 
 > MVP v0.1 — API 키 없이 바로 테스트 가능
 
@@ -29,6 +29,163 @@ careflow/
 ├── package.json
 └── tailwind.config.ts
 ```
+
+---
+
+## 🚀 VS Code에서 시작하기
+
+### Step 1 — 필수 프로그램 설치 (처음 한 번만)
+
+| 프로그램 | 다운로드 링크 | 설명 |
+|---------|------------|------|
+| Node.js | https://nodejs.org (LTS 버전) | JavaScript 실행 환경 |
+| VS Code | https://code.visualstudio.com | 코드 에디터 |
+| Git | https://git-scm.com | 버전 관리 |
+
+### Step 2 — 프로젝트 열기
+
+1. VS Code 실행
+2. `파일 → 폴더 열기` → `careflow` 폴더 선택
+3. VS Code 상단 메뉴 `터미널 → 새 터미널` 클릭
+
+### Step 3 — 의존성 설치 (딱 한 번만)
+
+```bash
+npm install
+```
+> ☕ 1-2분 정도 걸려요. `node_modules` 폴더가 생기면 완료!
+
+### Step 4 — 환경 변수 설정
+
+```bash
+# .env.example 파일을 복사해서 .env.local 만들기
+cp .env.example .env.local
+```
+지금은 API 키가 없으니 그냥 두면 돼요. 자동으로 **모의 응답 모드**로 실행됩니다.
+
+### Step 5 — 로컬 서버 실행
+
+```bash
+npm run dev
+```
+
+브라우저에서 http://localhost:3000 열기 🎉
+
+---
+
+## 📱 반응형 테스트 방법
+
+VS Code에서 Chrome DevTools를 사용하면 모바일/데스크톱을 동시에 확인할 수 있어요.
+
+1. Chrome에서 http://localhost:3000 열기
+2. `F12` (개발자 도구 열기)
+3. `Ctrl+Shift+M` (기기 에뮬레이션 토글)
+4. 상단에서 기기 선택 (iPhone, Galaxy, iPad 등)
+
+---
+
+## 🔑 나중에 API 키를 얻었을 때
+
+`.env.local` 파일을 열고:
+
+```env
+# OpenAI 사용 시
+OPENAI_API_KEY=sk-...여기에_키_입력...
+AI_MODE=openai
+
+# 또는 Claude 사용 시
+ANTHROPIC_API_KEY=sk-ant-...여기에_키_입력...
+AI_MODE=claude
+```
+
+저장 후 서버 재시작:
+```bash
+# 터미널에서 Ctrl+C로 서버 종료 후
+npm run dev
+```
+
+---
+
+## 📤 GitHub에 올리기
+
+### 처음 GitHub 저장소 만들기
+
+1. https://github.com 로그인
+2. 오른쪽 위 `+` → `New repository`
+3. 이름: `careflow`, Public/Private 선택 → `Create repository`
+
+### 코드 업로드
+
+```bash
+# 터미널에서 순서대로 실행
+git init
+git add .
+git commit -m "feat: CareFlow MVP 초기 설정"
+git branch -M main
+git remote add origin https://github.com/[내_아이디]/careflow.git
+git push -u origin main
+```
+
+### Vercel로 무료 배포 (선택)
+
+1. https://vercel.com 에서 GitHub 계정으로 로그인
+2. `New Project` → GitHub 저장소 선택
+3. `Deploy` 클릭 → 자동으로 https://careflow-xxx.vercel.app 생성!
+
+코드를 push할 때마다 자동으로 배포됩니다 🚀
+
+---
+
+## 🧠 핵심 파일 설명 (개발 공부용)
+
+### `lib/nursingLogic.ts` — 이게 CareFlow의 핵심 IP
+```
+사용자 메시지
+    ↓
+assessMessage()   ← 키워드 분석 → NANDA-I 진단 분류
+    ↓
+buildSystemPrompt() ← AI에게 간호사 역할 지침 전달
+```
+
+### `app/api/chat/route.ts` — 서버와 AI의 연결 다리
+```
+브라우저 → POST /api/chat → AI 호출 → 응답 반환
+```
+
+### `app/chat/page.tsx` — 사용자가 보는 채팅 화면
+```
+useState로 메시지 목록 관리
+fetch()로 /api/chat 호출
+결과를 화면에 표시
+```
+
+---
+
+## 📅 액션 플랜 연계
+
+| 주차 | 개발 목표 | 관련 파일 |
+|-----|---------|---------|
+| 1주차 | 로컬 실행 + 모의 테스트 | 전체 셋업 |
+| 2주차 | `nursingLogic.ts` 수정 → 나만의 간호 로직 고도화 | `lib/` |
+| 3주차 | 5명 테스트 → Vercel 배포 | 배포 설정 |
+| 4주차+ | API 키 연결 → 진짜 AI로 전환 | `.env.local` |
+
+---
+
+## ❓ 자주 묻는 질문
+
+**Q: `npm install` 에러가 나요**
+→ Node.js가 설치되어 있는지 확인: `node --version`
+
+**Q: 포트 3000이 이미 사용 중이에요**
+→ `npm run dev -- -p 3001` 로 다른 포트 사용
+
+**Q: API 응답이 이상해요**
+→ `app/api/chat/route.ts` 파일에 `console.log` 추가해서 디버깅
+
+---
+
+---
 
 ## ⚠️ 중요 알림: CareFlow v4.1 🚦 신호등 × "Related To" 프레임워크
 

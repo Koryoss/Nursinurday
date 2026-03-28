@@ -15,7 +15,13 @@ import MessageBubble from '@/components/MessageBubble'
 import TypingIndicator from '@/components/TypingIndicator'
 import type { ChatMessage } from '@/app/api/chat/route'
 import { saveSession } from '@/lib/sessionStorage'
-import type { ObservationDomain, CareAxis, CrisisLevel } from '@/lib/nursingLogic'
+import type { ObservationDomain, CareAxis, CrisisLevel, ConversationMode } from '@/lib/nursingLogic'
+
+// 말투 모드별 초기 인사
+const GREETING: Record<ConversationMode, string> = {
+  '친근': '안녕 💚\n나 CareFlow야. 오늘 어떤 하루였어?\n편하게 얘기해줘, 판단 같은 거 없어.',
+  '엄격': '안녕하세요 💚\n저는 CareFlow예요. 오늘 어떤 하루를 보내고 계신가요?\n편하게 이야기해주세요, 판단 없이 들을게요.',
+}
 
 // 빠른 입력 제안 (온보딩 UX)
 const QUICK_PROMPTS = [
@@ -31,17 +37,23 @@ function getTime() {
 }
 
 export default function ChatPage() {
-  const [messages, setMessages] = useState<(ChatMessage & { time: string })[]>([
-    {
-      role: 'assistant',
-      content: '안녕하세요 💚\n저는 CareFlow예요. 오늘 어떤 하루를 보내고 계신가요?\n편하게 이야기해주세요, 판단 없이 들을게요.',
-      time: getTime(),
-    }
-  ])
+  const [convMode, setConvMode] = useState<ConversationMode>('엄격')
+  const [messages, setMessages] = useState<(ChatMessage & { time: string })[]>([])
   const [input, setInput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   // 마지막으로 감지된 crisisLevel — 헤더 신호등 색상에 활용
   const [crisisLevel, setCrisisLevel] = useState<CrisisLevel>('none')
+
+  // sessionStorage에서 말투 모드 읽기 (온보딩에서 저장된 값)
+  useEffect(() => {
+    const saved = (sessionStorage.getItem('careflow_mode') ?? '엄격') as ConversationMode
+    setConvMode(saved)
+    setMessages([{
+      role: 'assistant',
+      content: GREETING[saved],
+      time: getTime(),
+    }])
+  }, [])
 
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
@@ -87,6 +99,7 @@ export default function ChatPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           messages: [...messages, userMsg].map(({ role, content }) => ({ role, content })),
+          mode: convMode,
         }),
       })
 
