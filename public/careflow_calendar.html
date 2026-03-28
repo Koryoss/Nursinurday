@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CareFlow — careflow_calendar (수국 버터크림)</title>
+<title>CareFlow — Calendar Mockup</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
@@ -11,15 +11,6 @@
     font-family: -apple-system, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
     padding: 40px 24px;
     color: #3D2B1F;
-  }
-
-  .page-title {
-    text-align: center;
-    font-size: 13px;
-    color: #8B6F57;
-    margin-bottom: 36px;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
   }
 
   .layout {
@@ -34,11 +25,27 @@
   .phone {
     width: 320px;
     background: #FFF8EC;
-    border-radius: 28px;
+    border-radius: 40px;
+    border: 2px solid #EAD9BA;
     overflow: hidden;
-    box-shadow: 0 8px 40px rgba(0,0,0,0.10);
+    box-shadow: 0 24px 60px rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,0.6);
     display: flex;
     flex-direction: column;
+    position: relative;
+  }
+
+  /* 상단 노치 */
+  .phone::before {
+    content: '';
+    position: absolute;
+    top: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80px;
+    height: 5px;
+    background: #EAD9BA;
+    border-radius: 3px;
+    z-index: 10;
   }
 
   /* ── 헤더 ── */
@@ -46,21 +53,23 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 14px 16px;
+    padding: 24px 16px 12px;
     background: #FFF8EC;
-    border-bottom: 1px solid #FFFBF3;
+    border-bottom: 1px solid #EAD9BA;
   }
   .header-left { display: flex; align-items: center; gap: 7px; }
-  .dot { width: 8px; height: 8px; border-radius: 50%; background: #28C840; }
-  .header-name { font-size: 13px; font-weight: 600; color: #1A7030; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: #28C840; animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+  .header-name { font-size: 13px; font-weight: 700; color: #3D2B1F; }
   .header-sub  { font-size: 11px; color: #A08866; }
   .header-icon { color: #A08866; }
 
   /* ── 탭 ── */
   .tabs {
     display: flex;
-    border-bottom: 1px solid #FFFBF3;
+    border-bottom: 1px solid #EAD9BA;
     padding: 0 16px;
+    background: #FFF8EC;
   }
   .tab {
     flex: 1;
@@ -69,24 +78,23 @@
     font-size: 12px;
     font-weight: 500;
     color: #A08866;
-    cursor: pointer;
     border-bottom: 2px solid transparent;
   }
   .tab.active {
-    color: #28C840;
-    border-bottom-color: #28C840;
-    font-weight: 600;
+    color: #3D8A70;
+    border-bottom-color: #5BA88A;
+    font-weight: 700;
   }
 
-  /* ── 섹션 패딩 ── */
   .content { padding: 16px; }
 
   /* ── 주간 뷰 ── */
   .week-label {
-    font-size: 11px;
-    font-weight: 600;
-    color: #8B6F57;
-    letter-spacing: 0.04em;
+    font-size: 10px;
+    font-weight: 700;
+    color: #A08866;
+    letter-spacing: 1px;
+    text-transform: uppercase;
     margin-bottom: 10px;
   }
 
@@ -95,61 +103,41 @@
     justify-content: space-between;
     margin-bottom: 20px;
   }
-
   .day-item {
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 5px;
   }
-
-  .day-name {
-    font-size: 10px;
-    color: #A08866;
-    font-weight: 500;
-  }
-
+  .day-name { font-size: 10px; color: #A08866; font-weight: 500; }
   .day-circle {
-    width: 34px;
-    height: 34px;
+    width: 34px; height: 34px;
     border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 11px;
-    font-weight: 600;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 600;
     position: relative;
-    cursor: pointer;
-    transition: transform 0.15s;
   }
-  .day-circle:hover { transform: scale(1.08); }
 
-  /* 상태별 색상 */
-  .day-none    { background: #FFFBF3; color: #EAD9BA; }
-  .day-normal  { background: #d1fae5; color: #065f46; }
-  .day-monitor { background: #fef3c7; color: #92400e; }
-  .day-crisis  { background: #fee2e2; color: #991b1b; }
+  /* 신호등 3색만 */
+  .day-none    { background: #FFFBF3; color: #EAD9BA; border: 1.5px dashed #EAD9BA; }
+  .day-normal  { background: #dcfce7; color: #16a34a; }
+  .day-monitor { background: #fef9c3; color: #a16207; }
+  .day-crisis  { background: #fee2e2; color: #dc2626; }
   .day-today   { box-shadow: 0 0 0 2px #28C840; }
 
-  /* 도메인 점 (하단 소점) */
-  .day-dots {
-    display: flex;
-    gap: 2px;
-  }
-  .mini-dot {
-    width: 4px; height: 4px;
-    border-radius: 50%;
-  }
+  /* 미니닷 — 단일 색 */
+  .day-dots { display: flex; gap: 2px; }
+  .mini-dot { width: 4px; height: 4px; border-radius: 50%; background: #5BA88A; }
 
-  /* ── 주간 요약 ── */
+  /* ── 주간 요약 바 ── */
   .summary-label {
-    font-size: 11px;
-    font-weight: 600;
-    color: #8B6F57;
+    font-size: 10px;
+    font-weight: 700;
+    color: #A08866;
+    letter-spacing: 1px;
+    text-transform: uppercase;
     margin-bottom: 8px;
-    letter-spacing: 0.04em;
   }
-
   .domain-bar-row {
     display: flex;
     align-items: center;
@@ -158,130 +146,26 @@
   }
   .domain-bar-name {
     font-size: 11px;
-    color: #374151;
-    width: 88px;
+    color: #6B5344;
+    width: 36px;
     flex-shrink: 0;
+    font-weight: 600;
   }
   .domain-bar-track {
     flex: 1;
     height: 6px;
-    background: #FFFBF3;
+    background: rgba(61,43,31,0.08);
     border-radius: 3px;
     overflow: hidden;
   }
   .domain-bar-fill {
     height: 100%;
     border-radius: 3px;
-    background: #28C840;
-    transition: width 0.4s;
+    background: #5BA88A;
   }
-  .domain-bar-fill.yellow { background: #fbbf24; }
-  .domain-bar-fill.blue   { background: #93c5fd; }
-  .domain-bar-fill.purple { background: #c4b5fd; }
-  .domain-bar-count {
-    font-size: 11px;
-    color: #A08866;
-    width: 18px;
-    text-align: right;
-  }
+  .domain-bar-count { font-size: 11px; color: #A08866; width: 18px; text-align: right; }
 
-  /* ── 월별 뷰 ── */
-  .month-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 12px;
-  }
-  .month-title {
-    font-size: 13px;
-    font-weight: 600;
-    color: #3D2B1F;
-  }
-  .month-nav {
-    font-size: 14px;
-    color: #A08866;
-    cursor: pointer;
-    padding: 2px 6px;
-    border-radius: 6px;
-  }
-  .month-nav:hover { background: #FFFBF3; }
-
-  .cal-grid {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 4px;
-    margin-bottom: 16px;
-  }
-
-  .cal-dow {
-    text-align: center;
-    font-size: 10px;
-    color: #A08866;
-    font-weight: 600;
-    padding-bottom: 4px;
-  }
-
-  .cal-cell {
-    aspect-ratio: 1;
-    border-radius: 8px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    font-size: 11px;
-    font-weight: 500;
-    cursor: pointer;
-    position: relative;
-    transition: transform 0.1s;
-  }
-  .cal-cell:hover { transform: scale(1.05); }
-  .cal-cell.empty { color: #F0E2C0; }
-  .cal-cell.has-normal  { background: #d1fae5; color: #065f46; }
-  .cal-cell.has-monitor { background: #fef3c7; color: #92400e; }
-  .cal-cell.has-crisis  { background: #fee2e2; color: #991b1b; }
-  .cal-cell.no-session  { color: #EAD9BA; }
-  .cal-cell.today { box-shadow: 0 0 0 2px #28C840; }
-  .cal-cell.future { color: #F0E2C0; background: none; cursor: default; }
-
-  /* 달력 날짜 하단 도트 */
-  .cal-dot {
-    width: 3px; height: 3px;
-    border-radius: 50%;
-    margin-top: 2px;
-  }
-
-  /* ── 월 요약 카드 ── */
-  .month-summary {
-    background: #f0fdf4;
-    border: 1px solid #d1fae5;
-    border-radius: 12px;
-    padding: 12px 14px;
-    margin-bottom: 12px;
-  }
-  .summary-title {
-    font-size: 11px;
-    font-weight: 600;
-    color: #065f46;
-    margin-bottom: 8px;
-  }
-  .summary-stat {
-    display: flex;
-    justify-content: space-between;
-    font-size: 11.5px;
-    color: #374151;
-    padding: 3px 0;
-    border-bottom: 1px solid #dcfce7;
-  }
-  .summary-stat:last-child { border-bottom: none; }
-  .summary-stat b { color: #28C840; }
-
-  /* ── 상세 기록 (날짜 탭) ── */
-  .detail-date {
-    font-size: 12px;
-    font-weight: 600;
-    color: #374151;
-    margin-bottom: 10px;
-  }
+  /* ── 선택일 상세 ── */
   .detail-domains {
     display: flex;
     flex-wrap: wrap;
@@ -292,62 +176,114 @@
     font-size: 11px;
     padding: 3px 10px;
     border-radius: 20px;
-    background: #ecfdf5;
-    color: #28C840;
-    border: 1px solid #a7f3d0;
-  }
-  .detail-tag.yellow {
-    background: #fefce8;
-    color: #ca8a04;
-    border-color: #fde047;
+    background: rgba(91,168,138,0.12);
+    color: #3D8A70;
+    border: 1px solid rgba(91,168,138,0.25);
+    font-weight: 600;
   }
   .detail-quote {
     font-size: 12px;
     color: #8B6F57;
     line-height: 1.6;
-    background: #f9fafb;
-    border-left: 3px solid #28C840;
+    background: rgba(91,168,138,0.06);
+    border-left: 3px solid #5BA88A;
     padding: 8px 10px;
     border-radius: 0 8px 8px 0;
     font-style: italic;
   }
 
+  /* ── 월별 뷰 ── */
+  .month-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+  .month-title { font-size: 13px; font-weight: 700; color: #3D2B1F; }
+  .month-nav   { font-size: 14px; color: #A08866; padding: 2px 6px; border-radius: 6px; }
+
+  .cal-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+    margin-bottom: 14px;
+  }
+  .cal-dow {
+    text-align: center;
+    font-size: 10px;
+    color: #A08866;
+    font-weight: 600;
+    padding-bottom: 4px;
+  }
+  .cal-cell {
+    aspect-ratio: 1;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 500;
+    position: relative;
+  }
+  .cal-cell.empty       { color: #F0E2C0; }
+  .cal-cell.has-normal  { background: #dcfce7; color: #16a34a; }
+  .cal-cell.has-monitor { background: #fef9c3; color: #a16207; }
+  .cal-cell.has-crisis  { background: #fee2e2; color: #dc2626; }
+  .cal-cell.no-session  { color: #EAD9BA; }
+  .cal-cell.today       { box-shadow: 0 0 0 2px #28C840; }
+  .cal-cell.future      { color: #F0E2C0; background: none; }
+
+  .cal-dot {
+    width: 3px; height: 3px;
+    border-radius: 50%;
+    background: #5BA88A;
+    margin-top: 2px;
+  }
+
+  /* ── 월 요약 카드 ── */
+  .month-summary {
+    background: rgba(91,168,138,0.08);
+    border: 1px solid rgba(91,168,138,0.2);
+    border-radius: 12px;
+    padding: 12px 14px;
+    margin-bottom: 12px;
+  }
+  .summary-title { font-size: 11px; font-weight: 700; color: #3D8A70; margin-bottom: 8px; }
+  .summary-stat {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11.5px;
+    color: #6B5344;
+    padding: 3px 0;
+    border-bottom: 1px solid rgba(91,168,138,0.15);
+  }
+  .summary-stat:last-child { border-bottom: none; }
+  .summary-stat b { color: #3D8A70; }
+
   /* ── 설명 패널 ── */
   .desc-panel {
-    width: 280px;
+    width: 240px;
     display: flex;
     flex-direction: column;
     gap: 14px;
+    padding-top: 40px;
   }
   .desc-card {
     background: #FFF8EC;
+    border: 1px solid #EAD9BA;
     border-radius: 14px;
     padding: 16px;
     font-size: 12px;
     line-height: 1.7;
-    color: #374151;
-    box-shadow: 0 1px 6px rgba(0,0,0,0.06);
+    color: #6B5344;
   }
-  .desc-card b { font-weight: 600; color: #3D2B1F; display: block; margin-bottom: 6px; }
-  .legend-row { display: flex; align-items: center; gap: 8px; margin-top: 6px; font-size: 11.5px; }
-  .legend-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
-
-  .data-structure {
-    background: #1e1e2e;
-    border-radius: 10px;
-    padding: 14px;
-    font-family: -apple-system, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
-    font-size: 10.5px;
-    line-height: 1.7;
-    color: #cdd6f4;
-  }
-  .code-key   { color: #89b4fa; }
-  .code-type  { color: #cba6f7; }
-  .code-comment { color: #6c7086; }
+  .desc-card b { font-weight: 700; color: #3D2B1F; display: block; margin-bottom: 8px; }
+  .legend-row  { display: flex; align-items: center; gap: 8px; margin-top: 6px; font-size: 11.5px; }
+  .legend-dot  { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
 </style>
 </head>
 <body>
-
 
 <div class="layout">
 
@@ -367,104 +303,79 @@
     <div class="tabs">
       <div class="tab active">주간</div>
       <div class="tab">월별</div>
-      <div class="tab">도메인</div>
     </div>
 
     <div class="content">
 
-      <!-- 주간 스트립 -->
       <p class="week-label">3월 둘째 주</p>
       <div class="week-strip">
-        <!-- 월 -->
         <div class="day-item">
           <span class="day-name">월</span>
           <div class="day-circle day-normal">10</div>
-          <div class="day-dots">
-            <div class="mini-dot" style="background:#28C840"></div>
-            <div class="mini-dot" style="background:#93c5fd"></div>
-          </div>
+          <div class="day-dots"><div class="mini-dot"></div><div class="mini-dot"></div></div>
         </div>
-        <!-- 화 -->
         <div class="day-item">
           <span class="day-name">화</span>
           <div class="day-circle day-none">11</div>
           <div class="day-dots"></div>
         </div>
-        <!-- 수 -->
         <div class="day-item">
           <span class="day-name">수</span>
           <div class="day-circle day-monitor">12</div>
-          <div class="day-dots">
-            <div class="mini-dot" style="background:#fbbf24"></div>
-            <div class="mini-dot" style="background:#fbbf24"></div>
-          </div>
+          <div class="day-dots"><div class="mini-dot"></div><div class="mini-dot"></div></div>
         </div>
-        <!-- 목 -->
         <div class="day-item">
           <span class="day-name">목</span>
           <div class="day-circle day-normal">13</div>
-          <div class="day-dots">
-            <div class="mini-dot" style="background:#28C840"></div>
-          </div>
+          <div class="day-dots"><div class="mini-dot"></div></div>
         </div>
-        <!-- 금 -->
         <div class="day-item">
           <span class="day-name">금</span>
           <div class="day-circle day-monitor">14</div>
-          <div class="day-dots">
-            <div class="mini-dot" style="background:#fbbf24"></div>
-            <div class="mini-dot" style="background:#f87171"></div>
-          </div>
+          <div class="day-dots"><div class="mini-dot"></div><div class="mini-dot"></div></div>
         </div>
-        <!-- 토 -->
         <div class="day-item">
           <span class="day-name">토</span>
           <div class="day-circle day-normal">15</div>
-          <div class="day-dots">
-            <div class="mini-dot" style="background:#c4b5fd"></div>
-          </div>
+          <div class="day-dots"><div class="mini-dot"></div></div>
         </div>
-        <!-- 일 (오늘) -->
         <div class="day-item">
-          <span class="day-name" style="color:#28C840; font-weight:700;">일</span>
+          <span class="day-name" style="color:#28C840;font-weight:700">일</span>
           <div class="day-circle day-normal day-today">16</div>
-          <div class="day-dots">
-            <div class="mini-dot" style="background:#28C840"></div>
-            <div class="mini-dot" style="background:#28C840"></div>
-          </div>
+          <div class="day-dots"><div class="mini-dot"></div><div class="mini-dot"></div></div>
         </div>
       </div>
 
-      <!-- 이번 주 요약 -->
-      <p class="summary-label">이번 주 관찰 영역</p>
+      <!-- 이번 주 4축 요약 -->
+      <p class="summary-label">이번 주 관찰 축</p>
       <div class="domain-bar-row">
-        <span class="domain-bar-name">에너지와 활동</span>
+        <span class="domain-bar-name">몸</span>
         <div class="domain-bar-track"><div class="domain-bar-fill" style="width:85%"></div></div>
         <span class="domain-bar-count">5</span>
       </div>
       <div class="domain-bar-row">
-        <span class="domain-bar-name">불안과 긴장</span>
-        <div class="domain-bar-track"><div class="domain-bar-fill yellow" style="width:60%"></div></div>
+        <span class="domain-bar-name">감정</span>
+        <div class="domain-bar-track"><div class="domain-bar-fill" style="width:60%"></div></div>
         <span class="domain-bar-count">3</span>
       </div>
       <div class="domain-bar-row">
-        <span class="domain-bar-name">잠과 회복</span>
-        <div class="domain-bar-track"><div class="domain-bar-fill blue" style="width:40%"></div></div>
+        <span class="domain-bar-name">관계</span>
+        <div class="domain-bar-track"><div class="domain-bar-fill" style="width:40%"></div></div>
         <span class="domain-bar-count">2</span>
       </div>
       <div class="domain-bar-row">
-        <span class="domain-bar-name">나를 대하는 방식</span>
-        <div class="domain-bar-track"><div class="domain-bar-fill purple" style="width:25%"></div></div>
+        <span class="domain-bar-name">의미</span>
+        <div class="domain-bar-track"><div class="domain-bar-fill" style="width:25%"></div></div>
         <span class="domain-bar-count">1</span>
       </div>
 
       <div style="height:14px"></div>
 
-      <!-- 선택된 날 상세 (오늘) -->
+      <!-- 선택된 날 상세 -->
       <p class="summary-label">오늘 3월 16일</p>
       <div class="detail-domains">
-        <span class="detail-tag">에너지와 활동</span>
-        <span class="detail-tag">감정의 흐름</span>
+        <span class="detail-tag">몸</span>
+        <span class="detail-tag">감정</span>
       </div>
       <div class="detail-quote">
         "오늘 아무것도 못 한 것 같아요. 근데 이렇게 기록하는 거 보니까 뭔가 하긴 했네요."
@@ -490,7 +401,6 @@
     <div class="tabs">
       <div class="tab">주간</div>
       <div class="tab active">월별</div>
-      <div class="tab">도메인</div>
     </div>
 
     <div class="content">
@@ -501,45 +411,43 @@
         <span class="month-nav">›</span>
       </div>
 
-      <!-- 달력 그리드 -->
       <div class="cal-grid">
-        <!-- 요일 헤더 -->
         <div class="cal-dow">월</div>
         <div class="cal-dow">화</div>
         <div class="cal-dow">수</div>
         <div class="cal-dow">목</div>
         <div class="cal-dow">금</div>
-        <div class="cal-dow" style="color:#f87171">토</div>
-        <div class="cal-dow" style="color:#f87171">일</div>
+        <div class="cal-dow">토</div>
+        <div class="cal-dow">일</div>
 
         <!-- 1주차 -->
-        <div class="cal-cell empty">  </div>
-        <div class="cal-cell empty">  </div>
-        <div class="cal-cell empty">  </div>
-        <div class="cal-cell empty">  </div>
-        <div class="cal-cell empty">  </div>
+        <div class="cal-cell empty"></div>
+        <div class="cal-cell empty"></div>
+        <div class="cal-cell empty"></div>
+        <div class="cal-cell empty"></div>
+        <div class="cal-cell empty"></div>
         <div class="cal-cell no-session">1</div>
-        <div class="cal-cell has-normal">2<div class="cal-dot" style="background:#28C840"></div></div>
+        <div class="cal-cell has-normal">2<div class="cal-dot"></div></div>
 
         <!-- 2주차 -->
-        <div class="cal-cell has-normal">3<div class="cal-dot" style="background:#28C840"></div></div>
+        <div class="cal-cell has-normal">3<div class="cal-dot"></div></div>
         <div class="cal-cell no-session">4</div>
-        <div class="cal-cell has-monitor">5<div class="cal-dot" style="background:#fbbf24"></div></div>
-        <div class="cal-cell has-normal">6<div class="cal-dot" style="background:#28C840"></div></div>
-        <div class="cal-cell has-normal">7<div class="cal-dot" style="background:#28C840"></div></div>
+        <div class="cal-cell has-monitor">5<div class="cal-dot"></div></div>
+        <div class="cal-cell has-normal">6<div class="cal-dot"></div></div>
+        <div class="cal-cell has-normal">7<div class="cal-dot"></div></div>
         <div class="cal-cell no-session">8</div>
-        <div class="cal-cell has-normal">9<div class="cal-dot" style="background:#28C840"></div></div>
+        <div class="cal-cell has-normal">9<div class="cal-dot"></div></div>
 
         <!-- 3주차 -->
-        <div class="cal-cell has-normal">10<div class="cal-dot" style="background:#28C840"></div></div>
+        <div class="cal-cell has-normal">10<div class="cal-dot"></div></div>
         <div class="cal-cell no-session">11</div>
-        <div class="cal-cell has-monitor">12<div class="cal-dot" style="background:#fbbf24"></div></div>
-        <div class="cal-cell has-normal">13<div class="cal-dot" style="background:#28C840"></div></div>
-        <div class="cal-cell has-monitor">14<div class="cal-dot" style="background:#fbbf24"></div></div>
-        <div class="cal-cell has-normal">15<div class="cal-dot" style="background:#28C840"></div></div>
-        <div class="cal-cell has-normal today">16<div class="cal-dot" style="background:#28C840"></div></div>
+        <div class="cal-cell has-monitor">12<div class="cal-dot"></div></div>
+        <div class="cal-cell has-normal">13<div class="cal-dot"></div></div>
+        <div class="cal-cell has-monitor">14<div class="cal-dot"></div></div>
+        <div class="cal-cell has-normal">15<div class="cal-dot"></div></div>
+        <div class="cal-cell has-normal today">16<div class="cal-dot"></div></div>
 
-        <!-- 4주차 이후 미래 -->
+        <!-- 이후 미래 -->
         <div class="cal-cell future">17</div>
         <div class="cal-cell future">18</div>
         <div class="cal-cell future">19</div>
@@ -561,7 +469,7 @@
       <div class="month-summary">
         <p class="summary-title">3월 기록 요약</p>
         <div class="summary-stat"><span>기록한 날</span><b>11일</b></div>
-        <div class="summary-stat"><span>가장 많이 나온 영역</span><b>에너지와 활동</b></div>
+        <div class="summary-stat"><span>가장 많이 나온 축</span><b>몸</b></div>
         <div class="summary-stat"><span>모니터링 감지</span><b>3회</b></div>
         <div class="summary-stat"><span>연속 기록</span><b>5일째 🔥</b></div>
       </div>
@@ -572,43 +480,13 @@
 
   <!-- ── 설명 패널 ── -->
   <div class="desc-panel">
-
     <div class="desc-card">
       <b>색 범례</b>
-      <div class="legend-row"><div class="legend-dot" style="background:#d1fae5; border:1px solid #28C840"></div> 일반 — 자기돌봄 범위</div>
-      <div class="legend-row"><div class="legend-dot" style="background:#fef3c7; border:1px solid #fcd34d"></div> 모니터링 — 만성 패턴 감지</div>
-      <div class="legend-row"><div class="legend-dot" style="background:#fee2e2; border:1px solid #fca5a5"></div> 위기 개입 기록</div>
-      <div class="legend-row"><div class="legend-dot" style="background:#FFFBF3; border:1px solid #F0E2C0"></div> 기록 없는 날</div>
+      <div class="legend-row"><div class="legend-dot" style="background:#dcfce7;border:1px solid #86efac"></div> 자기돌봄 범위</div>
+      <div class="legend-row"><div class="legend-dot" style="background:#fef9c3;border:1px solid #fde047"></div> 모니터링 — 만성 패턴 감지</div>
+      <div class="legend-row"><div class="legend-dot" style="background:#fee2e2;border:1px solid #fca5a5"></div> 위기 개입 기록</div>
+      <div class="legend-row"><div class="legend-dot" style="background:#FFFBF3;border:1px solid #EAD9BA"></div> 기록 없는 날</div>
     </div>
-
-    <div class="desc-card">
-      <b>저장 데이터 구조</b>
-      <div class="data-structure">
-<span class="code-comment">// localStorage: 'careflow_sessions'</span>
-{
-  <span class="code-key">date</span>: <span class="code-type">string</span>,       <span class="code-comment">// "2026-03-16"</span>
-  <span class="code-key">primaryDomain</span>: <span class="code-type">string</span>, <span class="code-comment">// "Energy"</span>
-  <span class="code-key">activeDomains</span>: <span class="code-type">string[]</span>, <span class="code-comment">// 감지 도메인</span>
-  <span class="code-key">axisScores</span>: <span class="code-type">object</span>,  <span class="code-comment">// 4축 점수</span>
-  <span class="code-key">crisisLevel</span>: <span class="code-type">string</span>,  <span class="code-comment">// none|monitor…</span>
-  <span class="code-key">messageCount</span>: <span class="code-type">number</span>, <span class="code-comment">// 대화 수</span>
-  <span class="code-key">timestamp</span>: <span class="code-type">number</span>   <span class="code-comment">// unix ms</span>
-}
-      </div>
-    </div>
-
-    <div class="desc-card">
-      <b>구현 단계</b>
-      <div style="font-size:11.5px; line-height:1.8; margin-top:4px;">
-        <div>① <code style="background:#FFFBF3;padding:1px 5px;border-radius:4px;">lib/sessionStorage.ts</code></div>
-        <div style="color:#8B6F57; padding-left:12px; margin-bottom:6px;">저장·불러오기·집계 헬퍼</div>
-        <div>② <code style="background:#FFFBF3;padding:1px 5px;border-radius:4px;">chat/page.tsx</code></div>
-        <div style="color:#8B6F57; padding-left:12px; margin-bottom:6px;">AI 응답 후 세션 자동 저장</div>
-        <div>③ <code style="background:#FFFBF3;padding:1px 5px;border-radius:4px;">app/history/page.tsx</code></div>
-        <div style="color:#8B6F57; padding-left:12px;">주간·월별 캘린더 렌더링</div>
-      </div>
-    </div>
-
   </div>
 
 </div>
