@@ -125,9 +125,13 @@
   .day-crisis  { background: #fee2e2; color: #dc2626; }
   .day-today   { box-shadow: 0 0 0 2px #28C840; }
 
-  /* 미니닷 — 단일 색 */
+  /* 미니닷 — 4축 색상 */
   .day-dots { display: flex; gap: 2px; }
-  .mini-dot { width: 4px; height: 4px; border-radius: 50%; background: #5BA88A; }
+  .mini-dot { width: 4px; height: 4px; border-radius: 50%; }
+  .md-body    { background: #F5A87C; }   /* 몸 */
+  .md-emotion { background: #EE9FB8; }   /* 감정 */
+  .md-relation{ background: #B8A8D4; }   /* 관계 */
+  .md-meaning { background: #E8C86E; }   /* 의미 */
 
   /* ── 주간 요약 바 ── */
   .summary-label {
@@ -161,7 +165,6 @@
   .domain-bar-fill {
     height: 100%;
     border-radius: 3px;
-    background: #5BA88A;
   }
   .domain-bar-count { font-size: 11px; color: #A08866; width: 18px; text-align: right; }
 
@@ -176,17 +179,20 @@
     font-size: 11px;
     padding: 3px 10px;
     border-radius: 20px;
-    background: rgba(91,168,138,0.12);
-    color: #3D8A70;
-    border: 1px solid rgba(91,168,138,0.25);
     font-weight: 600;
   }
+  /* 4축 태그 */
+  .tag-body     { background: rgba(245,168,124,0.18); color: #b55a1a; border: 1px solid rgba(245,168,124,0.4); }
+  .tag-emotion  { background: rgba(238,159,184,0.18); color: #b53060; border: 1px solid rgba(238,159,184,0.4); }
+  .tag-relation { background: rgba(184,168,212,0.18); color: #6a4faa; border: 1px solid rgba(184,168,212,0.4); }
+  .tag-meaning  { background: rgba(232,200,110,0.18); color: #9a7010; border: 1px solid rgba(232,200,110,0.4); }
+
   .detail-quote {
     font-size: 12px;
     color: #8B6F57;
     line-height: 1.6;
-    background: rgba(91,168,138,0.06);
-    border-left: 3px solid #5BA88A;
+    background: rgba(245,168,124,0.06);
+    border-left: 3px solid #F5A87C;
     padding: 8px 10px;
     border-radius: 0 8px 8px 0;
     font-style: italic;
@@ -312,7 +318,7 @@
         <div class="day-item">
           <span class="day-name">월</span>
           <div class="day-circle day-normal">10</div>
-          <div class="day-dots"><div class="mini-dot"></div><div class="mini-dot"></div></div>
+          <div class="day-dots"><div class="mini-dot md-body"></div><div class="mini-dot md-emotion"></div></div>
         </div>
         <div class="day-item">
           <span class="day-name">화</span>
@@ -322,27 +328,27 @@
         <div class="day-item">
           <span class="day-name">수</span>
           <div class="day-circle day-monitor">12</div>
-          <div class="day-dots"><div class="mini-dot"></div><div class="mini-dot"></div></div>
+          <div class="day-dots"><div class="mini-dot md-body"></div><div class="mini-dot md-relation"></div></div>
         </div>
         <div class="day-item">
           <span class="day-name">목</span>
           <div class="day-circle day-normal">13</div>
-          <div class="day-dots"><div class="mini-dot"></div></div>
+          <div class="day-dots"><div class="mini-dot md-emotion"></div></div>
         </div>
         <div class="day-item">
           <span class="day-name">금</span>
           <div class="day-circle day-monitor">14</div>
-          <div class="day-dots"><div class="mini-dot"></div><div class="mini-dot"></div></div>
+          <div class="day-dots"><div class="mini-dot md-body"></div><div class="mini-dot md-meaning"></div></div>
         </div>
         <div class="day-item">
           <span class="day-name">토</span>
           <div class="day-circle day-normal">15</div>
-          <div class="day-dots"><div class="mini-dot"></div></div>
+          <div class="day-dots"><div class="mini-dot md-relation"></div></div>
         </div>
         <div class="day-item">
           <span class="day-name" style="color:#28C840;font-weight:700">일</span>
           <div class="day-circle day-normal day-today">16</div>
-          <div class="day-dots"><div class="mini-dot"></div><div class="mini-dot"></div></div>
+          <div class="day-dots"><div class="mini-dot md-body"></div><div class="mini-dot md-emotion"></div></div>
         </div>
       </div>
 
@@ -350,22 +356,22 @@
       <p class="summary-label">이번 주 관찰 축</p>
       <div class="domain-bar-row">
         <span class="domain-bar-name">몸</span>
-        <div class="domain-bar-track"><div class="domain-bar-fill" style="width:85%"></div></div>
+        <div class="domain-bar-track"><div class="domain-bar-fill" style="width:85%;background:#F5A87C"></div></div>
         <span class="domain-bar-count">5</span>
       </div>
       <div class="domain-bar-row">
         <span class="domain-bar-name">감정</span>
-        <div class="domain-bar-track"><div class="domain-bar-fill" style="width:60%"></div></div>
+        <div class="domain-bar-track"><div class="domain-bar-fill" style="width:60%;background:#EE9FB8"></div></div>
         <span class="domain-bar-count">3</span>
       </div>
       <div class="domain-bar-row">
         <span class="domain-bar-name">관계</span>
-        <div class="domain-bar-track"><div class="domain-bar-fill" style="width:40%"></div></div>
+        <div class="domain-bar-track"><div class="domain-bar-fill" style="width:40%;background:#B8A8D4"></div></div>
         <span class="domain-bar-count">2</span>
       </div>
       <div class="domain-bar-row">
         <span class="domain-bar-name">의미</span>
-        <div class="domain-bar-track"><div class="domain-bar-fill" style="width:25%"></div></div>
+        <div class="domain-bar-track"><div class="domain-bar-fill" style="width:25%;background:#E8C86E"></div></div>
         <span class="domain-bar-count">1</span>
       </div>
 
@@ -374,8 +380,8 @@
       <!-- 선택된 날 상세 -->
       <p class="summary-label">오늘 3월 16일</p>
       <div class="detail-domains">
-        <span class="detail-tag">몸</span>
-        <span class="detail-tag">감정</span>
+        <span class="detail-tag tag-body">몸</span>
+        <span class="detail-tag tag-emotion">감정</span>
       </div>
       <div class="detail-quote">
         "오늘 아무것도 못 한 것 같아요. 근데 이렇게 기록하는 거 보니까 뭔가 하긴 했네요."

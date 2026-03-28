@@ -56,12 +56,27 @@
     width: 320px;
     height: 620px;
     background: #FFF8EC;
-    border-radius: 28px;
+    border-radius: 40px;
+    border: 2px solid #EAD9BA;
     overflow: hidden;
-    box-shadow: 0 8px 40px rgba(0,0,0,0.10), 0 1px 4px rgba(0,0,0,0.06);
+    box-shadow: 0 24px 60px rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,0.6);
     display: flex;
     flex-direction: column;
     position: relative;
+  }
+
+  /* 상단 노치 */
+  .phone::before {
+    content: '';
+    position: absolute;
+    top: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80px;
+    height: 5px;
+    background: #EAD9BA;
+    border-radius: 3px;
+    z-index: 10;
   }
 
   /* ── 헤더 ── */
@@ -97,8 +112,8 @@
 
   /* 신호등 색상 */
   .dot-green  { background: #28C840; animation: pulse-green 2s infinite; }
-  .dot-yellow { background: #fbbf24; animation: pulse-yellow 2s infinite; }
-  .dot-red    { background: #f87171; animation: pulse-red 1.2s infinite; }
+  .dot-yellow { background: #f59e0b; animation: pulse-yellow 2s infinite; }
+  .dot-red    { background: #ef4444; animation: pulse-red 1.2s infinite; }
 
   @keyframes pulse-green  { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(1.3)} }
   @keyframes pulse-yellow { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.6;transform:scale(1.3)} }
@@ -348,8 +363,8 @@
   }
 
   .dot-g { background: #28C840; }
-  .dot-y { background: #fbbf24; }
-  .dot-r { background: #f87171; }
+  .dot-y { background: #f59e0b; }
+  .dot-r { background: #ef4444; }
 </style>
 </head>
 <body>
@@ -552,7 +567,7 @@
       <div class="input-area">
         <div class="input-row">
           <div class="input-box">지금 어떠세요?</div>
-          <button class="send-btn" style="background:#f87171;">↑</button>
+          <button class="send-btn" style="background:#ef4444;">↑</button>
         </div>
         <p class="input-hint" style="color: #fca5a5;">대화는 계속 이어갈 수 있어요</p>
       </div>
