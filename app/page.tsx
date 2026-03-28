@@ -61,8 +61,6 @@ export default function HomePage() {
 
         <Link
           href="/preview"
-          target="_blank"
-          rel="noopener noreferrer"
           style={{
             display: 'inline-block',
             background: '#3D2B1F',
