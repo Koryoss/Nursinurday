@@ -3,9 +3,9 @@
 import { useState } from 'react'
 
 const PREVIEW_TABS = [
-  { id: 'dashboard', label: '📊 대시보드', src: '/careflow_dashboard_mockup.html' },
-  { id: 'calendar',  label: '📅 캘린더',   src: '/careflow_calendar.html' },
-  { id: 'chat',      label: '💬 채팅 상태', src: '/careflow_chat_states.html' },
+  { id: 'measurement', label: '📏 측정',      src: '/careflow_measurement.html' },
+  { id: 'chat',        label: '💬 채팅 상태', src: '/careflow_chat_states.html' },
+  { id: 'dashboard',   label: '📊 대시보드',  src: '/careflow_dashboard_mockup.html' },
 ]
 
 const features = [
@@ -16,7 +16,7 @@ const features = [
 ]
 
 export default function PreviewPage() {
-  const [activeTab, setActiveTab] = useState('dashboard')
+  const [activeTab, setActiveTab] = useState('measurement')
 
   return (
     <div style={{
