@@ -33,3 +33,4 @@ yarn-error.log*
 # TypeScript 빌드 캐시
 *.tsbuildinfo
 next-env.d.ts
+careflow_timeline.html

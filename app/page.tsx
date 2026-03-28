@@ -81,9 +81,9 @@ export default function HomePage() {
         {/* 미리보기 패널 */}
         {previewOpen && (
           <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap', marginTop: '24px' }}>
-            <a href="careflow_dashboard_mockup.html" style={previewLinkStyle}>📊 대시보드</a>
-            <a href="careflow_calendar.html" style={previewLinkStyle}>📅 캘린더</a>
-            <a href="careflow_chat_states.html" style={previewLinkStyle}>💬 채팅 상태</a>
+            <a href="/careflow_dashboard_mockup.html" style={previewLinkStyle}>📊 대시보드</a>
+            <a href="/careflow_calendar.html" style={previewLinkStyle}>📅 캘린더</a>
+            <a href="/careflow_chat_states.html" style={previewLinkStyle}>💬 채팅 상태</a>
           </div>
         )}
       </section>
