@@ -54,7 +54,7 @@ export interface ChatResponse {
 export async function POST(req: NextRequest) {
   try {
     const body: ChatRequest = await req.json()
-    const { messages, mode = '엄격' } = body
+    const { messages, mode: convMode = '엄격' } = body
 
     if (!messages || messages.length === 0) {
       return NextResponse.json({ error: '메시지가 없습니다.' }, { status: 400 })
@@ -89,14 +89,14 @@ export async function POST(req: NextRequest) {
     }
 
     // AI 모드 결정 (.env.local의 AI_MODE 값: 'mock' | 'openai' | 'claude')
-    const mode = process.env.AI_MODE ?? 'mock'
+    const aiMode = process.env.AI_MODE ?? 'mock'
 
     // ─── Mock 모드 (API 키 없이 NANDA 기반 응답 제공) ───
     // MVP 테스트 및 API 키 없는 환경에서 사용
     // mockResponses.ts의 18개 NANDA 진단별 응답 활용
     // 응답 구조: diagnosis(진단명) → stimulus(자극) → pathophysiology(경로) →
     //           response(반응) → emotion(정서) → therapeuticAction(치료중재)
-    if (mode === 'mock' || (!process.env.OPENAI_API_KEY && !process.env.ANTHROPIC_API_KEY)) {
+    if (aiMode === 'mock' || (!process.env.OPENAI_API_KEY && !process.env.ANTHROPIC_API_KEY)) {
 
       // primaryDomain 기반 NANDA 진단 응답 선택 (Sleep, Energy, BodySignals 등)
       let reply = getMockResponse(primaryDomain)
@@ -121,12 +121,12 @@ export async function POST(req: NextRequest) {
     // - 검출된 NANDA 진단 영역(primaryDomain) 기반 컨텍스트
     // - 4축 점수(axisScores) 반영한 개인화된 간호중재
     // - NANDA 6단계 응답 구조로 포맷팅 지시
-    if (mode === 'openai' && process.env.OPENAI_API_KEY) {
+    if (aiMode === 'openai' && process.env.OPENAI_API_KEY) {
       const { default: OpenAI } = await import('openai')
       const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
 
       // NANDA 평가 결과 기반 동적 시스템 프롬프트 생성
-      const systemPrompt = buildSystemPrompt(assessment, mode as ConversationMode)
+      const systemPrompt = buildSystemPrompt(assessment, convMode as ConversationMode)
 
       const completion = await openai.chat.completions.create({
         model: 'gpt-4o-mini',
@@ -160,9 +160,9 @@ export async function POST(req: NextRequest) {
     // - 검출된 NANDA 진단 영역(primaryDomain) 기반 컨텍스트
     // - 4축 점수(axisScores) 반영한 개인화된 간호중재
     // - NANDA 6단계 응답 구조로 포맷팅 지시
-    if (mode === 'claude' && process.env.ANTHROPIC_API_KEY) {
+    if (aiMode === 'claude' && process.env.ANTHROPIC_API_KEY) {
       // NANDA 평가 결과 기반 동적 시스템 프롬프트 생성
-      const systemPrompt = buildSystemPrompt(assessment, mode as ConversationMode)
+      const systemPrompt = buildSystemPrompt(assessment, convMode as ConversationMode)
 
       const response = await fetch('https://api.anthropic.com/v1/messages', {
         method: 'POST',
