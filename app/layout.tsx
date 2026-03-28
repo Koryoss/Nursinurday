@@ -6,7 +6,7 @@ import './globals.css'
 
 export const metadata: Metadata = {
   title: 'CareFlow — 일상 간호',
-  description: '간호학 기반 AI가 당신의 일상 스트레스를 함께 돌봐드립니다.',
+  description: 'CareFlow가 당신의 일상 스트레스를 함께 돌봐드립니다.',
   viewport: 'width=device-width, initial-scale=1',
 }
 
