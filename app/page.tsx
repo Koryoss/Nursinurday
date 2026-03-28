@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 const PREVIEW_TABS = [
   { id: 'dashboard', label: '📊 대시보드', src: '/careflow_dashboard_mockup.html' },
@@ -24,6 +24,16 @@ const whyNeeded = [
 export default function HomePage() {
   const [previewOpen, setPreviewOpen] = useState(false)
   const [activeTab, setActiveTab] = useState('dashboard')
+
+  // 모달 열릴 때 배경 스크롤 막기
+  useEffect(() => {
+    if (previewOpen) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = ''
+    }
+    return () => { document.body.style.overflow = '' }
+  }, [previewOpen])
 
   return (
     <div style={{
@@ -78,7 +88,7 @@ export default function HomePage() {
         </p>
 
         <button
-          onClick={() => setPreviewOpen(v => !v)}
+          onClick={() => setPreviewOpen(true)}
           style={{
             background: '#3D2B1F',
             color: '#fff',
@@ -91,83 +101,8 @@ export default function HomePage() {
             fontFamily: 'inherit',
           }}
         >
-          앱 미리보기 {previewOpen ? '▴' : '▾'}
+          앱 미리보기 ▸
         </button>
-
-        {/* 앱 미리보기 패널 */}
-        {previewOpen && (
-          <div style={{ marginTop: '40px', maxWidth: '900px', margin: '40px auto 0' }}>
-
-            {/* 대표 기능 소개 */}
-            <p style={{ fontSize: '13px', fontWeight: 600, color: '#9B7D6A', marginBottom: '16px', letterSpacing: '0.5px' }}>
-              대표 기능
-            </p>
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
-              gap: '12px',
-              marginBottom: '32px',
-            }}>
-              {features.map((f, i) => (
-                <div key={i} style={{
-                  background: 'rgba(255,255,255,0.8)',
-                  border: '1px solid rgba(61,43,31,0.08)',
-                  borderRadius: '14px',
-                  padding: '16px',
-                  textAlign: 'left',
-                }}>
-                  <div style={{ fontSize: '24px', marginBottom: '8px' }}>{f.icon}</div>
-                  <div style={{ fontSize: '13px', fontWeight: 700, marginBottom: '4px' }}>{f.title}</div>
-                  <div style={{ fontSize: '12px', color: '#6B5344', lineHeight: 1.5 }}>{f.desc}</div>
-                </div>
-              ))}
-            </div>
-
-            {/* 탭 바 */}
-            <div style={{
-              display: 'flex',
-              gap: '8px',
-              marginBottom: '0',
-              borderBottom: '2px solid rgba(61,43,31,0.1)',
-              paddingBottom: '0',
-            }}>
-              {PREVIEW_TABS.map(tab => (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  style={{
-                    padding: '10px 20px',
-                    borderRadius: '8px 8px 0 0',
-                    border: 'none',
-                    cursor: 'pointer',
-                    fontFamily: 'inherit',
-                    fontSize: '14px',
-                    fontWeight: 600,
-                    transition: 'all 0.15s',
-                    background: activeTab === tab.id ? '#3D2B1F' : 'rgba(61,43,31,0.06)',
-                    color: activeTab === tab.id ? '#fff' : '#6B5344',
-                  }}
-                >
-                  {tab.label}
-                </button>
-              ))}
-            </div>
-
-            {/* iframe */}
-            <iframe
-              key={activeTab}
-              src={PREVIEW_TABS.find(t => t.id === activeTab)?.src}
-              style={{
-                width: '100%',
-                height: '600px',
-                border: '1px solid rgba(61,43,31,0.1)',
-                borderTop: 'none',
-                borderRadius: '0 0 16px 16px',
-                background: '#fff',
-              }}
-            />
-          </div>
-        )}
       </section>
 
       {/* 왜 이 서비스가 필요한가 */}
@@ -213,6 +148,136 @@ export default function HomePage() {
       }}>
         © 2026 CareFlow · 메니에르병 환자를 위한 일상 관리 앱
       </footer>
+
+      {/* ── 앱 미리보기 모달 ── */}
+      {previewOpen && (
+        <div
+          onClick={(e) => { if (e.target === e.currentTarget) setPreviewOpen(false) }}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(30, 18, 10, 0.6)',
+            backdropFilter: 'blur(4px)',
+            zIndex: 1000,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '24px',
+          }}
+        >
+          <div style={{
+            background: '#FFFBF3',
+            borderRadius: '20px',
+            width: '100%',
+            maxWidth: '960px',
+            maxHeight: '90vh',
+            display: 'flex',
+            flexDirection: 'column',
+            overflow: 'hidden',
+            boxShadow: '0 32px 80px rgba(30,18,10,0.3)',
+          }}>
+
+            {/* 모달 헤더 */}
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              padding: '20px 24px 0',
+              flexShrink: 0,
+            }}>
+              <div>
+                <div style={{ fontSize: '17px', fontWeight: 700 }}>앱 미리보기</div>
+                <div style={{ fontSize: '13px', color: '#9B7D6A', marginTop: '2px' }}>대표 기능을 화면으로 확인하세요</div>
+              </div>
+              <button
+                onClick={() => setPreviewOpen(false)}
+                style={{
+                  background: 'rgba(61,43,31,0.08)',
+                  border: 'none',
+                  borderRadius: '50%',
+                  width: '36px',
+                  height: '36px',
+                  fontSize: '18px',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: '#3D2B1F',
+                  flexShrink: 0,
+                }}
+                aria-label="닫기"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* 대표 기능 카드 */}
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
+              gap: '10px',
+              padding: '16px 24px',
+              flexShrink: 0,
+            }}>
+              {features.map((f, i) => (
+                <div key={i} style={{
+                  background: 'rgba(255,255,255,0.9)',
+                  border: '1px solid rgba(61,43,31,0.08)',
+                  borderRadius: '12px',
+                  padding: '14px',
+                }}>
+                  <div style={{ fontSize: '22px', marginBottom: '6px' }}>{f.icon}</div>
+                  <div style={{ fontSize: '12px', fontWeight: 700, marginBottom: '3px' }}>{f.title}</div>
+                  <div style={{ fontSize: '11px', color: '#6B5344', lineHeight: 1.4 }}>{f.desc}</div>
+                </div>
+              ))}
+            </div>
+
+            {/* 탭 바 */}
+            <div style={{
+              display: 'flex',
+              gap: '6px',
+              padding: '0 24px',
+              borderBottom: '2px solid rgba(61,43,31,0.1)',
+              flexShrink: 0,
+            }}>
+              {PREVIEW_TABS.map(tab => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  style={{
+                    padding: '10px 18px',
+                    borderRadius: '8px 8px 0 0',
+                    border: 'none',
+                    cursor: 'pointer',
+                    fontFamily: 'inherit',
+                    fontSize: '14px',
+                    fontWeight: 600,
+                    transition: 'all 0.15s',
+                    background: activeTab === tab.id ? '#3D2B1F' : 'rgba(61,43,31,0.06)',
+                    color: activeTab === tab.id ? '#fff' : '#6B5344',
+                  }}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+
+            {/* iframe */}
+            <iframe
+              key={activeTab}
+              src={PREVIEW_TABS.find(t => t.id === activeTab)?.src}
+              style={{
+                flex: 1,
+                width: '100%',
+                border: 'none',
+                background: '#fff',
+                minHeight: '0',
+              }}
+            />
+          </div>
+        </div>
+      )}
     </div>
   )
 }
