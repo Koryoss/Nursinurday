@@ -3,15 +3,17 @@
 import { useState } from 'react'
 
 const PREVIEW_TABS = [
-  { id: 'measurement', label: '📏 측정',      src: '/careflow_measurement.html' },
-  { id: 'chat',        label: '💬 채팅 상태', src: '/careflow_chat_states.html' },
-  { id: 'dashboard',   label: '📊 대시보드',  src: '/careflow_dashboard_mockup.html' },
+  { id: 'measurement',  label: '📏 측정',    src: '/careflow_measurement.html' },
+  { id: 'notification', label: '🔔 알림',    src: '/careflow_notification.html' },
+  { id: 'chat',         label: '💬 채팅',    src: '/careflow_chat_states.html' },
+  { id: 'dashboard',    label: '📊 대시보드', src: '/careflow_dashboard_mockup.html' },
 ]
 
 const features = [
   { icon: '⌚', title: 'Apple Watch 실시간 감지',  desc: '자이로스코프·심박수·가속도계로 어지럼증 발생을 자동 감지하고 기록해요.' },
   { icon: '🔊', title: '이명 스트레스 완화',       desc: '음성 데시벨을 모니터링해 무의식적으로 큰 목소리가 나올 때 햅틱으로 알려줘요.' },
-  { icon: '📊', title: '증상 패턴 분석',           desc: '기상 직후·취침 전 등 고위험 시간대와 투약 여부를 함께 기록해 패턴을 파악해요.' },
+  { icon: '💊', title: '복약 알림 · 수면 연동',    desc: '아침·점심·저녁 복약 알림, 미복약 시 1시간 후 재알림. 워치 수면 데이터로 기상·취침 전 기록 유도.' },
+  { icon: '📊', title: '증상 패턴 분석',           desc: '복약 기록 + 수면 데이터 + 4축 일기를 결합해 고위험 시간대와 투약 효과를 시각화해요.' },
   { icon: '📱', title: 'iPhone 통계 연동',         desc: 'Watch에서 수집한 데이터를 iPhone으로 전송해 주간·월간 통계를 한눈에 확인해요.' },
 ]
 
@@ -63,7 +65,7 @@ export default function PreviewPage() {
       {/* 대표 기능 카드 */}
       <div style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(4, 1fr)',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
         gap: '10px',
         padding: '14px 24px',
         flexShrink: 0,
