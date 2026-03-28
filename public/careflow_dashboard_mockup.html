@@ -297,8 +297,8 @@
       <div class="phone-body">
         <!-- 레이더 차트 -->
         <div class="radar-wrap">
-          <div class="radar-title">4축 관찰 현황</div>
-          <div class="radar-sub">오늘 감지된 영역의 강도</div>
+          <div class="radar-title">오늘의 기록 현황</div>
+          <div class="radar-sub">오늘 나의 에너지는 어디에 머물렀을까요? 기록의 빈도로 살펴보는 나의 웰니스 밸런스.</div>
           <div class="radar-svg-wrap">
             <svg width="180" height="170" viewBox="-10 -5 190 175" overflow="visible">
               <!-- 배경 그리드 -->
@@ -374,8 +374,8 @@
           </div>
         </div>
 
-        <!-- 오늘 감지된 영역 -->
-        <div class="section-title">오늘 감지된 영역</div>
+        <!-- 오늘 기록한 영역 -->
+        <div class="section-title">오늘 기록한 영역</div>
         <div class="domain-tags">
           <span class="domain-tag" style="background:rgba(245,168,124,0.2);color:#B8601C">몸</span>
           <span class="domain-tag" style="background:rgba(238,159,184,0.2);color:#B84070">감정</span>
@@ -383,19 +383,19 @@
           <span class="domain-tag" style="background:rgba(232,200,110,0.2);color:#A07820">의미</span>
         </div>
 
-        <!-- 오늘 요약 -->
-        <div class="section-title">오늘의 관찰 요약</div>
+        <!-- 오늘 기록 -->
+        <div class="section-title">오늘의 기록</div>
         <div class="summary-card">
           <div class="summary-header">
             <span class="summary-date">3월 19일 (목)</span>
-            <span class="crisis-badge crisis-monitor">🟡 모니터링</span>
+            <span class="crisis-badge crisis-none">✅ 기록 완료</span>
           </div>
           <div class="summary-quote">
             "이명이 요즘 더 심해진 것 같아요. 귀에서 소리가 계속 나니까 집중도 안 되고 자꾸 예민해지는 것 같아요."
           </div>
           <div class="summary-action">
-            <strong>오늘의 돌봄 제안</strong><br>
-            증상 자체보다, 그 소리와 함께 하루를 어떻게 버텨냈는지 — 그 과정을 먼저 들여다봐요.
+            <strong>기록 메모</strong><br>
+            이 내용은 이번 주 리포트에 포함됩니다.
           </div>
         </div>
       </div>
@@ -426,7 +426,7 @@
         <div class="stat-grid" style="margin-top:4px">
           <div class="stat-card"><div class="stat-value">5일</div><div class="stat-label">기록한 날</div></div>
           <div class="stat-card"><div class="stat-value">감정</div><div class="stat-label">주요 축</div></div>
-          <div class="stat-card"><div class="stat-value">2회</div><div class="stat-label">모니터링</div></div>
+          <div class="stat-card"><div class="stat-value">2회</div><div class="stat-label">기록 목표</div></div>
         </div>
 
         <!-- 7일 스트립 — 신호등 색, 미니닷 → 4축 색 -->
@@ -475,7 +475,7 @@
           </div>
           <div class="day-cell today">
             <div class="day-label today-label">오늘</div>
-            <div class="day-circle dc-urgent">19</div>
+            <div class="day-circle dc-safe">19</div>
             <div class="mini-dots">
               <div class="mini-dot" style="background:#F5A87C"></div>
               <div class="mini-dot" style="background:#EE9FB8"></div>
@@ -488,7 +488,7 @@
         <div class="detail-panel">
           <div class="detail-header">
             <span class="detail-date">오늘 (목) · 대화 4개</span>
-            <span class="crisis-badge crisis-monitor">모니터링</span>
+            <span class="crisis-badge crisis-none">기록 완료</span>
           </div>
           <div class="detail-domains">
             <span class="detail-domain-tag" style="background:rgba(245,168,124,0.2);color:#B8601C">몸</span>
@@ -579,7 +579,7 @@
           <div class="month-cell" style="background:#dcfce7;color:#16a34a">16<div class="cell-dot" style="background:#F5A87C"></div></div>
           <div class="month-cell" style="background:#fef9c3;color:#a16207">17<div class="cell-dot" style="background:#B8A8D4"></div></div>
           <div class="month-cell" style="background:#FFFBF3;color:#A08866">18</div>
-          <div class="month-cell today-cell" style="background:#fee2e2;color:#dc2626">19<div class="cell-dot" style="background:#EE9FB8"></div></div>
+          <div class="month-cell today-cell" style="background:#dcfce7;color:#16a34a">19<div class="cell-dot" style="background:#EE9FB8"></div></div>
           <div class="month-cell" style="background:#FFFBF3;color:#EAD9BA">20</div>
           <div class="month-cell" style="background:#FFFBF3;color:#EAD9BA">21</div>
           <div class="month-cell" style="background:#FFFBF3;color:#EAD9BA">22</div>
@@ -596,9 +596,9 @@
 
         <!-- 달력 범례 -->
         <div style="display:flex;flex-wrap:wrap;gap:6px 12px;margin-bottom:10px">
-          <span style="display:flex;align-items:center;gap:4px;font-size:9.5px;color:#8B6F57"><span style="width:10px;height:10px;border-radius:3px;background:#dcfce7;display:inline-block"></span>자기돌봄</span>
-          <span style="display:flex;align-items:center;gap:4px;font-size:9.5px;color:#8B6F57"><span style="width:10px;height:10px;border-radius:3px;background:#fef9c3;display:inline-block"></span>모니터링</span>
-          <span style="display:flex;align-items:center;gap:4px;font-size:9.5px;color:#8B6F57"><span style="width:10px;height:10px;border-radius:3px;background:#fee2e2;display:inline-block"></span>위기</span>
+          <span style="display:flex;align-items:center;gap:4px;font-size:9.5px;color:#8B6F57"><span style="width:10px;height:10px;border-radius:3px;background:#dcfce7;display:inline-block"></span>3회+ 기록</span>
+          <span style="display:flex;align-items:center;gap:4px;font-size:9.5px;color:#8B6F57"><span style="width:10px;height:10px;border-radius:3px;background:#fef9c3;display:inline-block"></span>1-2회 기록</span>
+          <span style="display:flex;align-items:center;gap:4px;font-size:9.5px;color:#8B6F57"><span style="width:10px;height:10px;border-radius:3px;background:#FFFBF3;border:1px solid #EAD9BA;display:inline-block"></span>미기록</span>
         </div>
 
         <!-- 월 요약 -->
@@ -606,7 +606,7 @@
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px">
           <div class="stat-card"><div class="stat-value">12일</div><div class="stat-label">기록한 날</div></div>
           <div class="stat-card"><div class="stat-value">감정</div><div class="stat-label">주요 축</div></div>
-          <div class="stat-card"><div class="stat-value">4회</div><div class="stat-label">모니터링 감지</div></div>
+          <div class="stat-card"><div class="stat-value">4개 축</div><div class="stat-label">기록된 축</div></div>
           <div class="stat-card"><div class="stat-value" style="color:#28C840">5일</div><div class="stat-label">🔥 연속 기록</div></div>
         </div>
 
@@ -627,7 +627,7 @@
 
   <div class="info-card">
     <h3>레이더 차트</h3>
-    <p>몸·감정·관계·의미 4축을 다각형으로 시각화해요. 어느 축이 오늘 활성화됐는지 한눈에 파악할 수 있어요. 꼭짓점이 바깥으로 나올수록 해당 축의 감지 강도가 높아요.</p>
+    <p>몸·감정·관계·의미 4축을 다각형으로 시각화해요. 오늘 어느 축에 기록이 많았는지 한눈에 파악할 수 있어요. 꼭짓점이 바깥으로 나올수록 해당 축의 기록 빈도가 높아요.</p>
   </div>
 
   <div class="info-card">
@@ -637,10 +637,10 @@
     <div class="color-row"><div class="color-swatch" style="background:#EE9FB8"></div>감정 — 로즈</div>
     <div class="color-row"><div class="color-swatch" style="background:#B8A8D4"></div>관계 — 라벤더</div>
     <div class="color-row"><div class="color-swatch" style="background:#E8C86E"></div>의미 — 골드</div>
-    <div class="color-divider" style="margin-top:10px">신호등</div>
-    <div class="color-row"><div class="color-swatch" style="background:#dcfce7;border:1px solid #86efac"></div>자기돌봄</div>
-    <div class="color-row"><div class="color-swatch" style="background:#fef9c3;border:1px solid #fde047"></div>모니터링</div>
-    <div class="color-row"><div class="color-swatch" style="background:#fee2e2;border:1px solid #fca5a5"></div>위기</div>
+    <div class="color-divider" style="margin-top:10px">기록 달성</div>
+    <div class="color-row"><div class="color-swatch" style="background:#dcfce7;border:1px solid #86efac"></div>3회+ 기록</div>
+    <div class="color-row"><div class="color-swatch" style="background:#fef9c3;border:1px solid #fde047"></div>1-2회 기록</div>
+    <div class="color-row"><div class="color-swatch" style="background:#FFFBF3;border:1px solid #EAD9BA"></div>미기록</div>
   </div>
 
   <div class="info-card">
@@ -653,6 +653,12 @@
     <p>"고치려는 게 아니라, 의료가 포기한 그 이후에도 오늘을 함께 들여다보는" 관찰 동행 — 나이 제한 없이 만성 증상을 안고 사는 모든 사람을 위한 도구예요.</p>
   </div>
 
+</div>
+
+
+<!-- 의료기기 면책 문구 -->
+<div style="max-width:1100px;margin:32px auto 0;padding:14px 20px;background:#FFF8EC;border:1px solid #EAD9BA;border-radius:12px;font-size:11px;color:#8B6F57;line-height:1.7;text-align:center;">
+  본 서비스는 의료 기기가 아닙니다. 제공되는 기록과 시각화 데이터는 사용자의 자기 관리 및 진료 시 참고를 돕기 위한 정보일 뿐이며, 어떠한 의학적 진단이나 치료 결정도 대신하지 않습니다.
 </div>
 
 </body>

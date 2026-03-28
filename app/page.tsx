@@ -55,8 +55,8 @@ export default function HomePage() {
           maxWidth: '560px',
           margin: '0 auto 40px',
         }}>
-          Apple Watch로 실시간 증상을 기록하고,<br />
-          iPhone에서 패턴을 파악해 더 나은 일상을 만드세요.
+          나의 어지럼증과 이명, 손목 위에서 바로 기록하세요.<br />
+          iPhone으로 모아진 데이터가 당신의 하루를 더 선명하게 보여줍니다.
         </p>
 
         <Link
@@ -86,7 +86,7 @@ export default function HomePage() {
             왜 CareFlow가 필요한가요?
           </h2>
           <p style={{ textAlign: 'center', color: '#6B5344', fontSize: '15px', marginBottom: '40px' }}>
-            메니에르병은 치료보다 <strong>일상 관리</strong>가 중요한 만성 질환이에요
+            갑작스러운 증상에 당황하지 않도록, 일상의 모든 변화를 꼼꼼히 기록하는 든든한 조력자가 되어 드릴게요.
           </p>
           <div style={{
             display: 'grid',
@@ -148,15 +148,28 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* 면책 문구 */}
+      <div style={{
+        maxWidth: '760px',
+        margin: '0 auto',
+        padding: '0 24px 32px',
+        fontSize: '12px',
+        color: '#A08866',
+        lineHeight: 1.7,
+        textAlign: 'center',
+      }}>
+        본 서비스는 의료 기기가 아닙니다. 제공되는 기록과 시각화 데이터는 사용자의 자기 관리 및 진료 시 참고를 돕기 위한 정보일 뿐이며, 어떠한 의학적 진단이나 치료 결정도 대신하지 않습니다.
+      </div>
+
       {/* 푸터 */}
       <footer style={{
         textAlign: 'center',
-        padding: '32px',
+        padding: '24px 32px 32px',
         fontSize: '13px',
         color: '#9B7D6A',
         borderTop: '1px solid rgba(61,43,31,0.08)',
       }}>
-        © 2026 CareFlow · 메니에르병 환자를 위한 일상 관리 앱
+        © 2026 CareFlow
       </footer>
     </div>
   )

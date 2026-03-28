@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CareFlow — careflow_chat_states (수국 버터크림)</title>
+<title>CareFlow — 대화형 일기장</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -12,15 +12,6 @@
     font-family: -apple-system, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
     padding: 48px 24px;
     color: #3D2B1F;
-  }
-
-  .page-title {
-    text-align: center;
-    font-size: 13px;
-    color: #8B6F57;
-    margin-bottom: 40px;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
   }
 
   /* ── 3단 레이아웃 ── */
@@ -46,10 +37,10 @@
     text-transform: uppercase;
     padding: 4px 12px;
     border-radius: 20px;
+    background: rgba(91,168,138,0.12);
+    color: #3D8A70;
+    border: 1px solid rgba(91,168,138,0.3);
   }
-  .label-normal  { background: #d1fae5; color: #065f46; }
-  .label-monitor { background: #fef9c3; color: #713f12; }
-  .label-critical{ background: #fee2e2; color: #7f1d1d; }
 
   /* ── 폰 프레임 ── */
   .phone {
@@ -90,7 +81,7 @@
     flex-shrink: 0;
   }
 
-  .header-back {
+  .header-left {
     font-size: 12px;
     color: #A08866;
     display: flex;
@@ -103,61 +94,28 @@
     gap: 7px;
   }
 
-  .status-dot {
+  .brand-dot {
     width: 8px;
     height: 8px;
     border-radius: 50%;
+    background: #5BA88A;
+    animation: pulse 2.5s infinite;
     flex-shrink: 0;
   }
-
-  /* 신호등 색상 */
-  .dot-green  { background: #28C840; animation: pulse-green 2s infinite; }
-  .dot-yellow { background: #f59e0b; animation: pulse-yellow 2s infinite; }
-  .dot-red    { background: #ef4444; animation: pulse-red 1.2s infinite; }
-
-  @keyframes pulse-green  { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(1.3)} }
-  @keyframes pulse-yellow { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.6;transform:scale(1.3)} }
-  @keyframes pulse-red    { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(1.4)} }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
 
   .header-name {
     font-size: 13px;
-    font-weight: 600;
-    color: #1A7030;
+    font-weight: 700;
+    color: #3D2B1F;
   }
 
   .header-sub {
     font-size: 11px;
+    color: #A08866;
   }
-  .sub-green  { color: #A08866; }
-  .sub-yellow { color: #d97706; font-weight: 500; }
-  .sub-red    { color: #dc2626; font-weight: 500; }
 
   .header-spacer { width: 32px; }
-
-  /* ── 컨텍스트 바 (monitor / critical) ── */
-  .context-bar {
-    display: flex;
-    align-items: flex-start;
-    gap: 8px;
-    padding: 10px 14px;
-    font-size: 11.5px;
-    line-height: 1.5;
-    flex-shrink: 0;
-  }
-
-  .bar-monitor {
-    background: #fffbeb;
-    border-bottom: 1px solid #fde68a;
-    color: #92400e;
-  }
-
-  .bar-critical {
-    background: #fff1f2;
-    border-bottom: 1px solid #fecaca;
-    color: #9f1239;
-  }
-
-  .bar-icon { font-size: 13px; flex-shrink: 0; margin-top: 1px; }
 
   /* ── 채팅 영역 ── */
   .chat-area {
@@ -167,6 +125,23 @@
     display: flex;
     flex-direction: column;
     gap: 12px;
+  }
+
+  /* 날짜 구분선 */
+  .date-divider {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #C4A882;
+    font-size: 10px;
+    font-weight: 600;
+  }
+  .date-divider::before,
+  .date-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: #EAD9BA;
   }
 
   /* 말풍선 */
@@ -179,15 +154,7 @@
   }
 
   .bubble-user {
-    background: #28C840;
-    color: #FFF8EC;
-    align-self: flex-end;
-    border-bottom-right-radius: 4px;
-  }
-
-  /* monitor 상태 사용자 말풍선 (강한 노랑) */
-  .bubble-user-monitor {
-    background: #f59e0b;
+    background: #3D2B1F;
     color: #FFF8EC;
     align-self: flex-end;
     border-bottom-right-radius: 4px;
@@ -201,65 +168,34 @@
     border: 1px solid #EAD9BA;
   }
 
-  /* monitor 상태 AI 말풍선 */
-  .bubble-ai-monitor {
-    background: #fffbeb;
-    color: #1f2937;
-    align-self: flex-start;
-    border-bottom-left-radius: 4px;
-    border: 1px solid #fde68a;
-  }
-
-  /* critical 상태에서 AI 말풍선 */
-  .bubble-ai-crisis {
-    background: #fff1f2;
-    border: 1px solid #fecaca;
-    color: #1f2937;
-  }
-
-  .bubble-action {
+  /* 기록 완료 카드 (AI 응답 안에 붙는 태그 영역) */
+  .record-card {
     margin-top: 8px;
     padding-top: 8px;
-    border-top: 1px solid #EAD9BA;
-    font-size: 11.5px;
-    color: #6B5344;
-  }
-
-  .bubble-action-crisis {
-    border-top: 1px solid #fecaca;
-    color: #9f1239;
-  }
-
-  .hotline {
-    display: inline-block;
-    background: #fef2f2;
-    border: 1px solid #fca5a5;
-    border-radius: 8px;
-    padding: 6px 10px;
-    font-size: 12px;
-    font-weight: 700;
-    color: #dc2626;
-    margin-top: 6px;
-  }
-
-  .domain-tags {
+    border-top: 1px solid rgba(91,168,138,0.25);
     display: flex;
+    flex-direction: column;
     gap: 5px;
-    flex-wrap: wrap;
-    margin-top: 6px;
   }
-  .domain-tag {
+
+  .record-card-label {
+    font-size: 10px;
+    color: #5BA88A;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+  }
+
+  .axis-tags {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+  }
+
+  .axis-tag {
     font-size: 10px;
     padding: 2px 8px;
     border-radius: 10px;
-    background: #ecfdf5;
-    color: #28C840;
-    border: 1px solid #a7f3d0;
-  }
-  .domain-tag-yellow {
-    background: #fefce8;
-    color: #ca8a04;
-    border-color: #fde047;
+    font-weight: 600;
   }
 
   /* 타이핑 인디케이터 */
@@ -285,11 +221,29 @@
   .typing span:nth-child(3) { animation-delay: .4s; }
   @keyframes bounce { 0%,80%,100%{transform:scale(.8)} 40%{transform:scale(1.2)} }
 
+  /* 완료 배너 */
+  .done-banner {
+    background: rgba(91,168,138,0.1);
+    border: 1px solid rgba(91,168,138,0.3);
+    border-radius: 12px;
+    padding: 10px 13px;
+    font-size: 11.5px;
+    color: #2D6A52;
+    line-height: 1.5;
+    align-self: stretch;
+  }
+
+  .done-banner .done-title {
+    font-weight: 700;
+    font-size: 12px;
+    margin-bottom: 4px;
+  }
+
   /* ── 입력창 ── */
   .input-area {
     padding: 10px 14px 14px;
     background: #FFF8EC;
-    border-top: 1px solid #FFFBF3;
+    border-top: 1px solid #EAD9BA;
     flex-shrink: 0;
   }
 
@@ -301,7 +255,7 @@
 
   .input-box {
     flex: 1;
-    background: #f9fafb;
+    background: #FFFBF3;
     border: 1px solid #F0E2C0;
     border-radius: 16px;
     padding: 9px 13px;
@@ -313,7 +267,7 @@
   .send-btn {
     width: 36px; height: 36px;
     border-radius: 12px;
-    background: #28C840;
+    background: #5BA88A;
     border: none;
     color: #FFF8EC;
     font-size: 14px;
@@ -327,7 +281,7 @@
   .input-hint {
     text-align: center;
     font-size: 10px;
-    color: #EAD9BA;
+    color: #C4A882;
     margin-top: 6px;
   }
 
@@ -339,284 +293,293 @@
     padding: 14px 16px;
     font-size: 12px;
     line-height: 1.7;
-    color: #374151;
+    color: #6B5344;
     box-shadow: 0 1px 6px rgba(0,0,0,0.06);
+    border: 1px solid #EAD9BA;
   }
 
   .desc-card b {
-    font-weight: 600;
+    font-weight: 700;
     color: #3D2B1F;
+    display: block;
+    margin-bottom: 6px;
   }
 
   .desc-card .point {
     display: flex;
     gap: 6px;
-    margin-top: 6px;
+    margin-top: 5px;
+    align-items: flex-start;
   }
 
-  .desc-card .point-dot {
+  .desc-card .point-icon {
     flex-shrink: 0;
-    width: 5px;
-    height: 5px;
-    border-radius: 50%;
-    margin-top: 7px;
+    font-size: 11px;
+    margin-top: 2px;
   }
-
-  .dot-g { background: #28C840; }
-  .dot-y { background: #f59e0b; }
-  .dot-r { background: #ef4444; }
 </style>
 </head>
 <body>
 
-
 <div class="screens">
 
   <!-- ══════════════════════════════════════
-       STATE 1 — 일반 (none)
+       SCREEN 1 — 기록 시작
   ══════════════════════════════════════ -->
   <div class="screen-wrap">
-    <span class="screen-label label-normal">🟢 일반</span>
+    <span class="screen-label">기록 시작</span>
 
     <div class="phone">
       <!-- 헤더 -->
       <div class="header">
-        <div class="header-center">
-          <div class="status-dot dot-green"></div>
-          <span class="header-name">CareFlow</span>
-          <span class="header-sub sub-green">자기돌봄</span>
-        </div>
-        <div class="header-spacer"></div>
-        <span class="header-back">
+        <span class="header-left">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
         </span>
+        <div class="header-center">
+          <div class="brand-dot"></div>
+          <span class="header-name">CareFlow</span>
+          <span class="header-sub">일기장</span>
+        </div>
+        <div class="header-spacer"></div>
       </div>
 
       <!-- 채팅 -->
       <div class="chat-area">
-        <div class="bubble bubble-ai">
-          안녕하세요 💚<br>오늘 어떤 하루를 보내고 계신가요? 편하게 이야기해주세요.
-        </div>
-
-        <div class="bubble bubble-user">
-          오늘 아무것도 못 했어요 😔<br>불안하고 이유를 모르겠어요
-        </div>
+        <div class="date-divider">3월 19일 목요일</div>
 
         <div class="bubble bubble-ai">
-          아무것도 못 한 것 같은 날, 그 답답함이 느껴져요. 불안한데 이유를 모를 때가 제일 힘들죠.
-          <div class="bubble-action">
-            오늘의 작은 한 걸음: 지금 자리에서 일어나 물 한 잔만 마셔봐요. 그것만으로도 충분해요.
-          </div>
-        </div>
-
-      </div>
-
-      <!-- 입력창 -->
-      <div class="input-area">
-        <div class="input-row">
-          <div class="input-box">오늘 어떤 하루였나요?</div>
-          <button class="send-btn"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></button>
-        </div>
-        <p class="input-hint">Shift+Enter = 줄바꿈 · Enter = 전송</p>
-      </div>
-    </div>
-
-    <!-- 설명 -->
-    <div class="desc-card">
-      <b>일반 상태</b>
-      <div class="point">
-        <div class="point-dot dot-g"></div>
-        <span>초록 점 — 정상 자기돌봄 범위</span>
-      </div>
-      <div class="point">
-        <div class="point-dot dot-g"></div>
-        <span>컨텍스트 바 없음, 헤더만 변경</span>
-      </div>
-      <div class="point">
-        <div class="point-dot dot-g"></div>
-        <span>도메인 감지·점수는 내부 로직<br>사용자에게 노출하지 않음</span>
-      </div>
-    </div>
-  </div>
-
-
-  <!-- ══════════════════════════════════════
-       STATE 2 — Monitor (🟡)
-  ══════════════════════════════════════ -->
-  <div class="screen-wrap">
-    <span class="screen-label label-monitor">🟡 모니터링</span>
-
-    <div class="phone">
-      <!-- 헤더 -->
-      <div class="header">
-        <div class="header-center">
-          <div class="status-dot dot-yellow"></div>
-          <span class="header-name">CareFlow</span>
-          <span class="header-sub sub-yellow">모니터링 중</span>
-        </div>
-        <div class="header-spacer"></div>
-        <span class="header-back">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-        </span>
-      </div>
-
-      <!-- 컨텍스트 바 -->
-      <div class="context-bar bar-monitor">
-        <span class="bar-icon">🌿</span>
-        <span>오랫동안 힘드셨군요. 가까운 정신건강복지센터에서 전문가와 이야기해보시는 것도 좋아요.</span>
-      </div>
-
-      <!-- 채팅 -->
-      <div class="chat-area">
-        <div class="bubble bubble-user">
-          몇 달째 계속 이러고 있어요.<br>나아질 기미가 안 보여요.
-        </div>
-
-        <div class="bubble bubble-ai-monitor">
-          몇 달 동안 그 무게를 혼자 감당하셨군요. 그 피로가 느껴져요.
-          <div class="bubble-action" style="border-top-color: #fde68a; color: #92400e;">
-            오늘의 작은 한 걸음: 지금 창밖을 1분만 바라봐요. 거창한 것 말고, 딱 그것만이요.
-          </div>
-        </div>
-
-        <div class="bubble bubble-user-monitor" style="margin-top:4px;">
-          그냥 다 지쳐요
-        </div>
-
-        <div class="bubble bubble-ai-monitor" style="background:#fef3c7; border-color:#f59e0b;">
-          지금 몸은 어때요? 어깨나 목 어딘가에 힘이 들어가 있진 않나요?
+          안녕하세요 🌿<br>오늘 어떤 하루를 보내고 계신가요?<br>편하게 이야기해주세요.
         </div>
       </div>
 
       <!-- 입력창 -->
       <div class="input-area">
         <div class="input-row">
-          <div class="input-box">오늘 어떤 하루였나요?</div>
-          <button class="send-btn" style="background:#f59e0b;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></button>
+          <div class="input-box">오늘 하루를 기록해보세요</div>
+          <button class="send-btn">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          </button>
         </div>
-        <p class="input-hint">Shift+Enter = 줄바꿈 · Enter = 전송</p>
+        <p class="input-hint">기록한 내용은 의료적 판단에 사용되지 않아요</p>
       </div>
     </div>
 
     <!-- 설명 -->
     <div class="desc-card">
-      <b>모니터링 상태</b>
+      <b>기록 시작 화면</b>
       <div class="point">
-        <div class="point-dot dot-y"></div>
-        <span>노란 점 + 헤더 "모니터링 중"</span>
+        <span class="point-icon">🌿</span>
+        <span>CareFlow가 먼저 말을 건네요 — 판단 없이 들을 준비가 됐어요</span>
       </div>
       <div class="point">
-        <div class="point-dot dot-y"></div>
-        <span>얇은 노란 바 — 기관 연결 권유<br>강요 없이, 부드럽게</span>
+        <span class="point-icon">📋</span>
+        <span>입력창 아래 "의료적 판단에 사용되지 않아요" 문구로 안심 유도</span>
       </div>
       <div class="point">
-        <div class="point-dot dot-y"></div>
-        <span>자기돌봄 응답은 정상 진행<br>위기 응답으로 대체하지 않음</span>
+        <span class="point-icon">✍️</span>
+        <span>자유 형식 텍스트 입력 — 증상, 감정, 상황 모두 OK</span>
       </div>
     </div>
   </div>
 
 
   <!-- ══════════════════════════════════════
-       STATE 3 — Critical (🔴)
+       SCREEN 2 — 기록 저장 중
   ══════════════════════════════════════ -->
   <div class="screen-wrap">
-    <span class="screen-label label-critical">🔴 위기</span>
+    <span class="screen-label">기록 저장 중</span>
 
     <div class="phone">
       <!-- 헤더 -->
       <div class="header">
-        <div class="header-center">
-          <div class="status-dot dot-red"></div>
-          <span class="header-name">CareFlow</span>
-          <span class="header-sub sub-red">위기 감지됨</span>
-        </div>
-        <div class="header-spacer"></div>
-        <span class="header-back">
+        <span class="header-left">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
         </span>
-      </div>
-
-      <!-- 컨텍스트 바 -->
-      <div class="context-bar bar-critical">
-        <span class="bar-icon">🫶</span>
-        <span>지금 많이 힘드시죠. 혼자가 아니에요. 아래 연락처로 바로 연결할 수 있어요.</span>
+        <div class="header-center">
+          <div class="brand-dot"></div>
+          <span class="header-name">CareFlow</span>
+          <span class="header-sub">일기장</span>
+        </div>
+        <div class="header-spacer"></div>
       </div>
 
       <!-- 채팅 -->
       <div class="chat-area">
+        <div class="date-divider">3월 19일 목요일</div>
+
+        <div class="bubble bubble-ai">
+          안녕하세요 🌿<br>오늘 어떤 하루를 보내고 계신가요?
+        </div>
+
         <div class="bubble bubble-user">
-          너무 힘들어서 다 끝내고 싶어요
+          아침부터 이명이 심했어요. 귀에서 소리가 계속 나니까 집중도 안 되고 자꾸 예민해지는 것 같아요.
         </div>
 
-        <div class="bubble bubble-ai bubble-ai-crisis">
-          지금 많이 힘드시죠. 혼자 감당하기 너무 힘든 순간이에요.<br><br>
-          당신 곁에 함께 있어 드릴게요.
-          <div class="bubble-action bubble-action-crisis">
-            지금 바로 전화해주세요 — 24시간 무료, 판단 없이 들어줘요.
+        <div class="bubble bubble-ai">
+          기록되었습니다 ✅
+          <div class="record-card">
+            <span class="record-card-label">자동 분류된 축</span>
+            <div class="axis-tags">
+              <span class="axis-tag" style="background:rgba(245,168,124,0.2);color:#B8601C">몸</span>
+              <span class="axis-tag" style="background:rgba(238,159,184,0.2);color:#B84070">감정</span>
+            </div>
           </div>
-          <div class="hotline">📞 자살예방상담전화 1393</div>
         </div>
 
-        <div class="bubble bubble-ai bubble-ai-crisis" style="margin-top: 4px; font-size: 12px; color: #8B6F57;">
-          전화하기 힘들다면, 지금 있는 곳에서 안전한지 알려줄래요?
+        <div class="typing">
+          <span></span><span></span><span></span>
         </div>
       </div>
 
-      <!-- 입력창 — critical에서는 입력창 유지 (대화 끊지 않음) -->
+      <!-- 입력창 -->
       <div class="input-area">
         <div class="input-row">
-          <div class="input-box">지금 어떠세요?</div>
-          <button class="send-btn" style="background:#ef4444;">↑</button>
+          <div class="input-box">계속 기록하거나 마칠 수 있어요</div>
+          <button class="send-btn">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          </button>
         </div>
-        <p class="input-hint" style="color: #fca5a5;">대화는 계속 이어갈 수 있어요</p>
+        <p class="input-hint">이 내용은 리포트에 포함됩니다</p>
       </div>
     </div>
 
     <!-- 설명 -->
     <div class="desc-card">
-      <b>위기 상태</b>
+      <b>기록 저장 중 화면</b>
       <div class="point">
-        <div class="point-dot dot-r"></div>
-        <span>빨간 점 + 헤더 "위기 감지됨"</span>
+        <span class="point-icon">✅</span>
+        <span>"기록되었습니다" — AI의 유일한 응답. 조언·진단 없음</span>
       </div>
       <div class="point">
-        <div class="point-dot dot-r"></div>
-        <span>분홍 바 — 차갑지 않게, 따뜻하게</span>
+        <span class="point-icon">🏷️</span>
+        <span>자동 분류 태그(몸·감정·관계·의미)가 기록 아래 조용히 붙어요</span>
       </div>
       <div class="point">
-        <div class="point-dot dot-r"></div>
-        <span>1393 전화번호 버튼형으로 강조<br>전면 빨강 배경 사용 안 함</span>
+        <span class="point-icon">📝</span>
+        <span>"이 내용은 리포트에 포함됩니다" — 기록이 어디로 가는지 투명하게 안내</span>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ══════════════════════════════════════
+       SCREEN 3 — 기록 완료
+  ══════════════════════════════════════ -->
+  <div class="screen-wrap">
+    <span class="screen-label">기록 완료</span>
+
+    <div class="phone">
+      <!-- 헤더 -->
+      <div class="header">
+        <span class="header-left">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        </span>
+        <div class="header-center">
+          <div class="brand-dot"></div>
+          <span class="header-name">CareFlow</span>
+          <span class="header-sub">일기장</span>
+        </div>
+        <div class="header-spacer"></div>
+      </div>
+
+      <!-- 채팅 -->
+      <div class="chat-area">
+        <div class="date-divider">3월 19일 목요일</div>
+
+        <div class="bubble bubble-ai">
+          오늘 어떤 하루를 보내고 계신가요? 🌿
+        </div>
+
+        <div class="bubble bubble-user">
+          아침부터 이명이 심했어요. 귀에서 소리가 계속 나요.
+        </div>
+
+        <div class="bubble bubble-ai">
+          기록되었습니다 ✅
+          <div class="record-card">
+            <span class="record-card-label">자동 분류된 축</span>
+            <div class="axis-tags">
+              <span class="axis-tag" style="background:rgba(245,168,124,0.2);color:#B8601C">몸</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="bubble bubble-user">
+          자꾸 예민해지고 불안해요. 나아질 수 있을지 모르겠어요.
+        </div>
+
+        <div class="bubble bubble-ai">
+          기록되었습니다 ✅
+          <div class="record-card">
+            <span class="record-card-label">자동 분류된 축</span>
+            <div class="axis-tags">
+              <span class="axis-tag" style="background:rgba(238,159,184,0.2);color:#B84070">감정</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 완료 배너 -->
+        <div class="done-banner">
+          <div class="done-title">✅ 오늘의 기록 저장 완료</div>
+          분류된 축: 몸 · 감정 — 이 내용은 이번 주 리포트에 포함됩니다.
+        </div>
+      </div>
+
+      <!-- 입력창 -->
+      <div class="input-area">
+        <div class="input-row">
+          <div class="input-box">추가로 기록하고 싶은 게 있나요?</div>
+          <button class="send-btn">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          </button>
+        </div>
+        <p class="input-hint">기록한 내용은 의료적 판단에 사용되지 않아요</p>
+      </div>
+    </div>
+
+    <!-- 설명 -->
+    <div class="desc-card">
+      <b>기록 완료 화면</b>
+      <div class="point">
+        <span class="point-icon">🗂️</span>
+        <span>여러 번 기록 가능 — 각 기록마다 축 태그가 자동으로 붙어요</span>
       </div>
       <div class="point">
-        <div class="point-dot dot-r"></div>
-        <span>입력창 유지 — 대화 단절 없음<br>AI 응답은 없고 안전 메시지만</span>
+        <span class="point-icon">📊</span>
+        <span>완료 배너: 오늘 분류된 축 요약 + 리포트 포함 안내</span>
+      </div>
+      <div class="point">
+        <span class="point-icon">🔒</span>
+        <span>AI는 "기록되었습니다" 외 어떤 조언도, 판단도 하지 않아요</span>
       </div>
     </div>
   </div>
 
 </div>
 
-<!-- 하단 설계 원칙 -->
-<div style="max-width: 1040px; margin: 48px auto 0; background: #FFF8EC; border-radius: 16px; padding: 24px 28px; box-shadow: 0 1px 6px rgba(0,0,0,0.06);">
-  <p style="font-size: 12px; font-weight: 700; color: #374151; margin-bottom: 14px; letter-spacing: 0.04em;">설계 원칙</p>
+<!-- 운영 원칙 -->
+<div style="max-width: 1040px; margin: 48px auto 0; background: #FFF8EC; border-radius: 16px; padding: 24px 28px; box-shadow: 0 1px 6px rgba(0,0,0,0.06); border: 1px solid #EAD9BA;">
+  <p style="font-size: 12px; font-weight: 700; color: #374151; margin-bottom: 14px; letter-spacing: 0.04em;">운영 원칙</p>
   <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;">
     <div style="font-size: 12px; line-height: 1.7; color: #8B6F57;">
-      <b style="color: #3D2B1F; display: block; margin-bottom: 4px;">신호등으로 이용자의 상태를 확인합니다</b>
-      상태 점(dot)과 얇은 바(bar)를 적절히 활용하여
-      사용자를 놀라게 하거나 불안을 가중시키지 않음.
+      <b style="color: #3D2B1F; display: block; margin-bottom: 4px;">AI는 일기장입니다, 상담원이 아닙니다</b>
+      CareFlow 채팅은 사용자의 말을 기록하는 일기장이에요. 어떠한 의학적 조언, 진단, 처방도 하지 않으며 오직 "기록되었습니다"만 응답해요.
     </div>
     <div style="font-size: 12px; line-height: 1.7; color: #8B6F57;">
-      <b style="color: #3D2B1F; display: block; margin-bottom: 4px;">위기 상태에서도 이용자와의 대화를 유도한다</b>
-      critical에서 입력창을 없애면 사용자가 고립감을 느낄 수 있음.
-      채팅은 열려 있되, AI 응답 대신 안전 메시지만 반환.
+      <b style="color: #3D2B1F; display: block; margin-bottom: 4px;">기록은 투명하게 관리됩니다</b>
+      입력된 내용은 4축(몸·감정·관계·의미)으로 자동 분류되어 주간 리포트에 포함돼요. 사용자는 언제나 자신의 기록이 어떻게 사용되는지 알 수 있어요.
     </div>
     <div style="font-size: 12px; line-height: 1.7; color: #8B6F57;">
-      <b style="color: #3D2B1F; display: block; margin-bottom: 4px;">monitor는 이용자의 선택을 존중한다</b>
-      기관 연결 안내는 바 영역에만 두고 채팅 흐름을 유지.
-      강요가 아닌 제안. 사용자가 무시할 수 있도록.
+      <b style="color: #3D2B1F; display: block; margin-bottom: 4px;">의료기기가 아닌 생활 관리 도구입니다</b>
+      CareFlow는 메니에르병 환자의 일상 기록을 돕는 앱이에요. 의학적 상태를 판정하지 않으며, 표시되는 모든 지표는 기록 빈도를 시각화한 것이에요.
     </div>
   </div>
+</div>
+
+
+<!-- 의료기기 면책 문구 -->
+<div style="max-width:1040px;margin:32px auto 0;padding:14px 20px;background:#FFF8EC;border:1px solid #EAD9BA;border-radius:12px;font-size:11px;color:#8B6F57;line-height:1.7;text-align:center;">
+  본 서비스는 의료 기기가 아닙니다. 제공되는 기록과 시각화 데이터는 사용자의 자기 관리 및 진료 시 참고를 돕기 위한 정보일 뿐이며, 어떠한 의학적 진단이나 치료 결정도 대신하지 않습니다.
 </div>
 
 </body>
