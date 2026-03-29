@@ -57,20 +57,6 @@ export default function HomePage() {
         <div style={{ fontSize: '24px', fontWeight: 800, color: '#3D2B1F', letterSpacing: '-0.5px' }}>
           Care<span style={{ color: '#5BA88A' }}>Flow</span>
         </div>
-        <Link
-          href="/preview"
-          style={{
-            background: '#3D2B1F',
-            color: '#FFF8EC',
-            padding: '10px 22px',
-            borderRadius: '10px',
-            fontSize: '15px',
-            fontWeight: 600,
-            textDecoration: 'none',
-          }}
-        >
-          앱 미리보기 ▸
-        </Link>
       </header>
 
       {/* ── 히어로 ── */}

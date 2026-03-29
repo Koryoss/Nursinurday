@@ -80,11 +80,8 @@ export default function PreviewPage() {
             alignItems: 'center',
             gap: '12px',
           }}>
-            <div style={{ fontSize: '24px', flexShrink: 0 }}>{f.icon}</div>
-            <div>
-              <div style={{ fontSize: '13px', fontWeight: 700, marginBottom: '2px' }}>{f.title}</div>
-              <div style={{ fontSize: '11px', color: '#6B5344', lineHeight: 1.4 }}>{f.desc}</div>
-            </div>
+            <div style={{ fontSize: '22px', flexShrink: 0 }}>{f.icon}</div>
+            <div style={{ fontSize: '13px', fontWeight: 700 }}>{f.title}</div>
           </div>
         ))}
       </div>
