@@ -2,6 +2,7 @@
 // 루트 레이아웃 — 모든 페이지에 공통 적용
 // =====================================================
 import type { Metadata } from 'next'
+import { Analytics } from '@vercel/analytics/next'
 import './globals.css'
 
 export const metadata: Metadata = {
@@ -19,6 +20,7 @@ export default function RootLayout({
     <html lang="ko">
       <body className="bg-surface min-h-screen antialiased">
         {children}
+        <Analytics />
       </body>
     </html>
   )
