@@ -219,6 +219,18 @@
   .freq-fill  { height: 100%; border-radius: 3px; }
   .freq-count { font-size: 10px; color: #A08866; width: 12px; text-align: right; }
 
+  /* ── 체크리스트 축 ── */
+  .axis-checklist { display: flex; flex-direction: column; gap: 5px; }
+  .axis-block { background: #FFFBF3; border-radius: 10px; padding: 9px 10px; border-left: 3px solid transparent; }
+  .axis-block-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 7px; }
+  .axis-block-title { font-size: 11px; font-weight: 800; }
+  .axis-block-sub { font-size: 9.5px; color: #A08866; margin-top: 1px; }
+  .axis-block-score { font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 99px; }
+  .check-item { display: flex; align-items: center; gap: 6px; margin-bottom: 3px; }
+  .check-icon { font-size: 11px; font-weight: 700; width: 14px; flex-shrink: 0; }
+  .check-label { font-size: 10px; color: #3D2B1F; }
+  .check-label.unchecked { color: #C4B09A; }
+
   /* ── 상세 패널 ── */
   .detail-panel { background: #FFF8EC; border-radius: 14px; padding: 12px; border: 1px solid #EAD9BA; }
   .detail-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
@@ -338,39 +350,45 @@
             </svg>
           </div>
 
-          <!-- 4축 범례 -->
-          <div class="axis-legend">
-            <div class="axis-item">
-              <div class="axis-dot" style="background:#F5A87C"></div>
-              <div class="axis-info">
-                <div class="axis-name">몸</div>
-                <div class="axis-score">이명 · 에너지</div>
-                <div class="axis-bar-track"><div class="axis-bar-fill" style="width:70%;background:#F5A87C"></div></div>
+          <!-- 4축 체크리스트 -->
+          <div class="axis-checklist">
+            <div class="axis-block" style="border-left-color:#F5A87C">
+              <div class="axis-block-header">
+                <div><div class="axis-block-title" style="color:#B8601C">몸</div><div class="axis-block-sub">신체 증상 · 에너지</div></div>
+                <span class="axis-block-score" style="background:rgba(245,168,124,0.15);color:#B8601C">3/4</span>
               </div>
+              <div class="check-item"><span class="check-icon" style="color:#F5A87C">✓</span><span class="check-label">이명이 있었나요?</span></div>
+              <div class="check-item"><span class="check-icon" style="color:#F5A87C">✓</span><span class="check-label">어지러움이 있었나요?</span></div>
+              <div class="check-item"><span class="check-icon" style="color:#F5A87C">✓</span><span class="check-label">피로감을 느꼈나요?</span></div>
+              <div class="check-item"><span class="check-icon" style="color:#D4C4A8">○</span><span class="check-label unchecked">두통이 있었나요?</span></div>
             </div>
-            <div class="axis-item">
-              <div class="axis-dot" style="background:#EE9FB8"></div>
-              <div class="axis-info">
-                <div class="axis-name">감정</div>
-                <div class="axis-score">불안 · 긴장</div>
-                <div class="axis-bar-track"><div class="axis-bar-fill" style="width:85%;background:#EE9FB8"></div></div>
+            <div class="axis-block" style="border-left-color:#EE9FB8">
+              <div class="axis-block-header">
+                <div><div class="axis-block-title" style="color:#B84070">감정</div><div class="axis-block-sub">불안 · 긴장 · 감정 기복</div></div>
+                <span class="axis-block-score" style="background:rgba(238,159,184,0.15);color:#B84070">4/4</span>
               </div>
+              <div class="check-item"><span class="check-icon" style="color:#EE9FB8">✓</span><span class="check-label">불안감을 느꼈나요?</span></div>
+              <div class="check-item"><span class="check-icon" style="color:#EE9FB8">✓</span><span class="check-label">예민하거나 짜증이 났나요?</span></div>
+              <div class="check-item"><span class="check-icon" style="color:#EE9FB8">✓</span><span class="check-label">두려움이 있었나요?</span></div>
+              <div class="check-item"><span class="check-icon" style="color:#EE9FB8">✓</span><span class="check-label">기분 변화가 심했나요?</span></div>
             </div>
-            <div class="axis-item">
-              <div class="axis-dot" style="background:#B8A8D4"></div>
-              <div class="axis-info">
-                <div class="axis-name">관계</div>
-                <div class="axis-score">연결 · 고립</div>
-                <div class="axis-bar-track"><div class="axis-bar-fill" style="width:30%;background:#B8A8D4"></div></div>
+            <div class="axis-block" style="border-left-color:#B8A8D4">
+              <div class="axis-block-header">
+                <div><div class="axis-block-title" style="color:#7060A8">관계</div><div class="axis-block-sub">연결 · 고립 · 사회 참여</div></div>
+                <span class="axis-block-score" style="background:rgba(184,168,212,0.15);color:#7060A8">1/3</span>
               </div>
+              <div class="check-item"><span class="check-icon" style="color:#D4C4A8">○</span><span class="check-label unchecked">사람들과 함께했나요?</span></div>
+              <div class="check-item"><span class="check-icon" style="color:#B8A8D4">✓</span><span class="check-label">고립감을 느꼈나요?</span></div>
+              <div class="check-item"><span class="check-icon" style="color:#D4C4A8">○</span><span class="check-label unchecked">소통이 힘들었나요?</span></div>
             </div>
-            <div class="axis-item">
-              <div class="axis-dot" style="background:#E8C86E"></div>
-              <div class="axis-info">
-                <div class="axis-name">의미</div>
-                <div class="axis-score">방향 · 성장</div>
-                <div class="axis-bar-track"><div class="axis-bar-fill" style="width:45%;background:#E8C86E"></div></div>
+            <div class="axis-block" style="border-left-color:#E8C86E">
+              <div class="axis-block-header">
+                <div><div class="axis-block-title" style="color:#A07820">의미</div><div class="axis-block-sub">방향 · 성취 · 삶의 질</div></div>
+                <span class="axis-block-score" style="background:rgba(232,200,110,0.15);color:#A07820">2/3</span>
               </div>
+              <div class="check-item"><span class="check-icon" style="color:#E8C86E">✓</span><span class="check-label">성취감을 느꼈나요?</span></div>
+              <div class="check-item"><span class="check-icon" style="color:#D4C4A8">○</span><span class="check-label unchecked">하루가 의미 있었나요?</span></div>
+              <div class="check-item"><span class="check-icon" style="color:#E8C86E">✓</span><span class="check-label">계획한 일을 했나요?</span></div>
             </div>
           </div>
         </div>
@@ -497,25 +515,37 @@
             <span class="detail-domain-tag" style="background:rgba(184,168,212,0.2);color:#7060A8">관계</span>
             <span class="detail-domain-tag" style="background:rgba(232,200,110,0.2);color:#A07820">의미</span>
           </div>
-          <div class="detail-axis-row">
-            <span class="detail-axis-name">몸</span>
-            <div class="detail-axis-track"><div class="detail-axis-fill" style="width:70%;background:#F5A87C"></div></div>
-            <span class="detail-axis-val">7</span>
-          </div>
-          <div class="detail-axis-row">
-            <span class="detail-axis-name">감정</span>
-            <div class="detail-axis-track"><div class="detail-axis-fill" style="width:85%;background:#EE9FB8"></div></div>
-            <span class="detail-axis-val">9</span>
-          </div>
-          <div class="detail-axis-row">
-            <span class="detail-axis-name">관계</span>
-            <div class="detail-axis-track"><div class="detail-axis-fill" style="width:25%;background:#B8A8D4"></div></div>
-            <span class="detail-axis-val">2</span>
-          </div>
-          <div class="detail-axis-row">
-            <span class="detail-axis-name">의미</span>
-            <div class="detail-axis-track"><div class="detail-axis-fill" style="width:40%;background:#E8C86E"></div></div>
-            <span class="detail-axis-val">4</span>
+          <div style="display:flex;flex-direction:column;gap:4px;margin-top:2px">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:2px">
+              <span style="font-size:10px;font-weight:700;color:#B8601C">몸</span>
+              <span style="font-size:10px;font-weight:700;color:#B8601C;background:rgba(245,168,124,0.15);padding:1px 7px;border-radius:99px">3/4</span>
+            </div>
+            <div class="check-item"><span class="check-icon" style="color:#F5A87C">✓</span><span class="check-label">이명이 있었나요?</span></div>
+            <div class="check-item"><span class="check-icon" style="color:#F5A87C">✓</span><span class="check-label">어지러움이 있었나요?</span></div>
+            <div class="check-item"><span class="check-icon" style="color:#F5A87C">✓</span><span class="check-label">피로감을 느꼈나요?</span></div>
+            <div class="check-item"><span class="check-icon" style="color:#D4C4A8">○</span><span class="check-label unchecked">두통이 있었나요?</span></div>
+            <div style="display:flex;align-items:center;justify-content:space-between;margin:6px 0 2px">
+              <span style="font-size:10px;font-weight:700;color:#B84070">감정</span>
+              <span style="font-size:10px;font-weight:700;color:#B84070;background:rgba(238,159,184,0.15);padding:1px 7px;border-radius:99px">4/4</span>
+            </div>
+            <div class="check-item"><span class="check-icon" style="color:#EE9FB8">✓</span><span class="check-label">불안감을 느꼈나요?</span></div>
+            <div class="check-item"><span class="check-icon" style="color:#EE9FB8">✓</span><span class="check-label">예민하거나 짜증이 났나요?</span></div>
+            <div class="check-item"><span class="check-icon" style="color:#EE9FB8">✓</span><span class="check-label">두려움이 있었나요?</span></div>
+            <div class="check-item"><span class="check-icon" style="color:#EE9FB8">✓</span><span class="check-label">기분 변화가 심했나요?</span></div>
+            <div style="display:flex;align-items:center;justify-content:space-between;margin:6px 0 2px">
+              <span style="font-size:10px;font-weight:700;color:#7060A8">관계</span>
+              <span style="font-size:10px;font-weight:700;color:#7060A8;background:rgba(184,168,212,0.15);padding:1px 7px;border-radius:99px">1/3</span>
+            </div>
+            <div class="check-item"><span class="check-icon" style="color:#D4C4A8">○</span><span class="check-label unchecked">사람들과 함께했나요?</span></div>
+            <div class="check-item"><span class="check-icon" style="color:#B8A8D4">✓</span><span class="check-label">고립감을 느꼈나요?</span></div>
+            <div class="check-item"><span class="check-icon" style="color:#D4C4A8">○</span><span class="check-label unchecked">소통이 힘들었나요?</span></div>
+            <div style="display:flex;align-items:center;justify-content:space-between;margin:6px 0 2px">
+              <span style="font-size:10px;font-weight:700;color:#A07820">의미</span>
+              <span style="font-size:10px;font-weight:700;color:#A07820;background:rgba(232,200,110,0.15);padding:1px 7px;border-radius:99px">2/3</span>
+            </div>
+            <div class="check-item"><span class="check-icon" style="color:#E8C86E">✓</span><span class="check-label">성취감을 느꼈나요?</span></div>
+            <div class="check-item"><span class="check-icon" style="color:#D4C4A8">○</span><span class="check-label unchecked">하루가 의미 있었나요?</span></div>
+            <div class="check-item"><span class="check-icon" style="color:#E8C86E">✓</span><span class="check-label">계획한 일을 했나요?</span></div>
           </div>
         </div>
 
