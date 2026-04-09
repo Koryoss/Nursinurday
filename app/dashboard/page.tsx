@@ -6,10 +6,32 @@ import Link from 'next/link'
 
 /* ── 데이터 ──────────────────────────────── */
 const AXES = [
-  { key:'body',     label:'몸',  sub:'신체 증상 · 에너지',   color:'#F5A87C', textColor:'#7A3A0A', glow:'rgba(245,168,124,0.45)', items:['이명','어지러움','피로','두통'],       checked:[true,true,true,false],  score:3, max:4  },
-  { key:'emotion',  label:'감정', sub:'불안 · 긴장 · 감정 기복', color:'#EE9FB8', textColor:'#7A1A40', glow:'rgba(238,159,184,0.45)', items:['불안','예민·짜증','두려움','기분기복'],  checked:[true,true,true,true],   score:4, max:4  },
-  { key:'relation', label:'관계', sub:'연결 · 고립 · 사회 참여', color:'#B8A8D4', textColor:'#3D2878', glow:'rgba(184,168,212,0.45)', items:['함께함','고립감','소통어려움'],       checked:[false,true,false],      score:1, max:3  },
-  { key:'meaning',  label:'의미', sub:'방향 · 성취 · 삶의 질',  color:'#E8C86E', textColor:'#6B4A00', glow:'rgba(232,200,110,0.45)', items:['성취감','의미있음','계획실행'],       checked:[true,false,true],       score:2, max:3  },
+  { key:'body',     label:'몸',  sub:'신체 증상 · 에너지',      color:'#F5A87C', textColor:'#7A3A0A', glow:'rgba(245,168,124,0.45)',
+    items:[
+      { emoji:'👂', word:'이명',    question:'이명이 있었나요?'          },
+      { emoji:'🌀', word:'어지러움', question:'어지러움이 있었나요?'       },
+      { emoji:'😴', word:'피로',    question:'피로감을 느꼈나요?'         },
+      { emoji:'🤕', word:'두통',    question:'두통이 있었나요?'           },
+    ], checked:[true,true,true,false], score:3, max:4 },
+  { key:'emotion',  label:'감정', sub:'불안 · 긴장 · 감정 기복',    color:'#EE9FB8', textColor:'#7A1A40', glow:'rgba(238,159,184,0.45)',
+    items:[
+      { emoji:'😰', word:'불안',     question:'불안감을 느꼈나요?'         },
+      { emoji:'😤', word:'예민·짜증', question:'예민하거나 짜증이 났나요?'  },
+      { emoji:'😨', word:'두려움',   question:'두려움이 있었나요?'         },
+      { emoji:'🎭', word:'기분 기복', question:'기분 변화가 심했나요?'      },
+    ], checked:[true,true,true,true],  score:4, max:4 },
+  { key:'relation', label:'관계', sub:'연결 · 고립 · 사회 참여',    color:'#B8A8D4', textColor:'#3D2878', glow:'rgba(184,168,212,0.45)',
+    items:[
+      { emoji:'🤝', word:'함께함',    question:'사람들과 함께했나요?'       },
+      { emoji:'🏝️', word:'고립감',    question:'고립감을 느꼈나요?'         },
+      { emoji:'💭', word:'소통 어려움', question:'소통이 힘들었나요?'        },
+    ], checked:[false,true,false],     score:1, max:3 },
+  { key:'meaning',  label:'의미', sub:'방향 · 성취 · 삶의 질',      color:'#E8C86E', textColor:'#6B4A00', glow:'rgba(232,200,110,0.45)',
+    items:[
+      { emoji:'⭐', word:'성취감',    question:'성취감을 느꼈나요?'         },
+      { emoji:'✨', word:'의미 있음',  question:'하루가 의미 있었나요?'      },
+      { emoji:'📌', word:'계획 실행',  question:'계획한 일을 했나요?'        },
+    ], checked:[true,false,true],      score:2, max:3 },
 ]
 const TOTAL_SCORE = AXES.reduce((s,a)=>s+a.score,0)   // 10
 const TOTAL_MAX   = AXES.reduce((s,a)=>s+a.max,0)     // 14
@@ -265,19 +287,27 @@ export default function DashboardPage() {
                     {a.score}/{a.max}
                   </motion.span>
                 </div>
-                <div style={{ display:'grid', gridTemplateColumns:`repeat(${a.max},1fr)`, gap:5 }}>
+                <div style={{ display:'flex', flexDirection:'column', gap:6, borderTop:'1px solid rgba(255,255,255,0.07)', paddingTop:10 }}>
                   {a.items.map((item,i)=>(
                     <motion.div
                       key={i}
-                      initial={{ opacity:0, scale:0.8 }}
-                      animate={{ opacity:1, scale:1 }}
-                      transition={{ delay:0.3+ai*0.08+i*0.05, type:'spring', stiffness:300 }}
-                      style={{ padding:'5px 4px', borderRadius:10, background: a.checked[i] ? `${a.color}25` : 'rgba(255,255,255,0.05)', border:`1px solid ${a.checked[i] ? a.color+'50' : 'rgba(255,255,255,0.08)'}`, textAlign:'center' }}
+                      initial={{ opacity:0, x:-8 }}
+                      animate={{ opacity:1, x:0 }}
+                      transition={{ delay:0.3+ai*0.06+i*0.04, type:'spring', stiffness:280 }}
+                      style={{ display:'flex', alignItems:'center', gap:9, padding:'7px 10px', borderRadius:11, background: a.checked[i] ? `${a.color}18` : 'rgba(255,255,255,0.04)', border:`1px solid ${a.checked[i] ? a.color+'40' : 'rgba(255,255,255,0.06)'}` }}
                     >
-                      <div style={{ fontSize:9.5, fontWeight:700, color: a.checked[i] ? a.color : 'rgba(255,255,255,0.3)' }}>
+                      {/* 체크 아이콘 */}
+                      <span style={{ fontSize:13, fontWeight:800, color: a.checked[i] ? a.color : 'rgba(255,255,255,0.2)', width:14, textAlign:'center', flexShrink:0 }}>
                         {a.checked[i] ? '✓' : '○'}
-                      </div>
-                      <div style={{ fontSize:8.5, color: a.checked[i] ? 'rgba(255,255,255,0.8)' : 'rgba(255,255,255,0.25)', marginTop:1, lineHeight:1.3 }}>{item}</div>
+                      </span>
+                      {/* 이모지 */}
+                      <span style={{ fontSize:16, flexShrink:0, opacity: a.checked[i] ? 1 : 0.3 }}>
+                        {item.emoji}
+                      </span>
+                      {/* 질문 전체 텍스트 */}
+                      <span style={{ fontSize:12, fontWeight: a.checked[i] ? 600 : 400, color: a.checked[i] ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.28)', flex:1 }}>
+                        {item.question}
+                      </span>
                     </motion.div>
                   ))}
                 </div>
