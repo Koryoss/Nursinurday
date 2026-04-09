@@ -272,7 +272,7 @@ export default function ExplorePage() {
               <div style={{ fontSize:11, color:'#A08866', textAlign:'center', lineHeight:1.7 }}>
                 {TOTAL}개 항목이 모두 기록됐어요.<br />대시보드에서 오늘을 확인해보세요.
               </div>
-              <Link href="/history" style={{ marginTop:14, background:'#5BA88A', color:'#fff', fontSize:12, fontWeight:700, padding:'8px 20px', borderRadius:99, textDecoration:'none' }}>
+              <Link href="/dashboard" style={{ marginTop:14, background:'#5BA88A', color:'#fff', fontSize:12, fontWeight:700, padding:'8px 20px', borderRadius:99, textDecoration:'none' }}>
                 대시보드 보기 →
               </Link>
             </div>
@@ -315,10 +315,10 @@ export default function ExplorePage() {
         {/* ── 하단 탭 바 ──────────────────────── */}
         <div style={{ flexShrink:0, marginTop:8, padding:'10px 0 30px', borderTop:'1px solid rgba(61,43,31,0.08)', display:'grid', gridTemplateColumns:'repeat(4,1fr)', background:'rgba(255,251,243,0.96)' }}>
           {[
-            { icon:'📋', label:'기록',     href:'/explore',  active:true  },
-            { icon:'🔔', label:'알림',     href:'/preview',  active:false },
-            { icon:'💬', label:'채팅',     href:'/chat',     active:false },
-            { icon:'📊', label:'대시보드', href:'/history',  active:false },
+            { icon:'📋', label:'기록',     href:'/explore',      active:true  },
+            { icon:'🔔', label:'알림',     href:'/notification', active:false },
+            { icon:'💬', label:'채팅',     href:'/chat',         active:false },
+            { icon:'📊', label:'대시보드', href:'/dashboard',    active:false },
           ].map(tab => (
             <Link key={tab.label} href={tab.href} style={{ textDecoration:'none', display:'flex', flexDirection:'column', alignItems:'center', gap:3, opacity:tab.active ? 1 : 0.45 }}>
               <span style={{ fontSize:22 }}>{tab.icon}</span>

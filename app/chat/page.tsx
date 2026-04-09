@@ -1,291 +1,154 @@
-// =====================================================
-// 채팅 페이지 v4 — CareFlow NANDA 간호 진단 기반
-// POST /api/chat에서 받은 NANDA 6단계 응답을 사용자 친화적으로 표시
-// 반응형: 모바일(전체 화면) / 데스크톱(중앙 카드)
-//
-// NANDA 응답 구조: 진단(diagnosis) → 자극(stimulus) → 경로(pathophysiology) →
-//                  반응(response) → 정서(emotion) → 치료(therapeuticAction)
-// MessageBubble 컴포넌트가 마크다운 포맷 응답을 렌더링
-// =====================================================
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import Link from 'next/link'
-import MessageBubble from '@/components/MessageBubble'
-import TypingIndicator from '@/components/TypingIndicator'
-import type { ChatMessage } from '@/app/api/chat/route'
-import { saveSession } from '@/lib/sessionStorage'
-import type { ObservationDomain, CareAxis, CrisisLevel, ConversationMode } from '@/lib/nursingLogic'
+import IPhoneFrame from '../components/IPhoneFrame'
 
-// 말투 모드별 초기 인사
-const GREETING: Record<ConversationMode, string> = {
-  '친근': '안녕 💚\n나 CareFlow야. 오늘 어떤 하루였어?\n편하게 얘기해줘, 판단 같은 거 없어.',
-  '엄격': '안녕하세요 💚\n저는 CareFlow예요. 오늘 어떤 하루를 보내고 계신가요?\n편하게 이야기해주세요, 판단 없이 들을게요.',
-}
+const AXIS_COLOR: Record<string, string> = { 몸:'#F5A87C', 감정:'#EE9FB8', 관계:'#B8A8D4', 의미:'#E8C86E' }
+const AXIS_TEXT:  Record<string, string> = { 몸:'#7A3A0A', 감정:'#7A1A40', 관계:'#3D2878', 의미:'#6B4A00' }
 
-// 빠른 입력 제안 (온보딩 UX)
-const QUICK_PROMPTS = [
-  '오늘 아무것도 못 했어요 😔',
-  '불안하고 이유를 모르겠어요',
-  '너무 지쳤어요',
-  '기분이 자꾸 바뀌어요',
+interface Msg { id: string; role: 'ai'|'user'; text: string; tags?: string[] }
+
+const INIT: Msg[] = [
+  {
+    id: '0', role: 'ai',
+    text: '안녕하세요 😊 오늘 하루 어떠셨나요? 편하게 이야기해 주세요. 몸 상태, 감정, 주변 사람들과의 관계, 오늘의 의미 — 어떤 것이든 괜찮아요.',
+    tags: [],
+  },
 ]
 
-// 현재 시간 포맷
-function getTime() {
-  return new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })
+const AUTO_REPLIES: { keywords: string[]; reply: string; tags: string[] }[] = [
+  { keywords:['이명','귀','소리','울림'],         reply:'이명이 느껴지셨군요. 오늘 소리가 특히 심한 시간대가 있었나요?',                         tags:['몸']          },
+  { keywords:['어지','빙빙','균형','흔들'],        reply:'어지러움이 있었군요. 걸을 때 심했는지, 앉아 있을 때도 느껴졌는지 궁금해요.',              tags:['몸']          },
+  { keywords:['피로','피곤','지쳐','힘들','졸'],   reply:'많이 피곤하셨겠어요. 오늘 수면은 어떠셨나요?',                                         tags:['몸','감정']   },
+  { keywords:['불안','걱정','무서','두려'],        reply:'불안한 마음이 드셨군요. 어떤 순간에 그런 감정이 왔는지 기억나세요?',                     tags:['감정']        },
+  { keywords:['예민','짜증','화','민감'],          reply:'예민하게 느껴지는 하루였군요. 주변 소리나 빛이 특히 거슬렸나요?',                        tags:['감정']        },
+  { keywords:['외로','혼자','고립','연락'],        reply:'혼자라는 느낌이 드셨군요. 오늘 누군가와 대화하셨나요?',                                  tags:['관계']        },
+  { keywords:['가족','친구','사람','만남'],        reply:'소중한 사람과 함께하는 시간이 있었군요. 어떤 감정이 느껴졌나요?',                        tags:['관계']        },
+  { keywords:['성취','해냈','완료','끝냈','했어'], reply:'오늘 무언가를 해내셨군요! 어떤 일이었는지 더 이야기해 주시겠어요?',                      tags:['의미']        },
+  { keywords:['좋아','괜찮','나쁘지'],            reply:'그나마 다행이에요. 오늘 특별히 기억에 남는 순간이 있었나요?',                            tags:['의미']        },
+  { keywords:['두통','머리','통증'],              reply:'두통이 있으셨군요. 이명이나 어지러움이 함께 오진 않았나요?',                             tags:['몸']          },
+]
+
+function getReply(text: string): { reply: string; tags: string[] } {
+  for (const r of AUTO_REPLIES) {
+    if (r.keywords.some(k => text.includes(k))) return { reply: r.reply, tags: r.tags }
+  }
+  return { reply: '기록해 주셔서 감사해요. 오늘 하루를 한 줄로 표현한다면 어떻게 말씀하시겠어요?', tags: [] }
 }
 
+const TODAY = new Date().toLocaleDateString('ko-KR', { month: 'long', day: 'numeric', weekday: 'short' })
+
 export default function ChatPage() {
-  const [convMode, setConvMode] = useState<ConversationMode>('엄격')
-  const [messages, setMessages] = useState<(ChatMessage & { time: string })[]>([])
-  const [input, setInput] = useState('')
-  const [isLoading, setIsLoading] = useState(false)
-  // 마지막으로 감지된 crisisLevel — 헤더 신호등 색상에 활용
-  const [crisisLevel, setCrisisLevel] = useState<CrisisLevel>('none')
+  const [msgs, setMsgs]     = useState<Msg[]>(INIT)
+  const [input, setInput]   = useState('')
+  const [typing, setTyping] = useState(false)
+  const bottomRef           = useRef<HTMLDivElement>(null)
 
-  // sessionStorage에서 말투 모드 읽기 (온보딩에서 저장된 값)
-  useEffect(() => {
-    const saved = (sessionStorage.getItem('careflow_mode') ?? '엄격') as ConversationMode
-    setConvMode(saved)
-    setMessages([{
-      role: 'assistant',
-      content: GREETING[saved],
-      time: getTime(),
-    }])
-  }, [])
+  useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: 'smooth' }) }, [msgs, typing])
 
-  const messagesEndRef = useRef<HTMLDivElement>(null)
-  const inputRef = useRef<HTMLTextAreaElement>(null)
-
-  // 새 메시지 올 때 스크롤 아래로
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages, isLoading])
-
-  // 헤더 신호등 색상 — macOS 트래픽 라이트
-  const statusDotBg =
-    crisisLevel === 'critical' ? '#FF5F57' :
-    crisisLevel === 'urgent'   ? '#FF9F0A' :
-    crisisLevel === 'monitor'  ? '#FEBC2E' :
-                                 '#28C840'
-  const statusDotPulse = crisisLevel !== 'critical'
-
-  // 메시지 전송
-  const sendMessage = async (text: string) => {
-    if (!text.trim() || isLoading) return
-
-    const userMsg: ChatMessage & { time: string } = {
-      role: 'user',
-      content: text.trim(),
-      time: getTime(),
-    }
-
-    setMessages(prev => [...prev, userMsg])
+  const send = () => {
+    const text = input.trim()
+    if (!text) return
     setInput('')
-    setIsLoading(true)
-
-    try {
-      // ─── NANDA 간호 진단 API 호출 ───
-      // /api/chat는 다음을 반환:
-      // - reply: NANDA 6단계 포맷된 응답 (진단→자극→경로→반응→정서→치료)
-      // - primaryDomain: 검출된 주요 관찰 영역 (Sleep, Energy, BodySignals 등)
-      // - activeDomains: 복수 감지 도메인 배열
-      // - axisScores: 4축 점수 (Body/Emotion/Connection/Meaning)
-      // - crisisLevel: 위기 수준 ('none'|'monitor'|'urgent'|'critical')
-      // - mode: 응답 생성 모드 ('mock'|'openai'|'claude'|'crisis')
-      const res = await fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          messages: [...messages, userMsg].map(({ role, content }) => ({ role, content })),
-          mode: convMode,
-        }),
-      })
-
-      if (!res.ok) throw new Error('API 오류')
-
-      const data = await res.json()
-
-      // NANDA 응답을 메시지로 추가 (MessageBubble에서 마크다운 렌더링)
-      setMessages(prev => [...prev, {
-        role: 'assistant',
-        content: data.reply,
-        time: getTime(),
-      }])
-
-      // ─── 위기 감지 신호등 업데이트 ───
-      // crisisLevel: 🔴 critical | 🟠 urgent | 🟡 monitor | 🟢 none
-      if (data.crisisLevel) {
-        setCrisisLevel(data.crisisLevel as CrisisLevel)
-      }
-
-      // ─── 세션 자동 저장 (NANDA 평가 결과 기록) ───
-      // 사용자의 관찰 영역(primaryDomain)과 4축 점수(axisScores)를 세션에 저장
-      // 향후 대시보드의 트렌드 분석 및 패턴 추적에 활용
-      if (data.primaryDomain) {
-        saveSession({
-          primaryDomain: data.primaryDomain as ObservationDomain,
-          activeDomains: (data.activeDomains ?? [data.primaryDomain]) as ObservationDomain[],
-          axisScores: (data.axisScores ?? {
-            Body: 0, Emotion: 0, Connection: 0, Meaning: 0,
-          }) as Record<CareAxis, number>,
-          crisisLevel: (data.crisisLevel ?? 'none') as CrisisLevel,
-          messageCount: 1,  // saveSession 내부에서 누적됨
-        })
-      }
-
-    } catch (err) {
-      setMessages(prev => [...prev, {
-        role: 'assistant',
-        content: '죄송해요, 잠시 문제가 생겼어요. 다시 시도해줄래요?',
-        time: getTime(),
-      }])
-    } finally {
-      setIsLoading(false)
-      // 입력창으로 포커스
-      setTimeout(() => inputRef.current?.focus(), 100)
-    }
+    setMsgs(prev => [...prev, { id: Date.now().toString(), role: 'user', text }])
+    setTyping(true)
+    setTimeout(() => {
+      const { reply, tags } = getReply(text)
+      setTyping(false)
+      setMsgs(prev => [...prev, { id: `ai-${Date.now()}`, role: 'ai', text: reply, tags }])
+    }, 900)
   }
 
-  // Enter 키 처리 (Shift+Enter = 줄바꿈, Enter = 전송)
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault()
-      sendMessage(input)
-    }
-  }
+  const allTags = [...new Set(msgs.flatMap(m => m.tags ?? []))]
 
   return (
-    <div className="flex flex-col h-screen" style={{ background: '#FFFBF3' }}>
+    <IPhoneFrame sub={`${TODAY} · AI 일기장`}>
+      <div style={{ flex:1, display:'flex', flexDirection:'column', overflow:'hidden' }}>
 
-      {/* ── 상단 헤더 ── */}
-      <header
-        className="flex-shrink-0 flex items-center justify-between px-4 py-3"
-        style={{ background: '#FFF8EC', borderBottom: '1px solid #EAD9BA' }}
-      >
-        <div className="flex items-center gap-2">
-          <div
-            className={`w-2 h-2 rounded-full ${statusDotPulse ? 'animate-pulse' : ''}`}
-            style={{ backgroundColor: statusDotBg }}
-          />
-          <span className="font-semibold text-sm" style={{ color: '#2C1C10' }}>🌼 CareFlow</span>
-          <span className="text-xs" style={{ color: '#B89A6A' }}>자기돌봄</span>
-        </div>
-
-        {/* 오른쪽: 히스토리 + 홈 */}
-        <div className="flex items-center gap-3">
-          <Link href="/history" style={{ color: '#B89A6A' }} className="hover:opacity-70 transition-opacity" title="기록 보기">
-            {/* 캘린더 아이콘 */}
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-              <line x1="16" y1="2" x2="16" y2="6"/>
-              <line x1="8" y1="2" x2="8" y2="6"/>
-              <line x1="3" y1="10" x2="21" y2="10"/>
-            </svg>
-          </Link>
-          <Link href="/" style={{ color: '#B89A6A' }} className="hover:opacity-70 transition-opacity" title="홈으로">
-            {/* 집 아이콘 */}
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-              <polyline points="9 22 9 12 15 12 15 22"/>
-            </svg>
-          </Link>
-        </div>
-      </header>
-
-      {/* ── 채팅 영역 ── */}
-      <main className="flex-1 overflow-y-auto">
-        <div className="max-w-2xl mx-auto px-4 py-6">
-
-          {/* 메시지 목록 */}
-          {messages.map((msg, i) => (
-            <MessageBubble
-              key={i}
-              role={msg.role}
-              content={msg.content}
-              timestamp={msg.time}
-            />
-          ))}
-
-          {/* 타이핑 인디케이터 */}
-          {isLoading && <TypingIndicator />}
-
-          {/* 스크롤 앵커 */}
-          <div ref={messagesEndRef} />
-        </div>
-      </main>
-
-      {/* ── 입력창 ── */}
-      <footer
-        className="flex-shrink-0 px-4 pt-3 pb-3"
-        style={{ background: '#FFF8EC', borderTop: '1px solid #EAD9BA' }}
-      >
-
-        {/* 빠른 입력 제안 — 처음 메시지 전까지만 입력창 바로 위에 표시 */}
-        {messages.length === 1 && (
-          <div className="max-w-2xl mx-auto mb-2">
-            <p className="text-xs mb-2" style={{ color: '#B89A6A' }}>자주 하는 이야기</p>
-            <div className="flex flex-wrap gap-2">
-              {QUICK_PROMPTS.map((prompt) => (
-                <button
-                  key={prompt}
-                  onClick={() => sendMessage(prompt)}
-                  className="rounded-full px-3 py-1.5 text-xs whitespace-nowrap transition-opacity hover:opacity-70"
-                  style={{ background: '#FFFBF3', border: '1px solid #EAD9BA', color: '#5C3D1E' }}
-                >
-                  {prompt}
-                </button>
-              ))}
-            </div>
+        {/* 기록된 축 태그 */}
+        {allTags.length > 0 && (
+          <div style={{ padding:'8px 16px', display:'flex', gap:5, flexWrap:'wrap', borderBottom:'1px solid rgba(61,43,31,0.06)', flexShrink:0 }}>
+            {allTags.map(t => (
+              <span key={t} style={{ fontSize:10, fontWeight:700, padding:'3px 9px', borderRadius:99, background:`${AXIS_COLOR[t]}28`, color:AXIS_TEXT[t] }}>✓ {t}</span>
+            ))}
           </div>
         )}
 
-        <div className="max-w-2xl mx-auto flex items-end gap-3">
+        {/* 메시지 영역 */}
+        <div style={{ flex:1, overflowY:'auto', padding:'12px 14px', display:'flex', flexDirection:'column', gap:10, scrollbarWidth:'none' }}>
+          {msgs.map(m => (
+            <div key={m.id} style={{ display:'flex', flexDirection:'column', alignItems: m.role === 'user' ? 'flex-end' : 'flex-start', gap:4 }}>
+              {m.role === 'ai' && (
+                <div style={{ display:'flex', alignItems:'center', gap:5, marginBottom:2 }}>
+                  <div style={{ width:22, height:22, borderRadius:'50%', background:'linear-gradient(135deg,#5BA88A,#7CC4A8)', display:'flex', alignItems:'center', justifyContent:'center' }}>
+                    <span style={{ fontSize:11 }}>🌿</span>
+                  </div>
+                  <span style={{ fontSize:10, fontWeight:700, color:'#5BA88A' }}>CareFlow</span>
+                </div>
+              )}
+              <div style={{
+                maxWidth:'82%', padding:'10px 13px',
+                borderRadius: m.role === 'user' ? '18px 18px 4px 18px' : '4px 18px 18px 18px',
+                background: m.role === 'user' ? '#5BA88A' : '#FFF8EC',
+                color: m.role === 'user' ? '#fff' : '#3D2B1F',
+                fontSize:13, lineHeight:1.6, fontWeight:500,
+                border: m.role === 'ai' ? '1px solid #EAD9BA' : 'none',
+                boxShadow:'0 2px 8px rgba(0,0,0,0.06)',
+              }}>
+                {m.text}
+              </div>
+              {m.role === 'ai' && m.tags && m.tags.length > 0 && (
+                <div style={{ display:'flex', gap:4, paddingLeft:4 }}>
+                  {m.tags.map(t => (
+                    <span key={t} style={{ fontSize:9.5, fontWeight:700, padding:'2px 7px', borderRadius:99, background:`${AXIS_COLOR[t]}28`, color:AXIS_TEXT[t] }}>{t}</span>
+                  ))}
+                </div>
+              )}
+            </div>
+          ))}
+
+          {typing && (
+            <div style={{ display:'flex', alignItems:'center', gap:5 }}>
+              <div style={{ width:22, height:22, borderRadius:'50%', background:'linear-gradient(135deg,#5BA88A,#7CC4A8)', display:'flex', alignItems:'center', justifyContent:'center' }}>
+                <span style={{ fontSize:11 }}>🌿</span>
+              </div>
+              <div style={{ background:'#FFF8EC', border:'1px solid #EAD9BA', borderRadius:'4px 18px 18px 18px', padding:'10px 14px', display:'flex', gap:4 }}>
+                {[0,1,2].map(i => (
+                  <div key={i} style={{ width:6, height:6, borderRadius:'50%', background:'#C4B09A', animation:`dot 1.2s ease-in-out ${i*0.2}s infinite` }} />
+                ))}
+              </div>
+            </div>
+          )}
+          <div ref={bottomRef} />
+        </div>
+
+        {/* 입력창 */}
+        <div style={{ padding:'10px 12px 14px', borderTop:'1px solid rgba(61,43,31,0.08)', flexShrink:0, display:'flex', gap:8, alignItems:'flex-end' }}>
           <textarea
-            ref={inputRef}
             value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder="오늘 어떤 하루였나요? 편하게 이야기해 주세요"
+            onChange={e => setInput(e.target.value)}
+            onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send() } }}
+            placeholder="오늘 하루를 이야기해보세요..."
             rows={1}
-            className="flex-1 resize-none rounded-2xl px-4 py-3 text-sm max-h-32 overflow-y-auto focus:outline-none transition-colors"
-            style={{
-              height: 'auto',
-              background: '#FFFBF3',
-              border: '1px solid #EAD9BA',
-              color: '#2C1C10',
-            }}
-            onInput={(e) => {
-              const el = e.currentTarget
-              el.style.height = 'auto'
-              el.style.height = Math.min(el.scrollHeight, 128) + 'px'
-            }}
+            style={{ flex:1, resize:'none', border:'1.5px solid #EAD9BA', borderRadius:20, padding:'10px 14px', fontSize:13, color:'#3D2B1F', background:'#FFF8EC', outline:'none', fontFamily:'inherit', lineHeight:1.5, maxHeight:80, overflowY:'auto' }}
           />
           <button
-            onClick={() => sendMessage(input)}
-            disabled={!input.trim() || isLoading}
-            className="flex-shrink-0 w-11 h-11 rounded-2xl flex items-center justify-center transition-opacity hover:opacity-80 shadow-sm disabled:cursor-not-allowed"
-            style={{
-              background: (!input.trim() || isLoading) ? '#EAD9BA' : '#28C840',
-              color: '#FFFBF3',
-            }}
+            onClick={send}
+            disabled={!input.trim()}
+            style={{ width:38, height:38, borderRadius:'50%', border:'none', cursor: input.trim() ? 'pointer' : 'default', background: input.trim() ? '#5BA88A' : '#EAD9BA', display:'flex', alignItems:'center', justifyContent:'center', transition:'background 0.2s', flexShrink:0 }}
           >
-            {isLoading ? (
-              <span className="text-lg">⏳</span>
-            ) : (
-              /* 연필 아이콘 */
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-              </svg>
-            )}
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+            </svg>
           </button>
         </div>
-        <p className="text-center text-xs mt-2" style={{ color: '#D4B896' }}>
-          Shift+Enter = 줄바꿈 · Enter = 전송
-        </p>
-      </footer>
-    </div>
+      </div>
+
+      <style>{`
+        @keyframes dot { 0%,80%,100%{transform:scale(1);opacity:.5} 40%{transform:scale(1.3);opacity:1} }
+        textarea::placeholder { color:#C4B09A; }
+        div::-webkit-scrollbar { display:none; }
+      `}</style>
+    </IPhoneFrame>
   )
 }
