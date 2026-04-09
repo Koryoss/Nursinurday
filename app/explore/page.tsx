@@ -1,8 +1,9 @@
 'use client'
 
 import { useState, useRef, useCallback } from 'react'
+import Link from 'next/link'
 
-/* ── 4축 데이터 ─────────────────────────────── */
+/* ── 4축 체크리스트 (DashboardScreen과 동일) ─── */
 const AXES = [
   {
     key: 'body',
@@ -11,16 +12,13 @@ const AXES = [
     color: '#F5A87C',
     textColor: '#7A3A0A',
     bg: 'rgba(245,168,124,0.13)',
-    zone: [0, 0, 0.5, 0.5] as [number, number, number, number],
-    discoveries: [
-      '귀에서 가는 고음이 맴돌았어요',
-      '어지러움이 잠깐 찾아왔어요',
-      '오늘 피로감이 조금 있었어요',
-      '두통이 오후에 살짝 느껴졌어요',
-      '몸이 무겁게 느껴진 하루예요',
-      '귀울림이 밤에 더 심해졌어요',
-      '걸을 때 약간 흔들리는 느낌이 있었어요',
-      '소리에 더 예민하게 반응했어요',
+    bgDone: 'rgba(245,168,124,0.28)',
+    zone: [0, 0, 0.5, 0.5] as [number,number,number,number],
+    items: [
+      '이명이 있었나요?',
+      '어지러움이 있었나요?',
+      '피로감을 느꼈나요?',
+      '두통이 있었나요?',
     ],
   },
   {
@@ -30,15 +28,13 @@ const AXES = [
     color: '#EE9FB8',
     textColor: '#7A1A40',
     bg: 'rgba(238,159,184,0.13)',
-    zone: [0.5, 0, 1, 0.5] as [number, number, number, number],
-    discoveries: [
-      '이유 없이 불안한 순간이 있었어요',
-      '작은 일에 예민하게 반응했어요',
-      '기분이 자주 바뀐 하루였어요',
-      '긴장감이 쉽게 풀리지 않았어요',
-      '두려운 생각이 스쳐 지나갔어요',
-      '감정 기복이 조금 있었어요',
-      '마음이 차분히 가라앉은 순간도 있었어요',
+    bgDone: 'rgba(238,159,184,0.28)',
+    zone: [0.5, 0, 1, 0.5] as [number,number,number,number],
+    items: [
+      '불안감을 느꼈나요?',
+      '예민하거나 짜증이 났나요?',
+      '두려움이 있었나요?',
+      '기분 변화가 심했나요?',
     ],
   },
   {
@@ -48,14 +44,12 @@ const AXES = [
     color: '#B8A8D4',
     textColor: '#3D2878',
     bg: 'rgba(184,168,212,0.13)',
-    zone: [0, 0.5, 0.5, 1] as [number, number, number, number],
-    discoveries: [
-      '혼자 있고 싶은 마음이 들었어요',
-      '대화가 조금 힘들게 느껴졌어요',
-      '사람들 속에서도 외로웠어요',
-      '가족과 함께한 시간이 위로가 됐어요',
-      '연락을 피하고 싶었어요',
-      '소통이 잘 안 되는 것 같아 답답했어요',
+    bgDone: 'rgba(184,168,212,0.28)',
+    zone: [0, 0.5, 0.5, 1] as [number,number,number,number],
+    items: [
+      '사람들과 함께했나요?',
+      '고립감을 느꼈나요?',
+      '소통이 힘들었나요?',
     ],
   },
   {
@@ -65,302 +59,281 @@ const AXES = [
     color: '#E8C86E',
     textColor: '#6B4A00',
     bg: 'rgba(232,200,110,0.13)',
-    zone: [0.5, 0.5, 1, 1] as [number, number, number, number],
-    discoveries: [
-      '오늘 계획한 일을 해냈어요',
-      '작은 성취감을 느낀 순간이 있었어요',
-      '하루가 의미 있게 느껴졌어요',
-      '무언가를 이루고 싶은 마음이 생겼어요',
-      '기록하는 것만으로도 충분해요',
-      '내일의 나를 위해 오늘을 남겨요',
+    bgDone: 'rgba(232,200,110,0.28)',
+    zone: [0.5, 0.5, 1, 1] as [number,number,number,number],
+    items: [
+      '성취감을 느꼈나요?',
+      '하루가 의미 있었나요?',
+      '계획한 일을 했나요?',
     ],
   },
 ]
 
-/* ── 타입 ─────────────────────────────────── */
-interface Discovery {
-  id: string
-  text: string
-  x: number
-  y: number
-  axis: typeof AXES[0]
-  removing: boolean
-}
+const TOTAL = AXES.reduce((s, a) => s + a.items.length, 0) // 14
 
-interface Ripple {
-  id: string
-  x: number
-  y: number
-  color: string
-}
+interface Bubble { id: string; text: string; x: number; y: number; axis: typeof AXES[0]; removing: boolean }
+interface Ripple  { id: string; x: number; y: number; color: string }
 
-/* ── 헬퍼 ────────────────────────────────── */
+const TODAY = new Date().toLocaleDateString('ko-KR', { month: 'long', day: 'numeric', weekday: 'short' })
+
 function getAxis(rx: number, ry: number) {
   return AXES.find(a => rx >= a.zone[0] && rx < a.zone[2] && ry >= a.zone[1] && ry < a.zone[3]) ?? AXES[0]
 }
 
-function pickRandom<T>(arr: T[], excludeLast?: T): T {
-  const filtered = arr.filter(i => i !== excludeLast)
-  return filtered[Math.floor(Math.random() * filtered.length)]
-}
-
-const TODAY = new Date().toLocaleDateString('ko-KR', { month: 'long', day: 'numeric', weekday: 'short' })
-
-/* ── 메인 컴포넌트 ────────────────────────── */
+/* ═══════════════════════════════════════════════ */
 export default function ExplorePage() {
-  const [discoveries, setDiscoveries] = useState<Discovery[]>([])
-  const [ripples, setRipples] = useState<Ripple[]>([])
-  const [recorded, setRecorded] = useState<{ axis: typeof AXES[0]; text: string }[]>([])
-  const [hint, setHint] = useState(true)
-  const lastTextRef = useRef<Record<string, string>>({})
-  const fieldRef = useRef<HTMLDivElement>(null)
-  const cooldownRef = useRef(false)
+  // 각 축의 몇 번째 항목까지 발견했는지
+  const [progress, setProgress] = useState<Record<string, number>>(
+    Object.fromEntries(AXES.map(a => [a.key, 0]))
+  )
+  const [bubbles, setBubbles]     = useState<Bubble[]>([])
+  const [ripples, setRipples]     = useState<Ripple[]>([])
+  const [allDone, setAllDone]     = useState(false)
+  const [hint, setHint]           = useState(true)
+  const fieldRef                  = useRef<HTMLDivElement>(null)
+  const cooldown                  = useRef(false)
+
+  const totalFound = Object.values(progress).reduce((s, v) => s + v, 0)
 
   const handleTap = useCallback((clientX: number, clientY: number) => {
-    if (cooldownRef.current) return
+    if (cooldown.current || allDone) return
     const rect = fieldRef.current?.getBoundingClientRect()
     if (!rect) return
 
-    const x = clientX - rect.left
-    const y = clientY - rect.top
+    const x  = clientX - rect.left
+    const y  = clientY - rect.top
     const rx = x / rect.width
     const ry = y / rect.height
     const axis = getAxis(rx, ry)
 
-    // 400ms 쿨다운
-    cooldownRef.current = true
-    setTimeout(() => { cooldownRef.current = false }, 400)
+    const cur = progress[axis.key]
+    if (cur >= axis.items.length) {
+      // 이 존은 이미 완료 → 살짝 리플만
+      const rid = Date.now().toString()
+      setRipples(r => [...r, { id: rid, x, y, color: axis.color }])
+      setTimeout(() => setRipples(r => r.filter(p => p.id !== rid)), 900)
+      return
+    }
+
+    cooldown.current = true
+    setTimeout(() => { cooldown.current = false }, 500)
 
     setHint(false)
 
     // 리플
-    const rippleId = Date.now().toString()
-    setRipples(r => [...r, { id: rippleId, x, y, color: axis.color }])
-    setTimeout(() => setRipples(r => r.filter(p => p.id !== rippleId)), 900)
+    const rid = Date.now().toString()
+    setRipples(r => [...r, { id: rid, x, y, color: axis.color }])
+    setTimeout(() => setRipples(r => r.filter(p => p.id !== rid)), 900)
 
-    // 랜덤 텍스트 (직전 텍스트 제외)
-    const text = pickRandom(axis.discoveries, lastTextRef.current[axis.key])
-    lastTextRef.current[axis.key] = text
+    // 다음 항목 발견
+    const text = axis.items[cur]
+    const newProg = { ...progress, [axis.key]: cur + 1 }
+    setProgress(newProg)
+
+    const newTotal = Object.values(newProg).reduce((s, v) => s + v, 0)
+    if (newTotal >= TOTAL) setAllDone(true)
 
     const id = `${Date.now()}-${Math.random()}`
-    const disc: Discovery = { id, text, x, y, axis, removing: false }
+    const bubble: Bubble = { id, text, x, y, axis, removing: false }
+    setBubbles(prev => [...prev.slice(-4), bubble])
 
-    setDiscoveries(prev => [...prev.slice(-4), disc])
-    setRecorded(prev => [...prev, { axis, text }])
-
-    // 4초 후 페이드아웃
     setTimeout(() => {
-      setDiscoveries(prev => prev.map(d => d.id === id ? { ...d, removing: true } : d))
-      setTimeout(() => setDiscoveries(prev => prev.filter(d => d.id !== id)), 700)
+      setBubbles(prev => prev.map(b => b.id === id ? { ...b, removing: true } : b))
+      setTimeout(() => setBubbles(prev => prev.filter(b => b.id !== id)), 700)
     }, 3500)
-  }, [])
+  }, [progress, allDone])
 
-  const onMouseDown = useCallback((e: React.MouseEvent) => handleTap(e.clientX, e.clientY), [handleTap])
-  const onTouchStart = useCallback((e: React.TouchEvent) => {
-    e.preventDefault()
-    handleTap(e.touches[0].clientX, e.touches[0].clientY)
-  }, [handleTap])
-
-  const recordedByAxis = AXES.map(a => ({
-    axis: a,
-    items: recorded.filter(r => r.axis.key === a.key),
-  })).filter(g => g.items.length > 0)
+  const onMouse = useCallback((e: React.MouseEvent) => handleTap(e.clientX, e.clientY), [handleTap])
+  const onTouch = useCallback((e: React.TouchEvent) => { e.preventDefault(); handleTap(e.touches[0].clientX, e.touches[0].clientY) }, [handleTap])
 
   return (
-    <div style={{
-      minHeight: '100dvh',
-      background: 'linear-gradient(145deg, #EDE0CC 0%, #E8D8C0 100%)',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      padding: '20px 16px',
-      fontFamily: "-apple-system, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif",
-    }}>
+    <div style={{ minHeight:'100dvh', background:'linear-gradient(145deg,#EDE0CC,#E8D8C0)', display:'flex', alignItems:'center', justifyContent:'center', padding:'20px 16px', fontFamily:"-apple-system,'Apple SD Gothic Neo','Noto Sans KR',sans-serif" }}>
 
-      {/* ── 아이폰 프레임 ─────────────────── */}
-      <div style={{
-        width: 390,
-        height: 844,
-        borderRadius: 54,
-        background: '#FFFBF3',
-        border: '2px solid #D4C4A0',
-        boxShadow: '0 40px 100px rgba(0,0,0,0.22), inset 0 1px 0 rgba(255,255,255,0.8)',
-        position: 'relative',
-        overflow: 'hidden',
-        display: 'flex',
-        flexDirection: 'column',
-        userSelect: 'none',
-      }}>
+      {/* ── 아이폰 프레임 ────────────────────── */}
+      <div style={{ width:390, height:844, borderRadius:54, background:'#FFFBF3', border:'2px solid #D4C4A0', boxShadow:'0 40px 100px rgba(0,0,0,0.22),inset 0 1px 0 rgba(255,255,255,0.8)', position:'relative', overflow:'hidden', display:'flex', flexDirection:'column', userSelect:'none' }}>
 
         {/* Dynamic Island */}
-        <div style={{
-          position: 'absolute', top: 14, left: '50%', transform: 'translateX(-50%)',
-          width: 120, height: 36, background: '#1C1C1E', borderRadius: 18, zIndex: 20,
-        }} />
+        <div style={{ position:'absolute', top:14, left:'50%', transform:'translateX(-50%)', width:120, height:36, background:'#1C1C1E', borderRadius:18, zIndex:20 }} />
 
         {/* 상태바 */}
-        <div style={{ height: 56, flexShrink: 0, display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', padding: '0 28px 8px', zIndex: 10 }}>
-          <span style={{ fontSize: 15, fontWeight: 600, color: '#3D2B1F' }}>9:41</span>
-          <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-            {/* 신호 */}
+        <div style={{ height:56, flexShrink:0, display:'flex', alignItems:'flex-end', justifyContent:'space-between', padding:'0 28px 8px', zIndex:10 }}>
+          <span style={{ fontSize:15, fontWeight:600, color:'#3D2B1F' }}>9:41</span>
+          <div style={{ display:'flex', gap:6, alignItems:'center' }}>
             <svg width="17" height="12" viewBox="0 0 17 12" fill="#3D2B1F">
-              <rect x="0" y="4" width="3" height="8" rx="1" opacity="0.4"/><rect x="4.5" y="2.5" width="3" height="9.5" rx="1" opacity="0.6"/>
-              <rect x="9" y="1" width="3" height="11" rx="1"/><rect x="13.5" y="0" width="3" height="12" rx="1"/>
+              <rect x="0" y="4" width="3" height="8" rx="1" opacity="0.4"/>
+              <rect x="4.5" y="2.5" width="3" height="9.5" rx="1" opacity="0.6"/>
+              <rect x="9" y="1" width="3" height="11" rx="1"/>
+              <rect x="13.5" y="0" width="3" height="12" rx="1"/>
             </svg>
-            {/* 배터리 */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <div style={{ width: 24, height: 12, border: '1.5px solid rgba(61,43,31,0.5)', borderRadius: 3, padding: '2px', display: 'flex', alignItems: 'center' }}>
-                <div style={{ height: '100%', width: '75%', background: '#3D2B1F', borderRadius: 1 }} />
+            <div style={{ display:'flex', alignItems:'center', gap:1 }}>
+              <div style={{ width:24, height:12, border:'1.5px solid rgba(61,43,31,0.5)', borderRadius:3, padding:'2px', display:'flex', alignItems:'center' }}>
+                <div style={{ height:'100%', width:'75%', background:'#3D2B1F', borderRadius:1 }} />
               </div>
-              <div style={{ width: 2, height: 6, background: 'rgba(61,43,31,0.4)', borderRadius: '0 1px 1px 0' }} />
+              <div style={{ width:2, height:6, background:'rgba(61,43,31,0.4)', borderRadius:'0 1px 1px 0' }} />
             </div>
           </div>
         </div>
 
         {/* 헤더 */}
-        <div style={{ padding: '0 22px 14px', flexShrink: 0, borderBottom: '1px solid rgba(61,43,31,0.08)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div style={{ padding:'0 22px 12px', flexShrink:0, borderBottom:'1px solid rgba(61,43,31,0.08)' }}>
+          <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between' }}>
             <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
-                <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#5BA88A', animation: 'cfPulse 2s infinite' }} />
-                <span style={{ fontSize: 20, fontWeight: 800, color: '#3D2B1F' }}>CareFlow</span>
+              <div style={{ display:'flex', alignItems:'center', gap:7 }}>
+                <div style={{ width:8, height:8, borderRadius:'50%', background:'#5BA88A', animation:'cfPulse 2s infinite' }} />
+                <span style={{ fontSize:20, fontWeight:800, color:'#3D2B1F' }}>CareFlow</span>
               </div>
-              <div style={{ fontSize: 11, color: '#A08866', marginTop: 3 }}>{TODAY} · 화면을 눌러 오늘을 탐색해보세요</div>
+              <div style={{ fontSize:11, color:'#A08866', marginTop:3 }}>
+                {TODAY} · {allDone ? '오늘 기록 완료 🎉' : `${totalFound} / ${TOTAL} 항목 발견`}
+              </div>
             </div>
-            {/* 기록된 축 인디케이터 */}
-            <div style={{ display: 'flex', gap: 4 }}>
+            {/* 축별 진행 도트 */}
+            <div style={{ display:'flex', gap:5 }}>
               {AXES.map(a => {
-                const done = recorded.some(r => r.axis.key === a.key)
+                const done = progress[a.key] >= a.items.length
+                const started = progress[a.key] > 0
                 return (
-                  <div key={a.key} style={{
-                    width: 8, height: 8, borderRadius: '50%',
-                    background: done ? a.color : 'rgba(61,43,31,0.1)',
-                    transition: 'background 0.4s',
-                  }} />
+                  <div key={a.key} style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:2 }}>
+                    <div style={{ width:9, height:9, borderRadius:'50%', background: done ? a.color : started ? `${a.color}80` : 'rgba(61,43,31,0.1)', transition:'all 0.4s', boxShadow: done ? `0 0 6px ${a.color}` : 'none' }} />
+                    <span style={{ fontSize:8, color: done ? a.textColor : '#C4B09A', fontWeight:700 }}>{a.label}</span>
+                  </div>
                 )
               })}
             </div>
           </div>
+
+          {/* 진행 바 */}
+          <div style={{ marginTop:10, height:4, background:'rgba(61,43,31,0.08)', borderRadius:2, overflow:'hidden' }}>
+            <div style={{ height:'100%', width:`${(totalFound/TOTAL)*100}%`, background:'linear-gradient(90deg,#5BA88A,#7CC4A8)', borderRadius:2, transition:'width 0.5s ease' }} />
+          </div>
         </div>
 
-        {/* 4축 존 레이블 */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', padding: '8px 20px 0', flexShrink: 0 }}>
-          {AXES.map((a, i) => (
-            <div key={a.key} style={{ display: 'flex', alignItems: 'center', gap: 5, paddingBottom: 4, justifyContent: i % 2 === 1 ? 'flex-end' : 'flex-start' }}>
-              <div style={{ width: 7, height: 7, borderRadius: '50%', background: a.color }} />
-              <span style={{ fontSize: 10, fontWeight: 700, color: a.textColor, opacity: 0.7 }}>{a.label}</span>
-            </div>
-          ))}
-        </div>
-
-        {/* ── 인터랙티브 필드 ────────────────── */}
+        {/* ── 인터랙티브 필드 ─────────────────── */}
         <div
           ref={fieldRef}
-          onMouseDown={onMouseDown}
-          onTouchStart={onTouchStart}
-          style={{ flex: 1, position: 'relative', margin: '6px 14px', borderRadius: 20, border: '1px solid rgba(61,43,31,0.07)', overflow: 'hidden', cursor: 'crosshair' }}
+          onMouseDown={onMouse}
+          onTouchStart={onTouch}
+          style={{ flex:1, position:'relative', margin:'8px 14px 6px', borderRadius:20, border:'1px solid rgba(61,43,31,0.07)', overflow:'hidden', cursor: allDone ? 'default' : 'crosshair' }}
         >
-          {/* 존 배경 그라디언트 */}
-          <div style={{ position: 'absolute', inset: 0, display: 'grid', gridTemplateColumns: '1fr 1fr', gridTemplateRows: '1fr 1fr', borderRadius: 20, overflow: 'hidden' }}>
-            {AXES.map(a => (
-              <div key={a.key} style={{ background: a.bg }} />
-            ))}
+          {/* 4존 배경 (완료 존은 더 진하게) */}
+          <div style={{ position:'absolute', inset:0, display:'grid', gridTemplateColumns:'1fr 1fr', gridTemplateRows:'1fr 1fr', borderRadius:20, overflow:'hidden' }}>
+            {AXES.map(a => {
+              const done = progress[a.key] >= a.items.length
+              return <div key={a.key} style={{ background: done ? a.bgDone : a.bg, transition:'background 0.5s' }} />
+            })}
           </div>
 
-          {/* 구분선 */}
-          <div style={{ position: 'absolute', top: '50%', left: 0, right: 0, height: 1, background: 'rgba(61,43,31,0.05)', pointerEvents: 'none' }} />
-          <div style={{ position: 'absolute', left: '50%', top: 0, bottom: 0, width: 1, background: 'rgba(61,43,31,0.05)', pointerEvents: 'none' }} />
+          {/* 존 구분선 */}
+          <div style={{ position:'absolute', top:'50%', left:0, right:0, height:1, background:'rgba(61,43,31,0.06)', pointerEvents:'none' }} />
+          <div style={{ position:'absolute', left:'50%', top:0, bottom:0, width:1, background:'rgba(61,43,31,0.06)', pointerEvents:'none' }} />
+
+          {/* 존 레이블 + 완료 뱃지 */}
+          {AXES.map((a, i) => {
+            const done = progress[a.key] >= a.items.length
+            const cnt  = progress[a.key]
+            const isRight = i === 1 || i === 3
+            const isBottom = i === 2 || i === 3
+            return (
+              <div key={a.key} style={{
+                position:'absolute',
+                top: isBottom ? undefined : 10,
+                bottom: isBottom ? 10 : undefined,
+                left: isRight ? undefined : 10,
+                right: isRight ? undefined : undefined,
+                ...(isRight ? { right:10 } : {}),
+                pointerEvents:'none',
+                display:'flex', alignItems:'center', gap:5,
+              }}>
+                <div style={{ width:7, height:7, borderRadius:'50%', background:a.color, boxShadow: done ? `0 0 8px ${a.color}` : 'none' }} />
+                <span style={{ fontSize:10, fontWeight:800, color:a.textColor, opacity:0.8 }}>{a.label}</span>
+                <span style={{ fontSize:9, color:a.textColor, opacity:0.55 }}>{cnt}/{a.items.length}</span>
+                {done && <span style={{ fontSize:10 }}>✓</span>}
+              </div>
+            )
+          })}
 
           {/* 떠다니는 오브 */}
           <AmbientOrbs />
 
           {/* 힌트 */}
-          {hint && (
-            <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}>
-              <div style={{ fontSize: 32, marginBottom: 10 }}>🌿</div>
-              <div style={{ fontSize: 12, color: 'rgba(61,43,31,0.38)', fontWeight: 500, textAlign: 'center', lineHeight: 1.8 }}>
-                화면을 눌러<br />오늘을 탐색해보세요
+          {hint && !allDone && (
+            <div style={{ position:'absolute', inset:0, display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', pointerEvents:'none' }}>
+              <div style={{ fontSize:30, marginBottom:10 }}>🌿</div>
+              <div style={{ fontSize:12, color:'rgba(61,43,31,0.38)', fontWeight:500, textAlign:'center', lineHeight:1.8 }}>
+                각 영역을 눌러<br />오늘의 기록을 채워보세요
               </div>
+            </div>
+          )}
+
+          {/* 완료 오버레이 */}
+          {allDone && (
+            <div style={{ position:'absolute', inset:0, display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', background:'rgba(255,251,243,0.85)', backdropFilter:'blur(4px)', pointerEvents:'none' }}>
+              <div style={{ fontSize:36, marginBottom:8 }}>🎉</div>
+              <div style={{ fontSize:15, fontWeight:800, color:'#3D2B1F', marginBottom:4 }}>오늘 기록 완료!</div>
+              <div style={{ fontSize:11, color:'#A08866', textAlign:'center', lineHeight:1.7 }}>
+                {TOTAL}개 항목이 모두 기록됐어요.<br />대시보드에서 오늘을 확인해보세요.
+              </div>
+              <Link href="/history" style={{ marginTop:14, background:'#5BA88A', color:'#fff', fontSize:12, fontWeight:700, padding:'8px 20px', borderRadius:99, textDecoration:'none' }}>
+                대시보드 보기 →
+              </Link>
             </div>
           )}
 
           {/* 리플 */}
           {ripples.map(r => (
-            <div key={r.id} style={{
-              position: 'absolute', left: r.x, top: r.y,
-              transform: 'translate(-50%,-50%)',
-              width: 56, height: 56, borderRadius: '50%',
-              border: `2px solid ${r.color}`,
-              animation: 'cfRipple 0.9s ease-out forwards',
-              pointerEvents: 'none',
-            }} />
+            <div key={r.id} style={{ position:'absolute', left:r.x, top:r.y, transform:'translate(-50%,-50%)', width:56, height:56, borderRadius:'50%', border:`2px solid ${r.color}`, animation:'cfRipple 0.9s ease-out forwards', pointerEvents:'none' }} />
           ))}
 
-          {/* 발견 텍스트 */}
-          {discoveries.map(d => <FloatingDisc key={d.id} d={d} />)}
+          {/* 떠오르는 말풍선 */}
+          {bubbles.map(b => <Bubble key={b.id} b={b} />)}
         </div>
 
-        {/* ── 기록 카운트 ───────────────────── */}
-        <div style={{
-          margin: '6px 14px 0',
-          padding: '10px 14px',
-          background: recorded.length > 0 ? 'rgba(91,168,138,0.08)' : 'rgba(61,43,31,0.03)',
-          borderRadius: 14,
-          border: `1px solid ${recorded.length > 0 ? 'rgba(91,168,138,0.2)' : 'rgba(61,43,31,0.07)'}`,
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          flexShrink: 0, transition: 'all 0.4s',
-          minHeight: 42,
-        }}>
-          {recorded.length === 0 ? (
-            <span style={{ fontSize: 11, color: '#C4B09A' }}>탐색하면 기록이 쌓여요</span>
-          ) : (
-            <>
-              <span style={{ fontSize: 11, color: '#5BA88A', fontWeight: 700 }}>✅ {recorded.length}개 항목 기록됨</span>
-              <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
-                {AXES.map(a => {
-                  const cnt = recorded.filter(r => r.axis.key === a.key).length
-                  if (!cnt) return null
-                  return (
-                    <span key={a.key} style={{ fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 99, background: `${a.color}28`, color: a.textColor }}>
-                      {a.label} {cnt}
+        {/* ── 기록된 항목 리스트 ──────────────── */}
+        <div style={{ margin:'0 14px', maxHeight:88, overflowY:'auto', display:'flex', flexDirection:'column', gap:4, flexShrink:0 }}>
+          {AXES.map(a => {
+            const found = a.items.slice(0, progress[a.key])
+            if (!found.length) return null
+            return (
+              <div key={a.key} style={{ display:'flex', alignItems:'flex-start', gap:7, padding:'6px 10px', background:'#FFF8EC', borderRadius:10, border:'1px solid rgba(61,43,31,0.07)', borderLeft:`3px solid ${a.color}` }}>
+                <span style={{ fontSize:10, fontWeight:800, color:a.textColor, minWidth:22, paddingTop:1 }}>{a.label}</span>
+                <div style={{ display:'flex', flexWrap:'wrap', gap:4 }}>
+                  {found.map((item, i) => (
+                    <span key={i} style={{ fontSize:10, color:'#3D2B1F', background:`${a.color}22`, padding:'2px 7px', borderRadius:99, fontWeight:500 }}>
+                      ✓ {item}
                     </span>
-                  )
-                })}
+                  ))}
+                </div>
               </div>
-            </>
+            )
+          })}
+          {totalFound === 0 && (
+            <div style={{ padding:'8px 10px', fontSize:11, color:'#C4B09A', textAlign:'center' }}>
+              영역을 탐색하면 기록이 여기에 쌓여요
+            </div>
           )}
         </div>
 
-        {/* ── 하단 탭 바 ───────────────────── */}
-        <div style={{
-          flexShrink: 0,
-          marginTop: 8,
-          padding: '10px 0 30px',
-          borderTop: '1px solid rgba(61,43,31,0.08)',
-          display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)',
-          background: 'rgba(255,251,243,0.96)',
-        }}>
+        {/* ── 하단 탭 바 ──────────────────────── */}
+        <div style={{ flexShrink:0, marginTop:8, padding:'10px 0 30px', borderTop:'1px solid rgba(61,43,31,0.08)', display:'grid', gridTemplateColumns:'repeat(4,1fr)', background:'rgba(255,251,243,0.96)' }}>
           {[
-            { icon: '📋', label: '기록', active: true },
-            { icon: '🔔', label: '알림', active: false },
-            { icon: '💬', label: '채팅', active: false },
-            { icon: '📊', label: '대시보드', active: false },
+            { icon:'📋', label:'기록',     href:'/explore',  active:true  },
+            { icon:'🔔', label:'알림',     href:'/preview',  active:false },
+            { icon:'💬', label:'채팅',     href:'/chat',     active:false },
+            { icon:'📊', label:'대시보드', href:'/history',  active:false },
           ].map(tab => (
-            <div key={tab.label} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, opacity: tab.active ? 1 : 0.4 }}>
-              <span style={{ fontSize: 22 }}>{tab.icon}</span>
-              <span style={{ fontSize: 10, fontWeight: tab.active ? 700 : 500, color: tab.active ? '#5BA88A' : '#A08866' }}>{tab.label}</span>
-              {tab.active && <div style={{ width: 4, height: 4, borderRadius: 2, background: '#5BA88A' }} />}
-            </div>
+            <Link key={tab.label} href={tab.href} style={{ textDecoration:'none', display:'flex', flexDirection:'column', alignItems:'center', gap:3, opacity:tab.active ? 1 : 0.45 }}>
+              <span style={{ fontSize:22 }}>{tab.icon}</span>
+              <span style={{ fontSize:10, fontWeight:tab.active ? 700 : 500, color:tab.active ? '#5BA88A' : '#A08866' }}>{tab.label}</span>
+              {tab.active && <div style={{ width:4, height:4, borderRadius:2, background:'#5BA88A' }} />}
+            </Link>
           ))}
         </div>
-
       </div>
 
       <style>{`
-        @keyframes cfPulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+        @keyframes cfPulse  { 0%,100%{opacity:1} 50%{opacity:.3} }
         @keyframes cfRipple { 0%{opacity:.8;transform:translate(-50%,-50%) scale(0)} 100%{opacity:0;transform:translate(-50%,-50%) scale(2.8)} }
-        @keyframes cfFloat { 0%{opacity:0;transform:translateY(8px)} 12%{opacity:1;transform:translateY(0)} 78%{opacity:1;transform:translateY(-28px)} 100%{opacity:0;transform:translateY(-48px)} }
-        @keyframes cfFloatOut { 0%{opacity:1;transform:translateY(-28px)} 100%{opacity:0;transform:translateY(-56px)} }
+        @keyframes cfFloat  { 0%{opacity:0;transform:translateY(8px)} 12%{opacity:1;transform:translateY(0)} 78%{opacity:1;transform:translateY(-26px)} 100%{opacity:0;transform:translateY(-46px)} }
+        @keyframes cfOut    { 0%{opacity:1;transform:translateY(-26px)} 100%{opacity:0;transform:translateY(-52px)} }
         @keyframes orbA { 0%,100%{transform:translate(0,0)} 50%{transform:translate(14px,-18px)} }
         @keyframes orbB { 0%,100%{transform:translate(0,0)} 50%{transform:translate(-12px,16px)} }
         @keyframes orbC { 0%,100%{transform:translate(0,0)} 50%{transform:translate(10px,20px)} }
@@ -370,54 +343,30 @@ export default function ExplorePage() {
   )
 }
 
-/* ── 플로팅 발견 텍스트 ──────────────────── */
-function FloatingDisc({ d }: { d: Discovery }) {
+/* ── 말풍선 ────────────────────────────────── */
+function Bubble({ b }: { b: { text:string; x:number; y:number; axis:typeof AXES[0]; removing:boolean } }) {
   return (
-    <div style={{
-      position: 'absolute',
-      left: d.x, top: d.y,
-      transform: 'translateX(-50%)',
-      pointerEvents: 'none',
-      zIndex: 20,
-      animation: d.removing ? 'cfFloatOut 0.7s ease-out forwards' : 'cfFloat 4.2s ease-out forwards',
-    }}>
-      <div style={{
-        background: '#FFFBF3',
-        border: `1.5px solid ${d.axis.color}`,
-        borderRadius: 14,
-        padding: '8px 12px',
-        boxShadow: `0 6px 24px rgba(0,0,0,0.1), 0 0 0 4px ${d.axis.color}18`,
-        maxWidth: 200,
-        whiteSpace: 'normal',
-      }}>
-        <div style={{ fontSize: 9.5, fontWeight: 700, color: d.axis.textColor, opacity: 0.65, marginBottom: 3 }}>
-          {d.axis.label} · {d.axis.sub}
-        </div>
-        <div style={{ fontSize: 11.5, color: '#3D2B1F', fontWeight: 600, lineHeight: 1.5 }}>{d.text}</div>
+    <div style={{ position:'absolute', left:b.x, top:b.y, transform:'translateX(-50%)', pointerEvents:'none', zIndex:20, animation: b.removing ? 'cfOut 0.7s ease-out forwards' : 'cfFloat 4.2s ease-out forwards' }}>
+      <div style={{ background:'#FFFBF3', border:`1.5px solid ${b.axis.color}`, borderRadius:14, padding:'8px 12px', boxShadow:`0 6px 24px rgba(0,0,0,0.1),0 0 0 4px ${b.axis.color}18`, maxWidth:200 }}>
+        <div style={{ fontSize:9, fontWeight:700, color:b.axis.textColor, opacity:0.6, marginBottom:3 }}>{b.axis.label} · {b.axis.sub}</div>
+        <div style={{ fontSize:12, color:'#3D2B1F', fontWeight:600, lineHeight:1.5 }}>✓ {b.text}</div>
       </div>
-      {/* 말풍선 꼬리 */}
-      <div style={{ width: 0, height: 0, borderLeft: '6px solid transparent', borderRight: '6px solid transparent', borderTop: `6px solid ${d.axis.color}`, margin: '0 auto' }} />
+      <div style={{ width:0, height:0, borderLeft:'6px solid transparent', borderRight:'6px solid transparent', borderTop:`6px solid ${b.axis.color}`, margin:'0 auto' }} />
     </div>
   )
 }
 
-/* ── 떠다니는 배경 오브 ──────────────────── */
+/* ── 배경 오브 ─────────────────────────────── */
 function AmbientOrbs() {
-  const orbs = [
-    { style: { top: '18%', left: '20%', width: 80, height: 80 }, color: 'rgba(245,168,124,0.2)', anim: 'orbA 8s ease-in-out infinite' },
-    { style: { top: '22%', right: '18%', width: 70, height: 70 }, color: 'rgba(238,159,184,0.2)', anim: 'orbB 10s ease-in-out infinite' },
-    { style: { bottom: '24%', left: '18%', width: 75, height: 75 }, color: 'rgba(184,168,212,0.2)', anim: 'orbC 9s ease-in-out infinite' },
-    { style: { bottom: '20%', right: '20%', width: 68, height: 68 }, color: 'rgba(232,200,110,0.2)', anim: 'orbD 11s ease-in-out infinite' },
-  ]
   return (
-    <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', overflow: 'hidden', borderRadius: 20 }}>
-      {orbs.map((o, i) => (
-        <div key={i} style={{
-          position: 'absolute', borderRadius: '50%',
-          background: `radial-gradient(circle, ${o.color} 0%, transparent 70%)`,
-          animation: o.anim,
-          ...o.style,
-        }} />
+    <div style={{ position:'absolute', inset:0, pointerEvents:'none', overflow:'hidden', borderRadius:20 }}>
+      {[
+        { s:{ top:'18%', left:'20%', width:80, height:80 }, c:'rgba(245,168,124,0.18)', a:'orbA 8s ease-in-out infinite' },
+        { s:{ top:'22%', right:'18%', width:70, height:70 }, c:'rgba(238,159,184,0.18)', a:'orbB 10s ease-in-out infinite' },
+        { s:{ bottom:'24%', left:'18%', width:75, height:75 }, c:'rgba(184,168,212,0.18)', a:'orbC 9s ease-in-out infinite' },
+        { s:{ bottom:'20%', right:'20%', width:68, height:68 }, c:'rgba(232,200,110,0.18)', a:'orbD 11s ease-in-out infinite' },
+      ].map((o, i) => (
+        <div key={i} style={{ position:'absolute', borderRadius:'50%', background:`radial-gradient(circle,${o.c} 0%,transparent 70%)`, animation:o.a, ...o.s }} />
       ))}
     </div>
   )
