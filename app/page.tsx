@@ -101,22 +101,41 @@ export default function HomePage() {
           iPhone으로 모아진 데이터가 당신의 하루를 더 선명하게 보여줍니다.
         </p>
 
-        <Link
-          href="/preview"
-          style={{
-            display: 'inline-block',
-            background: '#3D2B1F',
-            color: '#FFF8EC',
-            padding: '18px 40px',
-            borderRadius: '14px',
-            fontSize: '18px',
-            fontWeight: 700,
-            textDecoration: 'none',
-            letterSpacing: '-0.3px',
-          }}
-        >
-          앱 미리보기 ▸
-        </Link>
+        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', justifyContent: 'center' }}>
+          <Link
+            href="/explore"
+            style={{
+              display: 'inline-block',
+              background: '#5BA88A',
+              color: '#fff',
+              padding: '18px 40px',
+              borderRadius: '14px',
+              fontSize: '18px',
+              fontWeight: 700,
+              textDecoration: 'none',
+              letterSpacing: '-0.3px',
+            }}
+          >
+            🌿 지금 탐색해보기 ▸
+          </Link>
+          <Link
+            href="/preview"
+            style={{
+              display: 'inline-block',
+              background: 'transparent',
+              color: '#3D2B1F',
+              padding: '18px 40px',
+              borderRadius: '14px',
+              fontSize: '18px',
+              fontWeight: 700,
+              textDecoration: 'none',
+              letterSpacing: '-0.3px',
+              border: '2px solid rgba(61,43,31,0.2)',
+            }}
+          >
+            앱 미리보기
+          </Link>
+        </div>
       </section>
 
       {/* ── 기능 4개 ── */}
