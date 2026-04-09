@@ -46,7 +46,8 @@
       "Read(//opt/homebrew/bin/**)",
       "Bash(/opt/homebrew/bin/node --version)",
       "Bash(PATH=\"/opt/homebrew/bin:$PATH\" npm install @anthropic-ai/sdk)",
-      "Bash(ls /Users/jeong-yujin/Desktop/Nursinurday/careflow/.env*)"
+      "Bash(ls /Users/jeong-yujin/Desktop/Nursinurday/careflow/.env*)",
+      "Bash(PATH=\"/opt/homebrew/bin:$PATH\" npm install framer-motion)"
     ]
   }
 }
