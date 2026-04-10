@@ -101,7 +101,7 @@ export default function IPhoneFrame({ children, title, sub }: { children: ReactN
         )}
 
         {/* Content */}
-        <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+        <div style={{ flex: 1, minHeight: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
           {children}
         </div>
 

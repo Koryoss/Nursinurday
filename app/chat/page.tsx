@@ -139,7 +139,7 @@ export default function ChatPage() {
         {/* 메시지 영역 */}
         <div style={{
           position:'relative', zIndex:1,
-          flex:1, overflowY:'auto', padding:'14px 14px 8px',
+          flex:1, minHeight:0, overflowY:'auto', padding:'14px 14px 8px',
           display:'flex', flexDirection:'column', gap:12,
           scrollbarWidth:'none',
         }}>

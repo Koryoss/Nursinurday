@@ -48,10 +48,10 @@ export default function NotificationPage() {
 
   return (
     <IPhoneFrame sub={`${TODAY} · 알림 설정 · 피드`}>
-      <div style={{flex:1,overflowY:'auto',padding:'14px 16px 0',scrollbarWidth:'none',display:'flex',flexDirection:'column',gap:14}}>
+      <div style={{flex:1,minHeight:0,overflowY:'auto',padding:'14px 16px 0',scrollbarWidth:'none',display:'flex',flexDirection:'column',gap:14}}>
 
         {/* ① 복약 위젯 */}
-        <div style={{...GLASS,overflow:'hidden'}}>
+        <div style={{...GLASS,overflow:'hidden',flexShrink:0}}>
           <div style={{padding:'13px 16px 10px',display:'flex',alignItems:'center',gap:8}}>
             <span style={{fontSize:18}}>💊</span>
             <span style={{fontSize:13,fontWeight:800,color:TEXT}}>오늘의 복약</span>
@@ -94,7 +94,7 @@ export default function NotificationPage() {
         </div>
 
         {/* ② 토글 설정 */}
-        <div style={{...GLASS,overflow:'hidden'}}>
+        <div style={{...GLASS,overflow:'hidden',flexShrink:0}}>
           <div style={{padding:'13px 16px 8px',fontSize:10,fontWeight:700,color:TEXT_MID,letterSpacing:0.8,textTransform:'uppercase'}}>알림 설정</div>
           {[
             {icon:'💊',label:'복약 알림',   sub:'아침·점심·저녁 복약 시간',  val:meds,    set:setMeds   },

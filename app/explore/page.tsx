@@ -168,12 +168,12 @@ export default function ExplorePage() {
         </div>
 
         {/* 체크리스트 */}
-        <div style={{flex:1,overflowY:'auto',padding:'12px 16px',display:'flex',flexDirection:'column',gap:10,scrollbarWidth:'none'}}>
+        <div style={{flex:1,minHeight:0,overflowY:'auto',padding:'12px 16px',display:'flex',flexDirection:'column',gap:10,scrollbarWidth:'none'}}>
           {AXES.map((a,ai)=>{
             const cnt=checked[a.key].filter(Boolean).length
             const done=cnt===a.items.length
             return (
-              <div key={a.key} style={{...GLASS,overflow:'hidden',borderLeft:`3px solid ${a.color}`,boxShadow:done?`0 0 0 1.5px ${a.color}50, 0 8px 32px rgba(0,0,0,0.07)`:'0 8px 32px rgba(0,0,0,0.07)'}}>
+              <div key={a.key} style={{...GLASS,overflow:'hidden',flexShrink:0,borderLeft:`3px solid ${a.color}`,boxShadow:done?`0 0 0 1.5px ${a.color}50, 0 8px 32px rgba(0,0,0,0.07)`:'0 8px 32px rgba(0,0,0,0.07)'}}>
                 {/* 축 헤더 */}
                 <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'12px 14px 8px'}}>
                   <div style={{display:'flex',alignItems:'center',gap:8}}>
