@@ -71,7 +71,7 @@ export default function ChatPage() {
   const allTags = [...new Set(msgs.flatMap(m => m.tags ?? []))]
 
   return (
-    <IPhoneFrame sub={`${TODAY} · AI 케어 전문가`}>
+    <IPhoneFrame sub={`${TODAY} · AI 일기장`}>
       <div style={{ flex:1, display:'flex', flexDirection:'column', overflow:'hidden', position:'relative' }}>
 
         {/* 4-axis background pattern */}
@@ -84,7 +84,7 @@ export default function ChatPage() {
           pointerEvents:'none',
         }}/>
 
-        {/* AI 케어 전문가 프로필 헤더 */}
+        {/* AI 프로필 헤더 */}
         <div style={{
           position:'relative', zIndex:1,
           padding:'12px 16px 10px',
@@ -107,7 +107,7 @@ export default function ChatPage() {
           </div>
           <div>
             <div style={{ fontSize:13, fontWeight:800, color:TEXT }}>CareFlow AI</div>
-            <div style={{ fontSize:10, color:SAGE, fontWeight:600, marginTop:1 }}>케어 전문가 · 온라인</div>
+            <div style={{ fontSize:10, color:SAGE, fontWeight:600, marginTop:1 }}>온라인</div>
           </div>
           {/* Online indicator */}
           <div style={{
