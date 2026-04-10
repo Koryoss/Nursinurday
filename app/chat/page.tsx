@@ -248,9 +248,8 @@ export default function ChatPage() {
           {/* 마이크 아이콘 버튼 */}
           <button
             style={{
-              width:38, height:38, borderRadius:'50%', border:'none', cursor:'pointer',
+              width:38, height:38, borderRadius:'50%', border:'1px solid rgba(163,177,138,0.25)', cursor:'pointer',
               background:'rgba(163,177,138,0.12)',
-              border:'1px solid rgba(163,177,138,0.25)',
               display:'flex', alignItems:'center', justifyContent:'center',
               flexShrink:0, transition:'background 0.2s',
             }}
