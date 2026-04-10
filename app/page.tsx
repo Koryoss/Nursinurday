@@ -382,12 +382,6 @@ export default function HomePage() {
         </div>
       </footer>
 
-      <style>{`
-        @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { background: #FBFBFB; }
-        a:hover { opacity: 0.85; transition: opacity 0.18s; }
-      `}</style>
     </div>
   )
 }
