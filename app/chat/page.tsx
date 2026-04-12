@@ -52,12 +52,15 @@ export default function ChatPage() {
   const [input, setInput]   = useState('')
   const [typing, setTyping] = useState(false)
   const bottomRef           = useRef<HTMLDivElement>(null)
+  const sendingRef          = useRef(false)
 
   useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: 'smooth' }) }, [msgs, typing])
 
   const send = () => {
+    if (sendingRef.current) return
     const text = input.trim()
     if (!text) return
+    sendingRef.current = true
     setInput('')
     setMsgs(prev => [...prev, { id: Date.now().toString(), role: 'user', text }])
     setTyping(true)
@@ -65,6 +68,7 @@ export default function ChatPage() {
       const { reply, tags } = getReply(text)
       setTyping(false)
       setMsgs(prev => [...prev, { id: `ai-${Date.now()}`, role: 'ai', text: reply, tags }])
+      sendingRef.current = false
     }, 900)
   }
 
