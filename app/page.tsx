@@ -456,16 +456,16 @@ export default function HomePage() {
               </h2>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 2 }}>
-              {solutions.map((s, i) => (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 2 }}>
+              {solutions.slice(0, 2).map((s, i) => (
                 <div key={i} style={{
                   background: 'rgba(255,255,255,0.10)',
                   backdropFilter: 'blur(12px)',
                   WebkitBackdropFilter: 'blur(12px)',
                   padding: '48px 36px',
-                  borderRadius: i === 0 ? '20px 0 0 20px' : i === 2 ? '0 20px 20px 0' : 0,
+                  borderRadius: i === 0 ? '20px 0 0 20px' : '0 20px 20px 0',
                   border: '1px solid rgba(255,255,255,0.15)',
-                  borderRight: i < 2 ? 'none' : '1px solid rgba(255,255,255,0.15)',
+                  borderRight: i === 0 ? 'none' : '1px solid rgba(255,255,255,0.15)',
                   transition: 'background 0.2s',
                 }}>
                   <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', color: 'rgba(255,255,255,0.5)', marginBottom: 24 }}>{s.num}</div>
@@ -549,37 +549,6 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* ── 학술 근거 ── */}
-        <section style={{ padding: '120px 32px', borderTop: '1px solid rgba(163,177,138,0.12)' }}>
-          <div style={{ maxWidth: 1160, margin: '0 auto' }}>
-            <div style={{ textAlign: 'center', marginBottom: 64 }}>
-              <div style={{ display: 'inline-block', fontSize: 11, fontWeight: 700, letterSpacing: '0.16em', color: C.purple, textTransform: 'uppercase', marginBottom: 16, padding: '5px 14px', borderRadius: 99, background: 'rgba(184,168,212,0.12)' }}>
-                근거
-              </div>
-              <h2 style={{ fontSize: 'clamp(26px, 4vw, 40px)', fontWeight: 800, letterSpacing: '-1px', margin: 0 }}>
-                학술 근거 위에 설계했습니다
-              </h2>
-            </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 20 }}>
-              {researchItems.map((r, i) => (
-                <div key={i} style={{
-                  background: 'rgba(255,255,255,0.9)',
-                  backdropFilter: 'blur(12px)',
-                  WebkitBackdropFilter: 'blur(12px)',
-                  borderRadius: 20, padding: '36px 36px',
-                  border: '1px solid rgba(0,0,0,0.06)',
-                  boxShadow: '0 4px 20px rgba(0,0,0,0.04)',
-                  borderTop: `3px solid ${r.color}`,
-                }}>
-                  <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', color: r.color, marginBottom: 16, textTransform: 'uppercase' }}>{r.label}</div>
-                  <div style={{ fontSize: 16, fontWeight: 500, color: C.text, lineHeight: 1.7, marginBottom: 16 }}>{r.quote}</div>
-                  <div style={{ fontSize: 11, color: C.light, letterSpacing: '0.06em' }}>{r.source}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
         {/* ── 왜 CareFlow ── */}
         <section style={{ padding: '120px 32px', background: C.text }}>
           <div style={{ maxWidth: 1160, margin: '0 auto' }}>
@@ -612,55 +581,13 @@ export default function HomePage() {
               }}>
                 <div style={{ fontSize: 22, fontWeight: 800, color: '#fff', marginBottom: 4, letterSpacing: '-0.5px' }}>정유진</div>
                 <div style={{ fontSize: 11, fontWeight: 700, color: C.sage, letterSpacing: '0.12em', marginBottom: 32, textTransform: 'uppercase' }}>CareFlow · Founder</div>
-                <div style={{ fontSize: 14, color: 'rgba(255,255,255,0.55)', lineHeight: 1.8, marginBottom: 12 }}>서울대학교 간호학과 재학 (학사편입, 2026)</div>
-                <div style={{ fontSize: 14, color: 'rgba(255,255,255,0.55)', lineHeight: 1.8, marginBottom: 12 }}>뇌인지과학학회 회원</div>
-                <div style={{ fontSize: 14, color: 'rgba(255,255,255,0.55)', lineHeight: 1.8, marginBottom: 28 }}>서울대 창업지원단 생활비 지원 수혜</div>
+                <div style={{ fontSize: 14, color: 'rgba(255,255,255,0.55)', lineHeight: 1.8, marginBottom: 28 }}>서울대학교 간호학과 재학</div>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
                   {['간호학', '자율신경계', '만성 증상 관리', '디지털 헬스케어'].map((tag, i) => (
                     <span key={i} style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.06em', color: C.sage, border: `1px solid ${C.sage}50`, padding: '5px 12px', borderRadius: 99 }}>{tag}</span>
                   ))}
                 </div>
               </div>
-            </div>
-          </div>
-        </section>
-
-        {/* ── 하단 CTA ── */}
-        <section style={{ padding: '100px 32px' }}>
-          <div style={{ maxWidth: 800, margin: '0 auto', textAlign: 'center' }}>
-            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 16 }}>
-              <CareFlowLogo width={220} />
-            </div>
-            <h2 style={{ fontSize: 'clamp(28px, 5vw, 52px)', fontWeight: 800, letterSpacing: '-1.5px', margin: '0 0 16px', lineHeight: 1.2 }}>
-              오늘부터 기록을<br/>시작해보세요
-            </h2>
-            <p style={{ fontSize: 17, color: C.mid, lineHeight: 1.75, margin: '0 0 48px' }}>
-              진료실 밖 당신의 일상을 연결합니다.
-            </p>
-            <button
-              onClick={() => setShowSplash(true)}
-              style={{
-                fontSize: 17, fontWeight: 700, color: '#fff',
-                padding: '16px 48px', borderRadius: 16, border: 'none', cursor: 'pointer',
-                background: `linear-gradient(135deg, ${C.sage}, ${C.sageDk})`,
-                boxShadow: '0 8px 28px rgba(163,177,138,0.40)',
-                letterSpacing: '-0.3px',
-              }}
-            >
-              체험해 보기 →
-            </button>
-
-            <div style={{ display: 'flex', gap: 40, justifyContent: 'center', marginTop: 64, flexWrap: 'wrap' }}>
-              {[
-                { num: '4', label: '가지 기록 축',  color: C.sage   },
-                { num: '3', label: '회 복약 알림',   color: C.goldLt },
-                { num: '7', label: '일 주간 리포트', color: C.purple },
-              ].map((s, i) => (
-                <div key={i} style={{ textAlign: 'center' }}>
-                  <div style={{ fontSize: 44, fontWeight: 800, color: s.color, letterSpacing: '-2px', lineHeight: 1 }}>{s.num}</div>
-                  <div style={{ fontSize: 13, color: C.light, marginTop: 6, fontWeight: 600 }}>{s.label}</div>
-                </div>
-              ))}
             </div>
           </div>
         </section>
