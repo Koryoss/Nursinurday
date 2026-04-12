@@ -72,93 +72,141 @@ function CareFlowLogo({ width = 260 }: { width?: number }) {
   )
 }
 
-/* ── 스플래시 스크린 ── */
+/* ── 스플래시 스크린 (아이폰 프레임 안) ── */
 function SplashScreen({ onNavigate }: { onNavigate: () => void }) {
   const [phase, setPhase] = useState<0|1|2>(0)
+  // 0: 파동 그리기
+  // 1: CareFlow 텍스트 등장
+  // 2: 지금 시작하기 버튼
 
   useEffect(() => {
-    const t1 = setTimeout(() => setPhase(1), 1400)
-    const t2 = setTimeout(() => setPhase(2), 2200)
-    const t3 = setTimeout(() => onNavigate(), 3100)
+    const t1 = setTimeout(() => setPhase(1), 1900)
+    const t2 = setTimeout(() => setPhase(2), 2700)
+    const t3 = setTimeout(() => onNavigate(), 3800)
     return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3) }
   }, [onNavigate])
-
-  const waveAnim = phase === 1
-    ? { x: [0, -5, 5, -4, 4, -2, 2, 0], scaleY: [1, 1.06, 0.94, 1.04, 0.96, 1.01, 0.99, 1] }
-    : phase === 2
-    ? { x: [0, -2, 2, -1, 0], scaleY: [1, 1.02, 0.99, 1.01, 1] }
-    : {}
 
   return (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      transition={{ duration: 0.35 }}
+      transition={{ duration: 0.4 }}
       style={{
         position: 'fixed', inset: 0, zIndex: 9999,
-        background: C.bg,
+        background: 'linear-gradient(160deg, #E8EDE4 0%, #F0F4EE 50%, #EAF0E8 100%)',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
-        flexDirection: 'column', gap: 0,
+        padding: '20px 16px',
         fontFamily: FONT,
       }}
     >
-      <motion.div
-        animate={waveAnim}
-        transition={{
-          duration: phase === 1 ? 0.9 : 0.6,
-          ease: 'easeInOut',
-          times: phase === 1 ? [0,.14,.28,.42,.57,.71,.85,1] : [0,.25,.5,.75,1],
-        }}
-        style={{ marginBottom: 20 }}
-      >
-        <CareFlowLogo width={300} />
-      </motion.div>
+      {/* 아이폰 프레임 */}
+      <div style={{
+        width: 390, height: 844,
+        borderRadius: 54,
+        background: 'linear-gradient(160deg, #F0F4EE 0%, #F8F9FA 100%)',
+        border: '1.5px solid rgba(255,255,255,0.9)',
+        boxShadow: '0 40px 100px rgba(0,0,0,0.14), 0 8px 32px rgba(163,177,138,0.12), inset 0 1px 0 rgba(255,255,255,0.95)',
+        display: 'flex', flexDirection: 'column',
+        alignItems: 'center', justifyContent: 'center',
+        overflow: 'hidden', position: 'relative',
+      }}>
+        {/* Dynamic Island */}
+        <div style={{ position: 'absolute', top: 14, left: '50%', transform: 'translateX(-50%)', width: 120, height: 36, background: '#1C1C1E', borderRadius: 18, zIndex: 20 }} />
 
-      <AnimatePresence>
-        {phase === 0 && (
-          <motion.h1
-            key="logo-text"
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -12 }}
-            transition={{ duration: 0.45 }}
-            style={{
-              fontSize: 'clamp(44px, 8vw, 80px)',
-              fontWeight: 800,
-              letterSpacing: '-3px',
-              color: C.text,
-              margin: 0,
-              lineHeight: 1,
-            }}
-          >
-            CareFlow
-          </motion.h1>
-        )}
-      </AnimatePresence>
+        {/* 파동 SVG — 오른쪽→왼쪽으로 그려짐 */}
+        <svg width={280} height={146} viewBox="0 0 500 260" fill="none">
+          <defs>
+            <linearGradient id="spWave1" x1="490" y1="0" x2="0" y2="0" gradientUnits="userSpaceOnUse">
+              <stop offset="0%"   stopColor="#6BAE96"/>
+              <stop offset="30%"  stopColor="#A3B18A"/>
+              <stop offset="55%"  stopColor="#C4B488"/>
+              <stop offset="75%"  stopColor="#B8A8D4"/>
+              <stop offset="100%" stopColor="#D4C896"/>
+            </linearGradient>
+            <linearGradient id="spWave2" x1="490" y1="0" x2="200" y2="0" gradientUnits="userSpaceOnUse">
+              <stop offset="0%"   stopColor="#B8A8D4"/>
+              <stop offset="60%"  stopColor="#C8B8D8"/>
+              <stop offset="100%" stopColor="#D4C896" stopOpacity="0"/>
+            </linearGradient>
+            <linearGradient id="spWave3" x1="490" y1="0" x2="230" y2="0" gradientUnits="userSpaceOnUse">
+              <stop offset="0%"   stopColor="#E8D8A0"/>
+              <stop offset="100%" stopColor="#D4C896" stopOpacity="0"/>
+            </linearGradient>
+          </defs>
+          {/* 메인 파동 — 오른쪽 끝(M490,8)에서 시작해 왼쪽으로 */}
+          <motion.path
+            d="M490,8 C470,14 440,24 410,22 C360,18 318,10 290,50 C268,82 240,44 210,58 C180,72 160,98 132,98 L116,95 L106,122 L98,78 L90,138 L80,58 L72,168 L60,38 L48,105 L18,105"
+            stroke="url(#spWave1)"
+            strokeWidth="4.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            fill="none"
+            initial={{ pathLength: 0 }}
+            animate={{ pathLength: 1 }}
+            transition={{ duration: 1.8, ease: 'easeOut' }}
+          />
+          {/* 두 번째 선 */}
+          <motion.path
+            d="M490,28 C470,34 440,44 408,42 C358,38 318,32 290,66 C260,96 228,108 200,118"
+            stroke="url(#spWave2)"
+            strokeWidth="4"
+            strokeLinecap="round"
+            fill="none"
+            initial={{ pathLength: 0 }}
+            animate={{ pathLength: 1 }}
+            transition={{ duration: 1.5, ease: 'easeOut', delay: 0.25 }}
+          />
+          {/* 세 번째 선 */}
+          <motion.path
+            d="M490,6 C420,10 365,18 330,32 C295,46 260,64 230,80"
+            stroke="url(#spWave3)"
+            strokeWidth="3.5"
+            strokeLinecap="round"
+            fill="none"
+            initial={{ pathLength: 0 }}
+            animate={{ pathLength: 1 }}
+            transition={{ duration: 1.3, ease: 'easeOut', delay: 0.5 }}
+          />
+        </svg>
 
-      <AnimatePresence>
-        {phase === 2 && (
-          <motion.div
-            key="cta"
-            initial={{ opacity: 0, scale: 0.85, y: 16 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            transition={{ duration: 0.5, ease: [0.34, 1.56, 0.64, 1] }}
-            style={{
-              fontSize: 18,
-              fontWeight: 700,
-              color: '#fff',
-              padding: '14px 40px',
-              borderRadius: 16,
-              background: `linear-gradient(135deg, ${C.sage}, ${C.sageDk})`,
-              boxShadow: '0 8px 28px rgba(163,177,138,0.4)',
-              letterSpacing: '-0.3px',
-            }}
-          >
-            지금 시작하기 →
-          </motion.div>
-        )}
-      </AnimatePresence>
+        {/* CareFlow 텍스트 — phase 1 등장 */}
+        <AnimatePresence>
+          {phase >= 1 && (
+            <motion.h1
+              key="cf-text"
+              initial={{ opacity: 0, y: 14 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, ease: [0.34, 1.4, 0.64, 1] }}
+              style={{ fontSize: 52, fontWeight: 800, letterSpacing: '-3px', color: C.text, margin: '20px 0 0', lineHeight: 1 }}
+            >
+              CareFlow
+            </motion.h1>
+          )}
+        </AnimatePresence>
+
+        {/* 지금 시작하기 — phase 2 등장 */}
+        <AnimatePresence>
+          {phase >= 2 && (
+            <motion.div
+              key="cta-btn"
+              initial={{ opacity: 0, scale: 0.88, y: 16 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              transition={{ duration: 0.5, ease: [0.34, 1.56, 0.64, 1] }}
+              style={{
+                marginTop: 32,
+                fontSize: 17, fontWeight: 700, color: '#fff',
+                padding: '14px 40px', borderRadius: 16,
+                background: `linear-gradient(135deg, ${C.sage}, ${C.sageDk})`,
+                boxShadow: '0 8px 28px rgba(163,177,138,0.4)',
+                letterSpacing: '-0.3px',
+              }}
+            >
+              지금 시작하기 →
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
     </motion.div>
   )
 }
