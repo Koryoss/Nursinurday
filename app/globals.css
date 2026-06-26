@@ -7,10 +7,24 @@
 
 :root {
   --font-inter: 'Noto Sans KR', sans-serif;
+  --care-bg: #F3F6F1;
+  --care-surface: #FBFCFA;
+  --care-card: rgba(255,255,255,0.82);
+  --care-border: rgba(92,122,94,0.18);
+  --care-text: #26312A;
+  --care-mid: #5F6D64;
+  --care-light: #8D9A91;
+  --care-primary: #5C7A5E;
+  --care-primary-dark: #3F5F46;
+  --care-accent: #C58F5B;
+  --care-radius-card: 16px;
+  --care-radius-input: 12px;
 }
 
 body {
   font-family: var(--font-inter), sans-serif;
+  background: var(--care-bg);
+  color: var(--care-text);
 }
 
 /* 채팅 말풍선 애니메이션 */

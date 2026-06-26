@@ -47,7 +47,13 @@
       "Bash(/opt/homebrew/bin/node --version)",
       "Bash(PATH=\"/opt/homebrew/bin:$PATH\" npm install @anthropic-ai/sdk)",
       "Bash(ls /Users/jeong-yujin/Desktop/Nursinurday/careflow/.env*)",
-      "Bash(PATH=\"/opt/homebrew/bin:$PATH\" npm install framer-motion)"
+      "Bash(PATH=\"/opt/homebrew/bin:$PATH\" npm install framer-motion)",
+      "Bash(echo \"PID: $!\")",
+      "mcp__Claude_Preview__preview_start",
+      "Bash(npx vercel@latest logs https://nursinurday-i7il-n40gvo17a-relish333ever-1987s-projects.vercel.app)",
+      "Bash(npx vercel@latest build)",
+      "Bash(npx vercel@latest pull --yes)",
+      "Bash(npx vercel@latest ls)"
     ]
   }
 }

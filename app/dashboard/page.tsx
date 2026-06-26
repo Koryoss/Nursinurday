@@ -1,301 +1,493 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { motion } from 'framer-motion'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import type { Band, CorrelationItem, TrendPoint } from '@/lib/socialReturnIndicators'
+import { CARE_COLORS, CARE_FONT, CARE_GRADIENTS, CARE_RADIUS, CARE_SHADOW } from '@/lib/designTokens'
 
-/* ── 디자인 토큰 ─────────────────────────── */
-const SAGE       = '#A3B18A'
-const SAGE_DARK  = '#7A9E6A'
-const CLOUD      = '#F8F9FA'
-const GOLD       = '#D4AF37'
-const TEXT       = '#2D3436'
-const TEXT_MID   = '#636E72'
-const TEXT_LIGHT = '#B2BEC3'
-
-const GLASS: React.CSSProperties = {
-  background: 'rgba(255,255,255,0.70)',
-  backdropFilter: 'blur(20px)',
-  WebkitBackdropFilter: 'blur(20px)',
-  border: '1px solid rgba(255,255,255,0.85)',
-  borderRadius: 24,
-  boxShadow: '0 8px 32px rgba(0,0,0,0.07), 0 2px 8px rgba(0,0,0,0.04)',
+type IndicatorResponse = {
+  date: string
+  source: string
+  indicators: {
+    readiness: Band
+    steadiness: Band
+    activity_range: Band
+  }
+  trend: TrendPoint[]
+  correlations: CorrelationItem[]
 }
 
-/* ── 데이터 ──────────────────────────────── */
-const AXES = [
-  { key:'body',     label:'몸',  sub:'신체 증상 · 에너지',      color:'#F5A87C', textColor:'#7A3A0A',
-    items:[ {emoji:'👂',question:'이명이 있었나요?',checked:true}, {emoji:'🌀',question:'어지러움이 있었나요?',checked:true}, {emoji:'😴',question:'피로감을 느꼈나요?',checked:true}, {emoji:'🤕',question:'두통이 있었나요?',checked:false} ], score:3, max:4 },
-  { key:'emotion',  label:'감정', sub:'불안 · 긴장 · 감정 기복',   color:'#EE9FB8', textColor:'#7A1A40',
-    items:[ {emoji:'😰',question:'불안감을 느꼈나요?',checked:true}, {emoji:'😤',question:'예민하거나 짜증이 났나요?',checked:true}, {emoji:'😨',question:'두려움이 있었나요?',checked:true}, {emoji:'🎭',question:'기분 변화가 심했나요?',checked:true} ], score:4, max:4 },
-  { key:'relation', label:'관계', sub:'연결 · 고립 · 사회 참여',   color:'#B8A8D4', textColor:'#3D2878',
-    items:[ {emoji:'🤝',question:'사람들과 함께했나요?',checked:false}, {emoji:'🏝️',question:'고립감을 느꼈나요?',checked:true}, {emoji:'💭',question:'소통이 힘들었나요?',checked:false} ], score:1, max:3 },
-  { key:'meaning',  label:'의미', sub:'방향 · 성취 · 삶의 질',     color:'#E8C86E', textColor:'#6B4A00',
-    items:[ {emoji:'⭐',question:'성취감을 느꼈나요?',checked:true}, {emoji:'✨',question:'하루가 의미 있었나요?',checked:false}, {emoji:'📌',question:'계획한 일을 했나요?',checked:true} ], score:2, max:3 },
-]
-
-const TOTAL_SCORE = AXES.reduce((s,a)=>s+a.score, 0)
-const TOTAL_MAX   = AXES.reduce((s,a)=>s+a.max, 0)
-
-const WEEK = [
-  {day:'월',date:13,done:true, dots:['#F5A87C','#EE9FB8']},
-  {day:'화',date:14,done:false,dots:[]},
-  {day:'수',date:15,done:true, dots:['#EE9FB8','#E8C86E']},
-  {day:'목',date:16,done:true, dots:['#F5A87C']},
-  {day:'금',date:17,done:true, dots:['#EE9FB8','#B8A8D4']},
-  {day:'토',date:18,done:false,dots:[]},
-  {day:'일',date:19,done:true, dots:['#F5A87C','#EE9FB8'],today:true},
-]
-
-const TABS = [
-  {label:'기록',    href:'/explore'},
-  {label:'알림',    href:'/notification'},
-  {label:'채팅',    href:'/chat'},
-  {label:'대시보드',href:'/dashboard'},
-]
-
-const TODAY_STR = new Date().toLocaleDateString('ko-KR',{month:'long',day:'numeric',weekday:'short'})
-
-/* ── Liquid Blob path ────────────────────── */
-function blobPath(scores:number[], maxes:number[], wobble=0) {
-  const cx=100, cy=100, minR=32, maxR=72
-  const r = scores.map((s,i)=> minR + (maxR-minR)*(s/maxes[i]) + wobble)
-  const top   =[cx,        cy-r[0]]
-  const right =[cx+r[1],   cy     ]
-  const bot   =[cx,        cy+r[2]]
-  const left  =[cx-r[3],   cy     ]
-  const t = 38
-  return `M ${top[0]},${top[1]}
-    C ${top[0]+t},${top[1]}   ${right[0]},${right[1]-t} ${right[0]},${right[1]}
-    C ${right[0]},${right[1]+t} ${bot[0]+t},${bot[1]}   ${bot[0]},${bot[1]}
-    C ${bot[0]-t},${bot[1]}   ${left[0]},${left[1]+t}  ${left[0]},${left[1]}
-    C ${left[0]},${left[1]-t} ${top[0]-t},${top[1]}    ${top[0]},${top[1]} Z`
+type WeeklyForm = {
+  week_start: string
+  dhi_p: number
+  dhi_e: number
+  dhi_f: number
+  thi: number
+  hads_a: number
+  hads_d: number
+  vss_sf: number
 }
 
-function TabIcon({label,active}:{label:string;active:boolean}) {
-  const c = active ? SAGE : TEXT_LIGHT
-  const s = 1.8
-  if (label==='기록')     return <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth={s} strokeLinecap="round" strokeLinejoin="round"><rect x="5" y="3" width="14" height="18" rx="2"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="12" y2="16"/></svg>
-  if (label==='알림')     return <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth={s} strokeLinecap="round" strokeLinejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-  if (label==='채팅')     return <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth={s} strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-  if (label==='대시보드') return <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth={s} strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-  return null
+const SAGE = CARE_COLORS.primary
+const SAGE_DARK = CARE_COLORS.primaryDark
+const TEXT = CARE_COLORS.text
+const TEXT_MID = CARE_COLORS.mid
+const TEXT_LIGHT = CARE_COLORS.light
+const BORDER = CARE_COLORS.border
+const CARD = CARE_COLORS.card
+
+const BAND_LABELS: Record<Band, string> = {
+  low: '낮음',
+  normal: '보통',
+  high: '높음',
 }
 
-/* ══════════════════════════════════════════ */
-export default function DashboardPage() {
-  const [mounted, setMounted] = useState(false)
-  useEffect(()=>{ setMounted(true) },[])
+const BAND_COLORS: Record<Band, string> = {
+  low: '#7E9AA0',
+  normal: SAGE,
+  high: CARE_COLORS.primaryDark,
+}
 
-  const p1 = blobPath(AXES.map(a=>a.score), AXES.map(a=>a.max), 0)
-  const p2 = blobPath(AXES.map(a=>a.score), AXES.map(a=>a.max), 3)
+const BAND_POSITIONS: Record<Band, string> = {
+  low: '28%',
+  normal: '55%',
+  high: '78%',
+}
+
+const todayLocal = () => {
+  const now = new Date()
+  const yyyy = now.getFullYear()
+  const mm = String(now.getMonth() + 1).padStart(2, '0')
+  const dd = String(now.getDate()).padStart(2, '0')
+  return `${yyyy}-${mm}-${dd}`
+}
+
+const emptyWeekly = (): WeeklyForm => ({
+  week_start: todayLocal(),
+  dhi_p: 0,
+  dhi_e: 0,
+  dhi_f: 0,
+  thi: 0,
+  hads_a: 0,
+  hads_d: 0,
+  vss_sf: 0,
+})
+
+function Card({
+  title,
+  children,
+  aside,
+  compact = false,
+}: {
+  title: string
+  children: React.ReactNode
+  aside?: React.ReactNode
+  compact?: boolean
+}) {
+  return (
+    <section
+      style={{
+        background: CARD,
+        border: `1px solid ${BORDER}`,
+        borderRadius: CARE_RADIUS.lg,
+        boxShadow: 'none',
+        padding: compact ? 14 : 16,
+      }}
+    >
+      {(title || aside) && (
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 12 }}>
+        {title ? <h2 style={{ margin: 0, color: TEXT_MID, fontSize: 15, fontWeight: 900 }}>{title}</h2> : <span />}
+        {aside}
+      </div>
+      )}
+      {children}
+    </section>
+  )
+}
+
+function BandGauge({
+  title,
+  band,
+  body,
+}: {
+  title: string
+  band: Band
+  body: string
+}) {
+  return (
+    <div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10 }}>
+        <strong style={{ color: TEXT, fontSize: 20, lineHeight: 1.15 }}>{title}</strong>
+        <span
+          style={{
+            minWidth: 58,
+            textAlign: 'center',
+            borderRadius: 99,
+            padding: '6px 12px',
+            color: '#fff',
+            background: BAND_COLORS[band],
+            fontSize: 15,
+            fontWeight: 900,
+          }}
+        >
+          {BAND_LABELS[band]}
+        </span>
+      </div>
+      <div style={{ position: 'relative', height: 13, margin: '13px 0 7px' }}>
+        <div style={{ position: 'absolute', left: 0, right: 0, top: 3, height: 10, borderRadius: 999, background: '#ECF1EC' }} />
+        <div style={{ position: 'absolute', left: BAND_POSITIONS[band], top: -2, width: 5, height: 22, borderRadius: 999, background: TEXT, transform: 'translateX(-50%)' }} />
+      </div>
+      <p style={{ margin: 0, color: TEXT_MID, fontSize: 15, lineHeight: 1.45, fontWeight: 700 }}>
+        {body}
+      </p>
+    </div>
+  )
+}
+
+function TrendBars({ points }: { points: TrendPoint[] }) {
+  const recent = points.slice(-4)
+  const fallback = [42, 55, 50, 68]
+  const values = recent.length
+    ? recent.map(point => Math.max(26, Math.min(76, 34 + (point.gait ?? point.dizziness ?? 2) * 9)))
+    : fallback
 
   return (
-    <div style={{ minHeight:'100dvh', background:'linear-gradient(160deg,#E8EDE4,#F0F4EE,#EAF0E8)', display:'flex', alignItems:'center', justifyContent:'center', padding:'20px 16px', fontFamily:"-apple-system,'Apple SD Gothic Neo','Noto Sans KR',sans-serif" }}>
-
-      <div style={{ width:390, height:844, borderRadius:54, background:'linear-gradient(160deg,#EEF2EB 0%,#F8F9FA 55%,#F0F4EE 100%)', border:'1.5px solid rgba(255,255,255,0.9)', boxShadow:'0 40px 100px rgba(0,0,0,0.13),0 8px 32px rgba(163,177,138,0.12),inset 0 1px 0 rgba(255,255,255,0.95)', position:'relative', overflow:'hidden', display:'flex', flexDirection:'column', userSelect:'none' }}>
-
-        {/* 배경 글로우 오브 */}
-        <div style={{position:'absolute',top:-50,right:-30,width:200,height:200,borderRadius:'50%',background:'rgba(163,177,138,0.10)',filter:'blur(60px)',pointerEvents:'none',zIndex:0}}/>
-        <div style={{position:'absolute',bottom:80,left:-50,width:180,height:180,borderRadius:'50%',background:'rgba(212,175,55,0.07)',filter:'blur(50px)',pointerEvents:'none',zIndex:0}}/>
-
-        {/* Dynamic Island */}
-        <div style={{position:'absolute',top:14,left:'50%',transform:'translateX(-50%)',width:120,height:36,background:'#1C1C1E',borderRadius:18,zIndex:20}}/>
-
-        {/* 상태바 */}
-        <div style={{height:56,flexShrink:0,display:'flex',alignItems:'flex-end',justifyContent:'space-between',padding:'0 28px 8px',zIndex:10,position:'relative'}}>
-          <span style={{fontSize:15,fontWeight:600,color:TEXT}}>9:41</span>
-          <div style={{display:'flex',gap:6,alignItems:'center'}}>
-            <svg width="17" height="12" viewBox="0 0 17 12" fill={TEXT}>
-              <rect x="0" y="4" width="3" height="8" rx="1" opacity="0.35"/>
-              <rect x="4.5" y="2.5" width="3" height="9.5" rx="1" opacity="0.55"/>
-              <rect x="9" y="1" width="3" height="11" rx="1"/>
-              <rect x="13.5" y="0" width="3" height="12" rx="1"/>
-            </svg>
-            <div style={{display:'flex',alignItems:'center',gap:1}}>
-              <div style={{width:24,height:12,border:'1.5px solid rgba(45,52,54,0.4)',borderRadius:3,padding:'2px',display:'flex',alignItems:'center'}}>
-                <div style={{height:'100%',width:'75%',background:TEXT,borderRadius:1}}/>
-              </div>
-              <div style={{width:2,height:6,background:'rgba(45,52,54,0.35)',borderRadius:'0 1px 1px 0'}}/>
-            </div>
-          </div>
-        </div>
-
-        {/* 헤더 */}
-        <div style={{padding:'0 20px 14px',flexShrink:0,borderBottom:'1px solid rgba(163,177,138,0.15)',position:'relative',zIndex:10}}>
-          <div style={{display:'flex',alignItems:'center',justifyContent:'space-between'}}>
-            <div>
-              <div style={{display:'flex',alignItems:'center',gap:7}}>
-                <div style={{width:8,height:8,borderRadius:'50%',background:SAGE,animation:'cfPulse 2s infinite'}}/>
-                <span style={{fontSize:20,fontWeight:800,color:TEXT}}>CareFlow</span>
-              </div>
-              <div style={{fontSize:11,color:TEXT_MID,marginTop:3}}>{TODAY_STR} · 대시보드</div>
-            </div>
-            <div style={{...GLASS,padding:'6px 14px',borderRadius:99}}>
-              <span style={{fontSize:12,fontWeight:700,color:SAGE}}>{TOTAL_SCORE}<span style={{color:TEXT_LIGHT,fontWeight:500}}>/{TOTAL_MAX} 기록</span></span>
-            </div>
-          </div>
-        </div>
-
-        {/* 스크롤 콘텐츠 */}
-        <div style={{flex:1,overflowY:'auto',padding:'14px 20px 8px',display:'flex',flexDirection:'column',gap:12,scrollbarWidth:'none',position:'relative',zIndex:10}}>
-
-          {/* ① 오늘의 통찰 */}
-          <motion.div initial={{opacity:0,y:14}} animate={{opacity:mounted?1:0,y:mounted?0:14}} transition={{duration:0.45}} style={{...GLASS,padding:'14px 16px'}}>
-            <div style={{display:'flex',alignItems:'flex-start',gap:10}}>
-              <div style={{width:40,height:40,borderRadius:14,background:`rgba(163,177,138,0.18)`,border:`1px solid rgba(163,177,138,0.3)`,display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}>
-                <span style={{fontSize:18}}>🌿</span>
-              </div>
-              <div style={{flex:1}}>
-                <div style={{fontSize:10,fontWeight:700,color:SAGE,letterSpacing:0.8,textTransform:'uppercase',marginBottom:4}}>오늘의 통찰</div>
-                <div style={{fontSize:12.5,color:TEXT,lineHeight:1.65,fontWeight:500}}>
-                  오늘 감정 기복이 많았던 것 같아요. 잠시 조용한 곳에서 귀를 쉬게 해보세요.
-                </div>
-              </div>
-            </div>
-            <div style={{marginTop:10,padding:'8px 12px',background:`rgba(212,175,55,0.08)`,borderRadius:12,border:`1px solid rgba(212,175,55,0.2)`,display:'flex',alignItems:'center',gap:8}}>
-              <span style={{fontSize:14}}>🔊</span>
-              <span style={{fontSize:11,color:'#A08020',fontWeight:500}}>주변이 다소 소란스럽네요, 귀를 쉬게 해주세요 <span style={{opacity:0.7}}>(62dB)</span></span>
-            </div>
-          </motion.div>
-
-          {/* ② 액체형 차트 */}
-          <motion.div initial={{opacity:0,scale:0.95}} animate={{opacity:mounted?1:0,scale:mounted?1:0.95}} transition={{duration:0.5,delay:0.08,ease:[0.34,1.56,0.64,1]}} style={{...GLASS,padding:'16px'}}>
-            <div style={{fontSize:10,fontWeight:700,color:TEXT_MID,letterSpacing:0.8,textTransform:'uppercase',marginBottom:12}}>4축 밸런스</div>
-            <div style={{display:'flex',justifyContent:'center'}}>
-              <div style={{position:'relative',width:170,height:170}}>
-                <svg width="170" height="170" viewBox="-10 -10 220 220" overflow="visible">
-                  {/* 배경 그리드 */}
-                  {[20,40,60].map(r=><circle key={r} cx="100" cy="100" r={r} fill="none" stroke="rgba(163,177,138,0.15)" strokeWidth="1"/>)}
-                  <line x1="100" y1="35" x2="100" y2="165" stroke="rgba(163,177,138,0.12)" strokeWidth="1"/>
-                  <line x1="35"  y1="100" x2="165" y2="100" stroke="rgba(163,177,138,0.12)" strokeWidth="1"/>
-
-                  {/* 액체 블롭 */}
-                  <path fill={`rgba(163,177,138,0.18)`} stroke={`rgba(163,177,138,0.55)`} strokeWidth="1.5">
-                    <animate attributeName="d" dur="4s" repeatCount="indefinite"
-                      values={`${p1};${p2};${p1}`}
-                      calcMode="spline" keySplines="0.45 0 0.55 1;0.45 0 0.55 1"/>
-                  </path>
-
-                  {/* 중앙 Sage 구 */}
-                  <defs>
-                    <radialGradient id="sphere" cx="38%" cy="35%">
-                      <stop offset="0%" stopColor="#C8D8B8"/>
-                      <stop offset="100%" stopColor={SAGE_DARK}/>
-                    </radialGradient>
-                    <filter id="glow"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
-                  </defs>
-                  <circle cx="100" cy="100" r="22" fill="url(#sphere)" filter="url(#glow)">
-                    <animate attributeName="r" values="22;24;22" dur="3s" repeatCount="indefinite"/>
-                  </circle>
-
-                  {/* 축 끝점 */}
-                  {AXES.map((a,i)=>{
-                    const r = 32+(72-32)*(a.score/a.max)
-                    const pos=[[100,100-r],[100+r,100],[100,100+r],[100-r,100]][i]
-                    return <circle key={a.key} cx={pos[0]} cy={pos[1]} r="5.5" fill={a.color} opacity="0.9" style={{filter:`drop-shadow(0 0 4px ${a.color})`}}/>
-                  })}
-
-                  {/* 레이블 */}
-                  {[['몸','#F5A87C',100,22],['감정','#EE9FB8',188,100],['관계','#B8A8D4',100,186],['의미','#E8C86E',12,100]].map(([l,c,x,y])=>(
-                    <text key={l as string} x={x as number} y={y as number} textAnchor="middle" dominantBaseline="middle" fontSize="10" fontWeight="700" fill={c as string}>{l as string}</text>
-                  ))}
-                </svg>
-              </div>
-            </div>
-
-            {/* 점수 바 */}
-            <div style={{display:'flex',flexDirection:'column',gap:7,marginTop:14}}>
-              {AXES.map((a,i)=>(
-                <div key={a.key} style={{display:'flex',alignItems:'center',gap:8}}>
-                  <span style={{fontSize:11,fontWeight:700,color:TEXT,width:24}}>{a.label}</span>
-                  <div style={{flex:1,height:4,background:'rgba(163,177,138,0.12)',borderRadius:2,overflow:'hidden'}}>
-                    <motion.div initial={{width:0}} animate={{width:`${(a.score/a.max)*100}%`}} transition={{duration:0.9,delay:0.3+i*0.08,ease:[0.34,1.56,0.64,1]}} style={{height:'100%',background:a.color,borderRadius:2}}/>
-                  </div>
-                  <span style={{fontSize:11,fontWeight:700,color:a.color,width:24,textAlign:'right'}}>{a.score}/{a.max}</span>
-                </div>
-              ))}
-            </div>
-          </motion.div>
-
-          {/* ③ 4축 체크리스트 */}
-          <motion.div initial={{opacity:0,y:14}} animate={{opacity:mounted?1:0,y:mounted?0:14}} transition={{duration:0.45,delay:0.15}} style={{display:'flex',flexDirection:'column',gap:8}}>
-            <div style={{fontSize:10,fontWeight:700,color:TEXT_MID,letterSpacing:0.8,textTransform:'uppercase'}}>오늘의 4축 기록</div>
-            {AXES.map((a,ai)=>(
-              <motion.div key={a.key} whileTap={{scale:0.97}} transition={{type:'spring',stiffness:400,damping:18}} style={{...GLASS,padding:'12px 14px',borderLeft:`3px solid ${a.color}`}}>
-                <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:10}}>
-                  <div>
-                    <span style={{fontSize:13,fontWeight:800,color:a.textColor}}>{a.label}</span>
-                    <span style={{fontSize:10,color:TEXT_LIGHT,marginLeft:6}}>{a.sub}</span>
-                  </div>
-                  <motion.span animate={{scale:1}} style={{fontSize:11,fontWeight:700,padding:'3px 10px',borderRadius:99,background:`${a.color}22`,color:a.textColor,border:`1px solid ${a.color}35`}}>
-                    {a.score}/{a.max}
-                  </motion.span>
-                </div>
-                <div style={{display:'flex',flexDirection:'column',gap:5,borderTop:'1px solid rgba(0,0,0,0.04)',paddingTop:9}}>
-                  {a.items.map((item,i)=>(
-                    <motion.div key={i} initial={{opacity:0,x:-6}} animate={{opacity:1,x:0}} transition={{delay:0.2+ai*0.05+i*0.04,type:'spring',stiffness:280}} style={{display:'flex',alignItems:'center',gap:9,padding:'7px 10px',borderRadius:12,background:item.checked?`${a.color}14`:'rgba(0,0,0,0.02)',border:`1px solid ${item.checked?a.color+'30':'rgba(0,0,0,0.04)'}`}}>
-                      <span style={{fontSize:13,fontWeight:800,color:item.checked?a.color:'#C8D0D3',width:14,textAlign:'center',flexShrink:0}}>{item.checked?'✓':'○'}</span>
-                      <span style={{fontSize:16,flexShrink:0}}>{item.emoji}</span>
-                      <span style={{fontSize:12,fontWeight:item.checked?600:400,color:item.checked?TEXT:TEXT_LIGHT,flex:1}}>{item.question}</span>
-                    </motion.div>
-                  ))}
-                </div>
-              </motion.div>
-            ))}
-          </motion.div>
-
-          {/* ④ 주간 스트립 */}
-          <motion.div initial={{opacity:0,y:14}} animate={{opacity:mounted?1:0,y:mounted?0:14}} transition={{duration:0.45,delay:0.22}} style={{...GLASS,padding:'14px 12px'}}>
-            <div style={{fontSize:10,fontWeight:700,color:TEXT_MID,letterSpacing:0.8,textTransform:'uppercase',marginBottom:12}}>이번 주</div>
-            <div style={{display:'flex',justifyContent:'space-between'}}>
-              {WEEK.map(d=>(
-                <div key={d.date} style={{display:'flex',flexDirection:'column',alignItems:'center',gap:4,flex:1}}>
-                  <span style={{fontSize:9.5,fontWeight:600,color:d.today?SAGE:TEXT_LIGHT}}>{d.day}</span>
-                  <motion.div whileTap={{scale:0.88}} style={{width:30,height:30,borderRadius:'50%',display:'flex',alignItems:'center',justifyContent:'center',background:d.today?SAGE:d.done?`rgba(163,177,138,0.15)`:'transparent',border:d.today?'none':d.done?`1.5px solid rgba(163,177,138,0.4)`:`1.5px dashed rgba(0,0,0,0.10)`,boxShadow:d.today?`0 0 12px rgba(163,177,138,0.5)`:'none'}}>
-                    <span style={{fontSize:10,fontWeight:700,color:d.today?'#fff':d.done?SAGE_DARK:TEXT_LIGHT}}>{d.date}</span>
-                  </motion.div>
-                  <div style={{display:'flex',gap:2}}>
-                    {d.dots.map((c,i)=><div key={i} style={{width:4,height:4,borderRadius:'50%',background:c}}/>)}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </motion.div>
-
-          {/* ⑤ 월간 통계 */}
-          <motion.div initial={{opacity:0,y:14}} animate={{opacity:mounted?1:0,y:mounted?0:14}} transition={{duration:0.45,delay:0.28}} style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:8,paddingBottom:4}}>
-            {[{val:'11일',label:'기록한 날',color:SAGE},{val:'3일',label:'🔥 연속',color:'#E8915A'},{val:'감정',label:'주요 축',color:'#EE9FB8'}].map(s=>(
-              <motion.div key={s.label} whileTap={{scale:0.93}} transition={{type:'spring',stiffness:400,damping:15}} style={{...GLASS,padding:'14px 8px',textAlign:'center',cursor:'pointer'}}>
-                <div style={{fontSize:20,fontWeight:800,color:s.color}}>{s.val}</div>
-                <div style={{fontSize:9.5,color:TEXT_LIGHT,marginTop:4}}>{s.label}</div>
-              </motion.div>
-            ))}
-          </motion.div>
-
-        </div>
-
-        {/* Floating Bottom Tab Bar */}
-        <div style={{flexShrink:0,margin:'0 12px 18px',borderRadius:28,background:'rgba(255,255,255,0.82)',backdropFilter:'blur(20px)',WebkitBackdropFilter:'blur(20px)',border:'1px solid rgba(255,255,255,0.9)',boxShadow:'0 4px 20px rgba(0,0,0,0.07)',display:'grid',gridTemplateColumns:'repeat(4,1fr)',padding:'10px 4px 14px',zIndex:20,position:'relative'}}>
-          {TABS.map(tab=>{
-            const active=tab.href==='/dashboard'
-            return (
-              <Link key={tab.label} href={tab.href} style={{textDecoration:'none',display:'flex',flexDirection:'column',alignItems:'center',gap:3}}>
-                <motion.div whileTap={{scale:0.85}} transition={{type:'spring',stiffness:500,damping:15}} style={{width:44,height:28,borderRadius:12,display:'flex',alignItems:'center',justifyContent:'center',background:active?`rgba(163,177,138,0.18)`:'transparent',border:active?`1px solid rgba(163,177,138,0.3)`:'1px solid transparent'}}>
-                  <TabIcon label={tab.label} active={active}/>
-                </motion.div>
-                <span style={{fontSize:9.5,fontWeight:active?700:500,color:active?SAGE:TEXT_LIGHT}}>{tab.label}</span>
-              </Link>
-            )
-          })}
-        </div>
-
+    <div>
+      <div style={{ height: 76, display: 'flex', alignItems: 'flex-end', gap: 10, margin: '18px 4px 8px' }}>
+        {values.map((height, index) => (
+          <span
+            key={`${height}-${index}`}
+            style={{
+              flex: 1,
+              height: `${height}%`,
+              minHeight: 28,
+              borderRadius: '6px 6px 0 0',
+              background: '#D6E2D6',
+            }}
+          />
+        ))}
       </div>
-
-      <style>{`
-        @keyframes cfPulse{0%,100%{opacity:1}50%{opacity:.3}}
-        div::-webkit-scrollbar{display:none}
-      `}</style>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10, color: TEXT_LIGHT, fontSize: 13, fontWeight: 800, textAlign: 'center' }}>
+        <span>1주</span>
+        <span>2주</span>
+        <span>3주</span>
+        <span>4주</span>
+      </div>
+      <p style={{ margin: '9px 4px 0', color: TEXT_LIGHT, fontSize: 13, lineHeight: 1.45, fontWeight: 700 }}>
+        시작 ~ 최근 · 전체 기록 기준
+      </p>
     </div>
+  )
+}
+
+function NumberField({
+  label,
+  value,
+  onChange,
+}: {
+  label: string
+  value: number
+  onChange: (value: number) => void
+}) {
+  return (
+    <label style={{ display: 'grid', gap: 6, color: TEXT_MID, fontSize: 11, fontWeight: 800 }}>
+      {label}
+      <input
+        type="number"
+        min={0}
+        value={value}
+        onChange={event => onChange(Number(event.target.value))}
+        style={{
+          border: `1px solid ${BORDER}`,
+          borderRadius: 12,
+          padding: '10px 11px',
+          background: '#fff',
+          color: TEXT,
+          fontWeight: 800,
+          width: '100%',
+          boxSizing: 'border-box',
+        }}
+      />
+    </label>
+  )
+}
+
+function indicatorCopy(name: string, band: Band) {
+  if (band === 'high') return `${name}이 개인 최근 기록보다 높게 관찰돼요. 오늘 기록을 함께 볼까요?`
+  if (band === 'low') return `${name}이 개인 최근 기록보다 낮게 관찰돼요. 오늘 기록을 함께 볼까요?`
+  return `${name}이 개인 최근 기록과 비슷하게 관찰돼요. 오늘 기록을 이어가며 함께 볼까요?`
+}
+
+export default function DashboardPage() {
+  const [data, setData] = useState<IndicatorResponse | null>(null)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+  const [weekly, setWeekly] = useState<WeeklyForm>(emptyWeekly)
+  const [weeklySaving, setWeeklySaving] = useState(false)
+  const [weeklySaved, setWeeklySaved] = useState(false)
+  const [safetyMessage, setSafetyMessage] = useState('')
+  const steadinessBand = data?.indicators.steadiness ?? 'low'
+  const activityRangeBand = data?.indicators.activity_range ?? 'normal'
+
+  const loadIndicators = async () => {
+    setLoading(true)
+    setError('')
+
+    try {
+      const response = await fetch('/api/indicators', { method: 'POST' })
+      if (response.status === 401) {
+        window.location.href = '/login?next=/dashboard'
+        return
+      }
+      if (!response.ok) throw new Error('indicator')
+      setData(await response.json())
+    } catch (e) {
+      setError('지표를 불러오지 못했어요. 기록 저장 상태와 연결을 함께 볼까요?')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    loadIndicators()
+  }, [])
+
+  const saveWeekly = async () => {
+    setWeeklySaving(true)
+    setWeeklySaved(false)
+    setSafetyMessage('')
+    setError('')
+
+    try {
+      const response = await fetch('/api/weekly-checkins', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(weekly),
+      })
+      if (response.status === 401) {
+        window.location.href = '/login?next=/dashboard'
+        return
+      }
+      if (!response.ok) throw new Error('weekly')
+      const result = await response.json()
+      setWeeklySaved(true)
+      setSafetyMessage(result.safety ?? '')
+      setWeekly(emptyWeekly())
+    } catch (e) {
+      setError('주간 체크인을 저장하지 못했어요. 로그인 상태와 연결을 함께 볼까요?')
+    } finally {
+      setWeeklySaving(false)
+    }
+  }
+
+  return (
+    <main
+      style={{
+        minHeight: '100dvh',
+        background: CARE_GRADIENTS.app,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '20px 16px',
+        fontFamily: CARE_FONT,
+      }}
+    >
+      <div
+        style={{
+          width: 390,
+          height: 844,
+          borderRadius: CARE_RADIUS.shell,
+          background: CARE_GRADIENTS.shell,
+          border: '1.5px solid rgba(255,255,255,0.9)',
+          boxShadow: CARE_SHADOW.shell,
+          overflow: 'hidden',
+          display: 'flex',
+          flexDirection: 'column',
+        }}
+      >
+        <header style={{ padding: '30px 22px 14px', borderBottom: `1px solid ${BORDER}`, margin: '0 16px', flexShrink: 0 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, alignItems: 'center' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <div style={{ width: 10, height: 10, borderRadius: '50%', background: SAGE }} />
+              <span style={{ fontSize: 21, fontWeight: 900, color: SAGE_DARK }}>CareFlow</span>
+            </div>
+            <button
+              type="button"
+              onClick={loadIndicators}
+              disabled={loading}
+              style={{
+                border: 'none',
+                background: 'transparent',
+                color: TEXT_LIGHT,
+                fontSize: 17,
+                fontWeight: 800,
+                padding: 0,
+              }}
+            >
+              9:41
+            </button>
+          </div>
+        </header>
+
+        <div style={{ flex: 1, overflowY: 'auto', padding: '20px 16px 22px', display: 'grid', gap: 14, scrollbarWidth: 'none' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+            <Link
+              href="/explore"
+              style={{
+                background: '#fff',
+                border: `1px solid ${BORDER}`,
+                borderRadius: 16,
+                padding: '13px 14px',
+                color: SAGE_DARK,
+                fontSize: 15,
+                fontWeight: 900,
+                textAlign: 'center',
+                textDecoration: 'none',
+              }}
+            >
+              ✍️ 기록
+            </Link>
+            <Link
+              href="/notification"
+              style={{
+                background: '#fff',
+                border: `1px solid ${BORDER}`,
+                borderRadius: 16,
+                padding: '13px 14px',
+                color: SAGE_DARK,
+                fontSize: 15,
+                fontWeight: 900,
+                textAlign: 'center',
+                textDecoration: 'none',
+              }}
+            >
+              🔔 알림
+            </Link>
+          </div>
+
+          {!data && loading && (
+            <Card title="오늘의 지표 · 기준일 2026-06-22" compact>
+              <p style={{ margin: 0, color: TEXT_LIGHT, fontSize: 12, lineHeight: 1.5 }}>
+                기록을 바탕으로 최신 지표를 불러오고 있어요.
+              </p>
+            </Card>
+          )}
+
+          <Card title="">
+            <BandGauge
+              title="걸음 안정도"
+              band={steadinessBand}
+              body={indicatorCopy('걸음 안정도', steadinessBand)}
+            />
+          </Card>
+
+          <Card title="">
+            <BandGauge
+              title="활동 범위"
+              band={activityRangeBand}
+              body=""
+            />
+          </Card>
+
+          <Card title="오늘 저장된 기록">
+            <p style={{ margin: 0, color: TEXT_MID, fontSize: 16, lineHeight: 1.65, fontWeight: 700 }}>
+              아침 · 몸 신호 2개<br />
+              수면 · 23:00 ~ 07:00
+            </p>
+          </Card>
+
+          <Card title="활동 범위 추세">
+            <TrendBars points={data?.trend ?? []} />
+          </Card>
+
+          <Card title="관찰된 연관">
+            <p style={{ margin: 0, color: TEXT_MID, fontSize: 16, lineHeight: 1.65, fontWeight: 700 }}>
+              걷기 불안과 두통이 <strong style={{ color: TEXT }}>함께 오르내리는 흐름</strong>이 관찰돼요.
+            </p>
+            <p style={{ margin: '12px 0 0', color: TEXT_LIGHT, fontSize: 13, lineHeight: 1.5, fontWeight: 700 }}>
+              상관(연관)일 뿐, 원인·진단 아님
+            </p>
+          </Card>
+
+          <Card title="주1회 체크인" aside={<span style={{ color: TEXT_LIGHT, fontSize: 10 }}>추세용 · 판정 아님</span>}>
+            <div style={{ display: 'grid', gap: 10 }}>
+              <label style={{ display: 'grid', gap: 6, color: TEXT_MID, fontSize: 11, fontWeight: 800 }}>
+                주 시작일
+                <input
+                  type="date"
+                  value={weekly.week_start}
+                  onChange={event => setWeekly(prev => ({ ...prev, week_start: event.target.value }))}
+                  style={{ border: `1px solid ${BORDER}`, borderRadius: 12, padding: '10px 11px', background: '#fff', color: TEXT, fontWeight: 800 }}
+                />
+              </label>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 9 }}>
+                <NumberField label="DHI P" value={weekly.dhi_p} onChange={value => setWeekly(prev => ({ ...prev, dhi_p: value }))} />
+                <NumberField label="DHI E" value={weekly.dhi_e} onChange={value => setWeekly(prev => ({ ...prev, dhi_e: value }))} />
+                <NumberField label="DHI F" value={weekly.dhi_f} onChange={value => setWeekly(prev => ({ ...prev, dhi_f: value }))} />
+                <NumberField label="THI" value={weekly.thi} onChange={value => setWeekly(prev => ({ ...prev, thi: value }))} />
+                <NumberField label="HADS A" value={weekly.hads_a} onChange={value => setWeekly(prev => ({ ...prev, hads_a: value }))} />
+                <NumberField label="HADS D" value={weekly.hads_d} onChange={value => setWeekly(prev => ({ ...prev, hads_d: value }))} />
+                <NumberField label="VSS-SF" value={weekly.vss_sf} onChange={value => setWeekly(prev => ({ ...prev, vss_sf: value }))} />
+              </div>
+              <button
+                type="button"
+                onClick={saveWeekly}
+                disabled={weeklySaving}
+                style={{
+                  border: 'none',
+                  borderRadius: 14,
+                  padding: '13px 14px',
+                  background: SAGE,
+                  color: '#fff',
+                  fontSize: 13,
+                  fontWeight: 900,
+                  opacity: weeklySaving ? 0.65 : 1,
+                }}
+              >
+                {weeklySaving ? '저장 중...' : '주간 체크인 저장'}
+              </button>
+              <p style={{ margin: 0, color: TEXT_LIGHT, fontSize: 11, lineHeight: 1.6 }}>
+                DHI · THI · HADS · VSS-SF
+              </p>
+            </div>
+          </Card>
+
+          <Card title="대화 · 음성 기록">
+            <p style={{ margin: 0, color: TEXT_MID, fontSize: 16, lineHeight: 1.55, fontWeight: 700 }}>
+              “오늘 하루를 말하면 기록 초안을 함께 만들어요”
+            </p>
+            <p style={{ margin: '12px 0 0', color: TEXT_LIGHT, fontSize: 13, lineHeight: 1.5, fontWeight: 700 }}>
+              초안 확인 후 저장 · 점수 추정 없음
+            </p>
+            <Link href="/chat" style={{ display: 'inline-flex', marginTop: 12, color: SAGE_DARK, fontSize: 13, fontWeight: 900, textDecoration: 'none' }}>
+              대화로 기록하기
+            </Link>
+          </Card>
+
+          {weeklySaved && (
+            <div style={{ background: '#fff', border: `1px solid ${BORDER}`, borderRadius: 16, padding: 13, color: SAGE_DARK, fontSize: 12, fontWeight: 800 }}>
+              주간 체크인이 저장됐어요.
+            </div>
+          )}
+
+          {safetyMessage && (
+            <div style={{ background: 'rgba(255,248,236,0.92)', border: '1px solid rgba(212,154,98,0.45)', borderRadius: 16, padding: 13 }}>
+              <strong style={{ color: '#87521F', fontSize: 13 }}>함께 확인해볼까요?</strong>
+              <p style={{ margin: '5px 0 0', color: '#87521F', fontSize: 12, lineHeight: 1.6 }}>{safetyMessage}</p>
+            </div>
+          )}
+
+          <div style={{ borderLeft: `3px solid ${CARE_COLORS.accent}`, background: 'rgba(197,143,91,0.10)', borderRadius: '0 8px 8px 0', padding: '11px 13px', color: '#7A5A36', fontSize: 13, lineHeight: 1.55, fontWeight: 800 }}>
+            비의료기기 경계 · 증상·불안이 클 땐 지표 대신 의료진·외부자원 연계를 우선 안내
+          </div>
+
+          {error && (
+            <div style={{ background: 'rgba(255,244,240,0.92)', border: '1px solid rgba(180,72,44,0.3)', borderRadius: 16, padding: 13, color: '#A0482C', fontSize: 12, lineHeight: 1.6 }}>
+              {error}
+            </div>
+          )}
+        </div>
+      </div>
+    </main>
   )
 }

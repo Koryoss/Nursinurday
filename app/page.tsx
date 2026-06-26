@@ -4,21 +4,22 @@ import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import Link from 'next/link'
+import { CARE_COLORS, CARE_FONT, CARE_GRADIENTS, CARE_RADIUS, CARE_SHADOW } from '@/lib/designTokens'
 
 /* ── 디자인 토큰 ── */
 const C = {
-  bg:     '#FBFBFB',
-  text:   '#2D2D2D',
-  mid:    '#6B6B6B',
-  light:  '#ABABAB',
-  sage:   '#A3B18A',
-  sageDk: '#7A9E6A',
-  purple: '#B8A8D4',
-  gold:   '#D4AF37',
-  goldLt: '#E8C86E',
+  bg: CARE_COLORS.surface,
+  text: CARE_COLORS.text,
+  mid: CARE_COLORS.mid,
+  light: CARE_COLORS.light,
+  sage: CARE_COLORS.primary,
+  sageDk: CARE_COLORS.primaryDark,
+  purple: CARE_COLORS.lilac,
+  gold: CARE_COLORS.accent,
+  goldLt: CARE_COLORS.accent,
 }
 
-const FONT = "'Pretendard', -apple-system, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif"
+const FONT = CARE_FONT
 
 /* ── 로고 SVG ── */
 function CareFlowLogo({ width = 260 }: { width?: number }) {
@@ -94,7 +95,7 @@ function SplashScreen({ onNavigate }: { onNavigate: () => void }) {
       transition={{ duration: 0.4 }}
       style={{
         position: 'fixed', inset: 0, zIndex: 9999,
-        background: 'linear-gradient(160deg, #E8EDE4 0%, #F0F4EE 50%, #EAF0E8 100%)',
+        background: CARE_GRADIENTS.app,
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         padding: '20px 16px',
         fontFamily: FONT,
@@ -103,10 +104,10 @@ function SplashScreen({ onNavigate }: { onNavigate: () => void }) {
       {/* 아이폰 프레임 */}
       <div style={{
         width: 390, height: 844,
-        borderRadius: 54,
-        background: 'linear-gradient(160deg, #F0F4EE 0%, #F8F9FA 100%)',
+        borderRadius: CARE_RADIUS.shell,
+        background: CARE_GRADIENTS.shell,
         border: '1.5px solid rgba(255,255,255,0.9)',
-        boxShadow: '0 40px 100px rgba(0,0,0,0.14), 0 8px 32px rgba(163,177,138,0.12), inset 0 1px 0 rgba(255,255,255,0.95)',
+        boxShadow: CARE_SHADOW.shell,
         display: 'flex', flexDirection: 'column',
         alignItems: 'center', justifyContent: 'center',
         overflow: 'hidden', position: 'relative',
@@ -213,79 +214,210 @@ function SplashScreen({ onNavigate }: { onNavigate: () => void }) {
 
 /* ── 데이터 ── */
 const stats = [
-  { num: '41', unit: '%',  label: '이석증(BPPV) 환자 중\n이명을 동반하는 비율', source: 'Messina et al., 2017 · 2,682명' },
-  { num: '2',  unit: '배', label: '이명 환자의 우울 위험\n일반인 대비',           source: 'Meta-analysis · 22개 연구, 2025' },
-  { num: '115',unit: '만', label: '한국 어지러움\n연간 진료 환자 수',             source: '건강보험심사평가원, 2022' },
+  { num: '4', unit: '축', label: '몸·감정·관계·의미를\n한 흐름으로 기록' },
+  { num: '5', unit: '구간', label: '아침·점심·저녁·취침 전과\n응급 시점을 구분' },
+  { num: '7', unit: '일', label: '최근 기록을 기준으로\n평소와의 차이를 관찰' },
 ]
 
 const problemSteps = [
-  { num: '01', title: '의학의 한계',
-    desc: '이명·어지러움은 완치가 없습니다. 약물은 증상을 줄이는 것까지. 그 이후 일상 관리는 의료 시스템이 커버할 수 없는 영역입니다.' },
-  { num: '02', title: '일상의 공백',
-    desc: '2개월에 한 번 진료. 그 사이 언제, 왜 증상이 심해지는지 환자도 의사도 모릅니다. 기억에 의존해 말하는 짧은 진료 시간이 전부입니다.' },
-  { num: '03', title: '기록 부재의 진짜 이유',
-    desc: '귀찮아서가 아닙니다. 스트레스가 증상을 악화시킨다는 건 알지만, 어떤 스트레스가 얼마나 영향을 주는지는 모릅니다.',
-    highlight: '"해봐야 뭐가 달라져?"' },
+  { num: '01', title: '기억에 의존하는 기록',
+    desc: '증상이 있었던 날의 몸 상태, 감정, 관계와 의미를 나중에 떠올리기는 쉽지 않습니다. 따라서 CareFlow는 그날의 흐름을 짧게 남길 수 있게 돕습니다.' },
+  { num: '02', title: '흩어진 생활 맥락',
+    desc: '몸 신호만 따로 보거나 감정만 따로 보면 하루의 맥락이 잘 보이지 않을 수 있습니다. 따라서 네 축을 함께 놓고 관찰합니다.' },
+  { num: '03', title: '나에게 맞는 기준의 필요',
+    desc: 'CareFlow는 절대 정상치를 말하지 않습니다. 따라서 사용자의 최근 기록을 기준으로 평소와 어떻게 달랐는지 함께 봅니다.',
+    highlight: '"오늘 기록을 함께 볼까요?"' },
 ]
 
 const dataCards = [
-  { num: '2.47×', label: '이명 환자의 이석증 발생 위험\n일반인 대비',      source: '한국 NHIS 데이터 · 58만 명 · Rim et al., 2025', color: C.sage },
-  { num: '5.3×',  label: '이명 환자의 자살 사고 위험\n일반인 대비',        source: 'American Journal of Otolaryngology, 2025',   color: '#F5A87C' },
-  { num: '53%',   label: '이명 환자에서 보고되는\n수면장애 유병률',        source: 'Journal of Clinical Sleep Medicine, 2024',  color: C.purple },
-]
-
-const solutions = [
-  { num: '01 / 기록', title: '버튼 하나로 기록 완료',
-    desc: '어지러운 순간, 타이핑할 수 없습니다. 증상 발생 시 버튼 하나로 기록이 끝납니다. 나머지는 앱이 채웁니다.',
-    tag: '자동 수집 — 시간 · 날씨 · 기압 · 수면', accent: C.sage },
-  { num: '02 / 분석', title: '스트레스-증상 패턴 시각화',
-    desc: '기록이 쌓이면 어떤 날, 어떤 상황에서 증상이 심해지는지 보입니다. 패턴이 보이면 관리가 시작됩니다.',
-    tag: '타임라인 · 상관관계 그래프', accent: C.purple },
-  { num: '03 / 활용', title: '진료 시 참고 리포트',
-    desc: '2개월간의 패턴을 한 장으로. 기억에 의존하지 않고 데이터로 의사와 이야기할 수 있습니다.',
-    tag: '비의료기기 · 자기관리 도구', accent: C.goldLt },
+  { num: '입력', label: '몸 안의 수면 기록까지\n짧은 폼으로 저장', color: C.sage },
+  { num: '흐름', label: '내 최근 기록과 비교해\n평소와 다른 날을 확인', color: C.goldLt },
+  { num: '의견', label: '사용자의 목소리로\n다음 화면을 다듬기', color: C.purple },
 ]
 
 const flowSteps = [
-  { title: '증상 발생', desc: '이명이 울리거나 어지러움이 시작되는 순간' },
-  { title: '원탭 기록', desc: '버튼 하나. 시간·날씨·수면은 자동 수집' },
-  { title: '패턴 발견', desc: '스트레스와 증상의 상관관계가 그래프로' },
-  { title: '관리 시작', desc: '어떤 날 조심해야 하는지 스스로 알게 됨' },
+  { title: '하루 선택', desc: '오늘의 기록 시점을 고릅니다' },
+  { title: '짧게 입력', desc: '몸·감정·관계·의미를 남깁니다' },
+  { title: '흐름 확인', desc: '기록 기반 지표와 추세를 봅니다' },
+  { title: '함께 보기', desc: '필요한 변화와 질문을 살펴봅니다' },
 ]
 
 const researchItems = [
   { label: '자율신경계 · 내이',
-    quote: '스트레스 호르몬의 지속적 상승은 교감신경계를 통해 이명, 어지러움 등 내이 기능 이상으로 이어질 수 있다',
-    source: 'Horner KC · Neuroscience & Biobehavioral Reviews · 2003', color: C.sage },
+    quote: '몸 신호와 생활 맥락을 함께 기록하면 다음 대화에서 살펴볼 질문을 정리하기 쉬워집니다',
+    source: '기록과 대화 준비', color: C.sage },
   { label: '이명 · 어지러움 동반',
-    quote: '이석증(BPPV) 환자의 41.2%가 이명을 동반한다 — 두 증상은 함께 관리되어야 한다',
-    source: 'Messina et al. · Acta Otorhinolaryngol Ital · 2017 · n=2,682', color: '#F5A87C' },
+    quote: '함께 나타난 몸 신호를 기록하고, 관찰된 흐름을 사용자의 기준으로 다시 봅니다',
+    source: '몸 신호 기록', color: C.goldLt },
   { label: '정신건강 연동',
-    quote: '이명 환자의 우울 위험 1.92배, 불안 1.63배, 불면 3.07배 — 신체 증상이 정신건강 악순환을 만든다',
-    source: 'Meta-analysis · American Journal of Otolaryngology · 2025 · 22개 연구', color: C.purple },
+    quote: '감정과 수면 기록을 함께 놓고 하루의 흐름을 살펴봅니다',
+    source: '자기돌봄 참고 자료', color: C.purple },
   { label: '한국 데이터',
-    quote: '이명 환자의 BPPV 발생 위험 2.47배, BPPV 환자의 이명 발생 위험 2.05배 — 양방향 연관 확인',
-    source: 'Rim et al. · 한국 NHIS 데이터 · 2025 · n=580,000', color: C.goldLt },
+    quote: '개인 기준선 대비 band만 사용하고 절대 정상치나 예후 확률은 제공하지 않습니다',
+    source: '개인 기록 기준', color: C.goldLt },
 ]
 
 const axes = [
-  { color:'#F5A87C', bg:'rgba(245,168,124,0.08)', border:'rgba(245,168,124,0.25)', label:'몸',  sub:'신체 증상 · 에너지',
-    items:['이명이 있었나요?','어지러움이 있었나요?','피로감을 느꼈나요?','두통이 있었나요?'] },
-  { color:'#EE9FB8', bg:'rgba(238,159,184,0.08)', border:'rgba(238,159,184,0.25)', label:'감정', sub:'불안 · 긴장 · 감정 기복',
+  { color:'#C58F5B', bg:'rgba(197,143,91,0.10)', border:'rgba(197,143,91,0.28)', label:'몸',  sub:'몸 신호 · 수면 · 에너지',
+    items:['이명이 있었나요?','어지러움이 있었나요?','두통이 있었나요?','수면은 어땠나요?'] },
+  { color:'#9B8AC6', bg:'rgba(155,138,198,0.10)', border:'rgba(155,138,198,0.28)', label:'감정', sub:'불안 · 긴장 · 감정 기복',
     items:['불안감을 느꼈나요?','예민하거나 짜증이 났나요?','두려움이 있었나요?','기분 변화가 심했나요?'] },
-  { color:'#B8A8D4', bg:'rgba(184,168,212,0.08)', border:'rgba(184,168,212,0.25)', label:'관계', sub:'연결 · 고립 · 사회 참여',
+  { color:'#5C7A5E', bg:'rgba(92,122,94,0.10)', border:'rgba(92,122,94,0.28)', label:'관계', sub:'연결 · 고립 · 사회 참여',
     items:['사람들과 함께했나요?','고립감을 느꼈나요?','소통이 힘들었나요?'] },
-  { color:'#E8C86E', bg:'rgba(232,200,110,0.08)', border:'rgba(232,200,110,0.25)', label:'의미', sub:'방향 · 성취 · 삶의 질',
+  { color:'#B7A35A', bg:'rgba(183,163,90,0.10)', border:'rgba(183,163,90,0.28)', label:'의미', sub:'방향 · 성취 · 삶의 질',
     items:['성취감을 느꼈나요?','하루가 의미 있었나요?','계획한 일을 했나요?'] },
 ]
+
+const appPreviews = [
+  { title: '요약', kind: 'home' },
+  { title: '추세', kind: 'trend' },
+  { title: '기록', kind: 'record' },
+  { title: '알림', kind: 'alert' },
+]
+
+function MiniGauge({ label, band, color, position = '55%', copy }: { label: string; band: string; color: string; position?: string; copy?: string }) {
+  return (
+    <div style={{ background: '#fff', border: '1px solid rgba(92,122,94,0.16)', borderRadius: 16, padding: 14 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
+        <span style={{ fontSize: 17, fontWeight: 900, color: C.text }}>{label}</span>
+        <span style={{ fontSize: 12, fontWeight: 900, color: '#fff', background: color, padding: '5px 11px', borderRadius: 99 }}>{band}</span>
+      </div>
+      <div style={{ position: 'relative', height: 11, margin: '11px 0 7px' }}>
+        <div style={{ position: 'absolute', left: 0, right: 0, top: 3, height: 8, borderRadius: 99, background: '#ECF1EC' }} />
+        <div style={{ position: 'absolute', left: position, top: -2, width: 4, height: 18, borderRadius: 99, background: C.text, transform: 'translateX(-50%)' }} />
+      </div>
+      {copy && <div style={{ fontSize: 13, color: C.mid, lineHeight: 1.45, fontWeight: 700 }}>{copy}</div>}
+    </div>
+  )
+}
+
+function PreviewPhone({ kind }: { kind: string }) {
+  return (
+    <div style={{
+      width: '100%', maxWidth: 310, aspectRatio: '390 / 720',
+      borderRadius: 34,
+      background: CARE_GRADIENTS.shell,
+      border: '1.5px solid rgba(255,255,255,0.9)',
+      boxShadow: '0 22px 60px rgba(38,49,42,0.12)',
+      overflow: 'hidden',
+      display: 'flex',
+      flexDirection: 'column',
+    }}>
+      <div style={{ height: 62, display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', padding: '0 20px 12px', borderBottom: '1px solid rgba(92,122,94,0.18)', margin: '0 14px', flexShrink: 0 }}>
+        <span style={{ display: 'flex', alignItems: 'center', gap: 7, fontSize: 18, fontWeight: 900, color: C.sageDk }}>
+          <span style={{ width: 9, height: 9, borderRadius: 99, background: C.sage }} />
+          CareFlow
+        </span>
+        <span style={{ fontSize: 15, fontWeight: 800, color: C.light }}>{kind === 'trend' ? '추세' : '9:41'}</span>
+      </div>
+      <div style={{ flex: 1, minHeight: 0, padding: 16, overflow: 'hidden' }}>
+        {kind === 'home' && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 11 }}>
+            <div style={{ background: '#fff', border: '1px solid rgba(92,122,94,0.16)', borderRadius: 16, padding: 14 }}>
+              <div style={{ fontSize: 14, fontWeight: 900, color: C.mid, marginBottom: 12 }}>오늘 저장된 기록</div>
+              <div style={{ fontSize: 15, color: C.mid, lineHeight: 1.65, fontWeight: 700 }}>아침 · 몸 신호 2개<br/>수면 · 23:00 ~ 07:00</div>
+            </div>
+            <MiniGauge label="걸음 안정도" band="낮음" color="#7E9AA0" position="28%" copy="개인 최근 기록과의 차이를 함께 볼까요?" />
+            <MiniGauge label="활동 범위" band="보통" color={C.sage} position="52%" />
+          </div>
+        )}
+        {kind === 'trend' && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <div style={{ background: '#fff', border: '1px solid rgba(92,122,94,0.16)', borderRadius: 16, padding: 15 }}>
+              <div style={{ fontSize: 14, fontWeight: 900, color: C.mid, marginBottom: 20 }}>활동 범위 추세</div>
+              <div style={{ height: 72, display: 'flex', alignItems: 'flex-end', gap: 9, margin: '0 4px 7px' }}>
+                {[42, 55, 50, 68].map((height, index) => (
+                  <span key={index} style={{ flex: 1, height: `${height}%`, background: '#D6E2D6', borderRadius: '5px 5px 0 0' }} />
+                ))}
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8, color: C.light, fontSize: 12, fontWeight: 800, textAlign: 'center' }}>
+                <span>1주</span><span>2주</span><span>3주</span><span>4주</span>
+              </div>
+              <div style={{ color: C.light, fontSize: 12, fontWeight: 700, marginTop: 8 }}>시작 ~ 최근 · 전체 기록 기준</div>
+            </div>
+            <div style={{ background: '#fff', border: '1px solid rgba(92,122,94,0.16)', borderRadius: 16, padding: 15 }}>
+              <div style={{ fontSize: 14, fontWeight: 900, color: C.mid, marginBottom: 12 }}>관찰된 연관</div>
+              <div style={{ fontSize: 15, color: C.mid, lineHeight: 1.55, fontWeight: 700 }}>걷기 불안과 두통이 <b style={{ color: C.text }}>함께 오르내리는 흐름</b>이 관찰돼요.</div>
+              <div style={{ color: C.light, fontSize: 12, fontWeight: 700, marginTop: 10 }}>상관(연관)일 뿐, 원인·진단 아님</div>
+            </div>
+            <div style={{ background: '#fff', border: '1px solid rgba(92,122,94,0.16)', borderRadius: 16, padding: 15 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, marginBottom: 12 }}>
+                <span style={{ fontSize: 14, fontWeight: 900, color: C.mid }}>주1회 체크인</span>
+                <span style={{ fontSize: 12, fontWeight: 700, color: C.light }}>추세용 · 판정 아님</span>
+              </div>
+              <div style={{ fontSize: 15, color: C.mid, fontWeight: 800 }}>DHI · THI · HADS · VSS-SF</div>
+            </div>
+            <div style={{ borderLeft: `3px solid ${C.gold}`, background: 'rgba(197,143,91,0.10)', borderRadius: '0 8px 8px 0', padding: '10px 12px', color: '#7A5A36', fontSize: 12, lineHeight: 1.5, fontWeight: 800 }}>
+              비의료기기 경계 · 의료진·외부자원 연계를 우선 안내
+            </div>
+          </div>
+        )}
+        {kind === 'record' && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            <div style={{ background: '#fff', border: '1px solid rgba(92,122,94,0.16)', borderRadius: 16, padding: 14 }}>
+              <div style={{ fontSize: 13, color: C.mid, fontWeight: 800, marginBottom: 8 }}>기록 날짜</div>
+              <div style={{ fontSize: 17, color: C.text, fontWeight: 900 }}>2026-06-22</div>
+            </div>
+            <div style={{ background: '#fff', border: '1px solid rgba(92,122,94,0.16)', borderRadius: 16, padding: 14 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 8, marginBottom: 12 }}>
+                {axes.map(axis => (
+                  <div key={axis.label} style={{ border: `1px solid ${axis.border}`, background: axis.bg, borderRadius: 12, padding: '10px 4px', textAlign: 'center', fontSize: 15, fontWeight: 900, color: axis.color }}>{axis.label}</div>
+                ))}
+              </div>
+              <div style={{ background: 'rgba(197,143,91,0.12)', borderRadius: 12, padding: 12, textAlign: 'center', color: '#9A5A2F', fontSize: 14, fontWeight: 900 }}>심할수록 10에 가깝게</div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 12 }}>
+                {['어지럼', '이명'].map((item, index) => (
+                  <div key={item} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: 14, color: C.text, fontWeight: 800 }}>
+                    <span>{item}</span>
+                    <span style={{ color: C.sageDk }}>{index + 2}</span>
+                  </div>
+                ))}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderRadius: 12, padding: '9px 10px', background: 'rgba(197,143,91,0.10)', border: '1px solid rgba(197,143,91,0.20)', fontSize: 13, color: C.text, fontWeight: 800 }}>
+                  <span>몸 안의 수면</span>
+                  <span style={{ color: C.gold }}>07:00</span>
+                </div>
+              </div>
+            </div>
+            <div style={{ background: C.sage, color: '#fff', borderRadius: 14, padding: 14, textAlign: 'center', fontSize: 16, fontWeight: 900 }}>기록 저장</div>
+          </div>
+        )}
+        {kind === 'alert' && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10, alignItems: 'center' }}>
+            <div style={{ fontSize: 18, fontWeight: 900, color: C.text, alignSelf: 'stretch' }}>알림 시간</div>
+            <div style={{ width: 138, height: 138, borderRadius: 69, border: `7px solid ${C.sage}`, background: '#fff', position: 'relative', margin: '6px 0 4px' }}>
+              <div style={{ position: 'absolute', left: 64, bottom: 68, width: 5, height: 45, borderRadius: 3, background: C.gold, transform: 'rotate(90deg)', transformOrigin: 'bottom' }} />
+              <div style={{ position: 'absolute', left: 64, bottom: 68, width: 5, height: 34, borderRadius: 3, background: C.sageDk, transform: 'rotate(25deg)', transformOrigin: 'bottom' }} />
+              <div style={{ position: 'absolute', left: 62, top: 62, width: 12, height: 12, borderRadius: 6, background: C.sageDk }} />
+            </div>
+            <div style={{ fontSize: 28, fontWeight: 900, color: C.text }}>08:00</div>
+            {['기상 직후', '아침', '점심', '저녁', '취침 전'].map((item, index) => (
+              <div key={item} style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#fff', border: '1px solid rgba(92,122,94,0.16)', borderRadius: 14, padding: '10px 12px' }}>
+                <span style={{ fontSize: 14, fontWeight: 900, color: C.text }}>{item}</span>
+                <span style={{ fontSize: 14, fontWeight: 900, color: C.sageDk }}>{['07:00', '08:00', '12:30', '19:00', '22:30'][index]}</span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
 
 export default function HomePage() {
   const router = useRouter()
   const [showSplash, setShowSplash] = useState(false)
+  const [previewIndex, setPreviewIndex] = useState(0)
 
   const handleNavigate = useCallback(() => {
-    router.push('/explore')
+    router.push('/login')
   }, [router])
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setPreviewIndex(index => (index + 1) % appPreviews.length)
+    }, 2200)
+    return () => clearInterval(timer)
+  }, [])
 
   return (
     <>
@@ -313,18 +445,15 @@ export default function HomePage() {
               <span style={{ fontSize: 20, fontWeight: 800, letterSpacing: '-0.5px', color: C.text }}>CareFlow</span>
             </div>
             <nav style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-              <Link href="/explore"      style={{ fontSize: 14, fontWeight: 600, color: C.mid, textDecoration: 'none', padding: '8px 14px', borderRadius: 99 }}>기록</Link>
-              <Link href="/notification" style={{ fontSize: 14, fontWeight: 600, color: C.mid, textDecoration: 'none', padding: '8px 14px', borderRadius: 99 }}>알림</Link>
-              <Link href="/dashboard"    style={{ fontSize: 14, fontWeight: 600, color: C.mid, textDecoration: 'none', padding: '8px 14px', borderRadius: 99 }}>대시보드</Link>
               <button
                 onClick={() => setShowSplash(true)}
                 style={{
                   fontSize: 14, fontWeight: 700, color: '#fff',
                   padding: '9px 22px', borderRadius: 99, border: 'none', cursor: 'pointer',
                   background: `linear-gradient(135deg, ${C.sage}, ${C.sageDk})`,
-                  boxShadow: '0 4px 14px rgba(163,177,138,0.35)',
+                  boxShadow: CARE_SHADOW.button,
                 }}
-              >체험해 보기</button>
+              >시작하기</button>
             </nav>
           </div>
         </header>
@@ -347,24 +476,24 @@ export default function HomePage() {
             </h1>
 
             <p style={{ fontSize: 'clamp(18px, 3vw, 26px)', fontWeight: 500, color: C.mid, lineHeight: 1.6, maxWidth: 520, margin: '0 0 12px' }}>
-              진료실 밖 당신의 일상을 연결합니다.
+              베타 참여자를 모집하고 있어요.
             </p>
             <p style={{ fontSize: 'clamp(14px, 2vw, 17px)', color: C.light, lineHeight: 1.8, maxWidth: 540, margin: '0 0 52px' }}>
-              어지럼증과 이명, 오늘부터 매일 기록하세요.<br/>
-              내 몸·감정·관계·의미, 네 가지 축으로 삶의 패턴을 발견해요.
+              몸·감정·관계·의미 기록을 바탕으로 나의 흐름을 함께 볼까요?<br/>
+              CareFlow는 진단이나 치료를 대체하지 않는 비의료기기 자기돌봄 도구입니다.
             </p>
 
             <button
-              onClick={() => setShowSplash(true)}
+              onClick={() => router.push('/login')}
               style={{
                 fontSize: 17, fontWeight: 700, color: '#fff',
-                padding: '16px 48px', borderRadius: 16, border: 'none', cursor: 'pointer',
-                background: `linear-gradient(135deg, ${C.sage}, ${C.sageDk})`,
-                boxShadow: '0 8px 28px rgba(163,177,138,0.40)',
+                padding: '16px 48px', borderRadius: CARE_RADIUS.lg, border: 'none', cursor: 'pointer',
+                background: CARE_GRADIENTS.primary,
+                boxShadow: CARE_SHADOW.button,
                 letterSpacing: '-0.3px',
               }}
             >
-              체험해 보기 →
+              시작하기 →
             </button>
           </div>
         </section>
@@ -381,21 +510,85 @@ export default function HomePage() {
                   <span style={{ color: C.sage }}>{s.num}</span>{s.unit}
                 </div>
                 <div style={{ fontSize: 14, color: 'rgba(255,255,255,0.55)', lineHeight: 1.7, whiteSpace: 'pre-line', marginBottom: 10 }}>{s.label}</div>
-                <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.25)', letterSpacing: '0.06em', fontWeight: 500 }}>{s.source}</div>
               </div>
             ))}
           </div>
         </div>
+
+        {/* ── 앱 화면 미리보기 ── */}
+        <section style={{ padding: '110px 32px', background: 'rgba(92,122,94,0.05)', borderTop: '1px solid rgba(92,122,94,0.10)' }}>
+          <div style={{ maxWidth: 1160, margin: '0 auto' }}>
+            <div style={{ textAlign: 'center', marginBottom: 56 }}>
+              <div style={{ display: 'inline-block', fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', color: C.sage, marginBottom: 16, padding: '5px 14px', borderRadius: 99, background: 'rgba(92,122,94,0.12)' }}>
+                앱 화면 미리보기
+              </div>
+              <h2 style={{ fontSize: 'clamp(28px, 4vw, 44px)', fontWeight: 800, letterSpacing: '-1.5px', lineHeight: 1.25, margin: '0 0 14px', color: C.text }}>
+                로그인 전에도 화면 흐름을 볼 수 있어요
+              </h2>
+              <p style={{ fontSize: 17, color: C.mid, lineHeight: 1.75, maxWidth: 560, margin: '0 auto' }}>
+                실제 앱에서 쓰는 홈, 기록, 알림 화면을 공개 페이지에서 먼저 확인해보세요.
+              </p>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'center' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 28, alignItems: 'center', width: '100%', maxWidth: 760 }}>
+                <div style={{ display: 'flex', justifyContent: 'center' }}>
+                  <AnimatePresence mode="wait">
+                    <motion.div
+                      key={appPreviews[previewIndex].kind}
+                      initial={{ opacity: 0, y: 18, scale: 0.98 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: -18, scale: 0.98 }}
+                      transition={{ duration: 0.45 }}
+                      style={{ width: '100%', display: 'flex', justifyContent: 'center' }}
+                    >
+                      <PreviewPhone kind={appPreviews[previewIndex].kind} />
+                    </motion.div>
+                  </AnimatePresence>
+                </div>
+                <div>
+                  <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: '0.12em', color: C.sage, marginBottom: 12 }}>화면 흐름 미리보기</div>
+                  <div style={{ fontSize: 28, fontWeight: 900, color: C.text, letterSpacing: '-0.8px', marginBottom: 12 }}>
+                    요약 → 추세 → 기록 → 알림
+                  </div>
+                  <div style={{ fontSize: 15, lineHeight: 1.8, color: C.mid, marginBottom: 18 }}>
+                    영상처럼 자동으로 전환되는 화면 흐름이에요. 참고 와이어프레임의 홈·추세 카드 배치를 로그인 전에 먼저 볼 수 있습니다.
+                  </div>
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    {appPreviews.map((preview, index) => (
+                      <button
+                        key={preview.title}
+                        type="button"
+                        onClick={() => setPreviewIndex(index)}
+                        style={{
+                          border: `1px solid ${previewIndex === index ? C.sage : 'rgba(92,122,94,0.18)'}`,
+                          borderRadius: 999,
+                          padding: '9px 13px',
+                          background: previewIndex === index ? 'rgba(92,122,94,0.12)' : '#fff',
+                          color: previewIndex === index ? C.sageDk : C.mid,
+                          fontSize: 13,
+                          fontWeight: 900,
+                          cursor: 'pointer',
+                        }}
+                      >
+                        {preview.title}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
 
         {/* ── 문제 섹션 ── */}
         <section style={{ padding: '120px 32px' }}>
           <div style={{ maxWidth: 1160, margin: '0 auto' }}>
             <div style={{ marginBottom: 64 }}>
               <div style={{ display: 'inline-block', fontSize: 11, fontWeight: 700, letterSpacing: '0.16em', color: C.sage, textTransform: 'uppercase', marginBottom: 20, padding: '5px 14px', borderRadius: 99, background: 'rgba(163,177,138,0.12)' }}>
-                Problem
+                기록의 어려움
               </div>
               <h2 style={{ fontSize: 'clamp(28px, 4vw, 44px)', fontWeight: 800, letterSpacing: '-1.5px', lineHeight: 1.25, margin: 0, color: C.text }}>
-                완치 없는 병,<br/>그 이후의 공백
+                기록하기 어려운 하루,<br/>그 사이의 공백
               </h2>
             </div>
 
@@ -436,7 +629,6 @@ export default function HomePage() {
                   }}>
                     <div style={{ fontSize: 'clamp(32px, 4vw, 42px)', fontWeight: 800, color: d.color, lineHeight: 1, marginBottom: 8, letterSpacing: '-2px' }}>{d.num}</div>
                     <div style={{ fontSize: 14, color: C.text, lineHeight: 1.6, whiteSpace: 'pre-line', marginBottom: 10 }}>{d.label}</div>
-                    <div style={{ fontSize: 11, color: C.light, letterSpacing: '0.06em' }}>{d.source}</div>
                   </div>
                 ))}
               </div>
@@ -449,60 +641,28 @@ export default function HomePage() {
           <div style={{ maxWidth: 1160, margin: '0 auto' }}>
             <div style={{ marginBottom: 64 }}>
               <div style={{ display: 'inline-block', fontSize: 11, fontWeight: 700, letterSpacing: '0.16em', color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase', marginBottom: 20, padding: '5px 14px', borderRadius: 99, border: '1px solid rgba(255,255,255,0.25)' }}>
-                Solution
+                사용 흐름
               </div>
               <h2 style={{ fontSize: 'clamp(28px, 4vw, 44px)', fontWeight: 800, letterSpacing: '-1.5px', lineHeight: 1.25, margin: 0, color: '#fff' }}>
-                기록의 의미를 만드는 것이<br/>핵심입니다
-              </h2>
-            </div>
-
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 2 }}>
-              {solutions.slice(0, 2).map((s, i) => (
-                <div key={i} style={{
-                  background: 'rgba(255,255,255,0.10)',
-                  backdropFilter: 'blur(12px)',
-                  WebkitBackdropFilter: 'blur(12px)',
-                  padding: '48px 36px',
-                  borderRadius: i === 0 ? '20px 0 0 20px' : '0 20px 20px 0',
-                  border: '1px solid rgba(255,255,255,0.15)',
-                  borderRight: i === 0 ? 'none' : '1px solid rgba(255,255,255,0.15)',
-                  transition: 'background 0.2s',
-                }}>
-                  <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', color: 'rgba(255,255,255,0.5)', marginBottom: 24 }}>{s.num}</div>
-                  <div style={{ fontSize: 20, fontWeight: 700, color: '#fff', marginBottom: 16, lineHeight: 1.35, letterSpacing: '-0.5px' }}>{s.title}</div>
-                  <div style={{ fontSize: 14, color: 'rgba(255,255,255,0.7)', lineHeight: 1.85, marginBottom: 24 }}>{s.desc}</div>
-                  <div style={{ display: 'inline-block', fontSize: 11, fontWeight: 600, letterSpacing: '0.08em', color: 'rgba(255,255,255,0.85)', border: '1px solid rgba(255,255,255,0.3)', padding: '5px 12px', borderRadius: 99 }}>
-                    {s.tag}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* ── How it works ── */}
-        <section style={{ padding: '120px 32px', background: 'rgba(163,177,138,0.05)', borderTop: '1px solid rgba(163,177,138,0.10)' }}>
-          <div style={{ maxWidth: 1160, margin: '0 auto' }}>
-            <div style={{ textAlign: 'center', marginBottom: 80 }}>
-              <div style={{ display: 'inline-block', fontSize: 11, fontWeight: 700, letterSpacing: '0.16em', color: C.sage, textTransform: 'uppercase', marginBottom: 16, padding: '5px 14px', borderRadius: 99, background: 'rgba(163,177,138,0.12)' }}>
-                How it works
-              </div>
-              <h2 style={{ fontSize: 'clamp(26px, 4vw, 40px)', fontWeight: 800, letterSpacing: '-1px', margin: 0 }}>
                 네 단계로 작동합니다
               </h2>
             </div>
 
-            <div style={{ position: 'relative', display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 0 }}>
-              {/* 연결선 */}
-              <div style={{ position: 'absolute', top: 19, left: '12.5%', right: '12.5%', height: 1, background: 'rgba(163,177,138,0.3)', zIndex: 0 }} />
-
+            <div className="flow-arrow-wrap">
               {flowSteps.map((step, i) => (
-                <div key={i} style={{ padding: '0 24px', textAlign: 'center', position: 'relative', zIndex: 1 }}>
-                  <div style={{ width: 38, height: 38, borderRadius: '50%', margin: '0 auto 28px', background: i === 0 ? C.text : `linear-gradient(135deg, ${C.sage}, ${C.sageDk})`, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 12px rgba(163,177,138,0.3)' }}>
-                    <span style={{ fontSize: 14, fontWeight: 800, color: '#fff' }}>{i + 1}</span>
+                <div key={i} className="flow-step-item">
+                  <div className="flow-step-card">
+                    <div style={{ fontSize: 12, fontWeight: 800, letterSpacing: '0.12em', color: 'rgba(255,255,255,0.58)', marginBottom: 18 }}>
+                      {String(i + 1).padStart(2, '0')}
+                    </div>
+                    <div style={{ fontSize: 23, fontWeight: 850, color: '#fff', marginBottom: 14, lineHeight: 1.35, letterSpacing: '-0.6px' }}>{step.title}</div>
+                    <div style={{ fontSize: 15, color: 'rgba(255,255,255,0.74)', lineHeight: 1.7 }}>{step.desc}</div>
                   </div>
-                  <div style={{ fontSize: 15, fontWeight: 700, color: C.text, marginBottom: 10, lineHeight: 1.4 }}>{step.title}</div>
-                  <div style={{ fontSize: 13, color: C.mid, lineHeight: 1.7 }}>{step.desc}</div>
+                  {i < flowSteps.length - 1 && (
+                    <div className="flow-arrow" aria-hidden="true">
+                      <span />
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
@@ -514,7 +674,7 @@ export default function HomePage() {
           <div style={{ maxWidth: 1160, margin: '0 auto' }}>
             <div style={{ textAlign: 'center', marginBottom: 56 }}>
               <div style={{ display: 'inline-block', fontSize: 12, fontWeight: 700, letterSpacing: 1.2, color: C.goldLt, textTransform: 'uppercase', marginBottom: 16, padding: '5px 14px', borderRadius: 99, background: 'rgba(232,200,110,0.15)' }}>
-                4축 기록 모델
+                4축 자기돌봄
               </div>
               <h2 style={{ fontSize: 'clamp(26px, 4vw, 40px)', fontWeight: 800, letterSpacing: '-1px', margin: '0 0 16px' }}>
                 4축으로 나를 기록해요
@@ -554,47 +714,30 @@ export default function HomePage() {
           <div style={{ maxWidth: 1160, margin: '0 auto' }}>
             <div style={{ marginBottom: 64 }}>
               <div style={{ display: 'inline-block', fontSize: 11, fontWeight: 700, letterSpacing: '0.16em', color: C.sage, textTransform: 'uppercase', marginBottom: 20, padding: '5px 14px', borderRadius: 99, border: `1px solid ${C.sage}40` }}>
-                Why CareFlow
+                만든 이유
               </div>
               <h2 style={{ fontSize: 'clamp(28px, 4vw, 44px)', fontWeight: 800, letterSpacing: '-1.5px', lineHeight: 1.25, margin: 0, color: '#fff' }}>
                 이 문제를 해결하고 싶어서<br/>간호학과에 왔습니다
               </h2>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 80, alignItems: 'center' }}>
-              <div>
-                <p style={{ fontSize: 16, color: 'rgba(255,255,255,0.65)', lineHeight: 1.9, marginBottom: 20 }}>
-                  이명과 어지러움을 만성으로 겪는 가족을 곁에서 지켜보며 문제를 발견했습니다. <strong style={{ color: '#fff' }}>돌봄을 기술로 일상에 끌어올 수 있다는 확신</strong>이 있었고, 실제 환자가 옆에 있었기에 공감이 추상적이지 않았습니다.
-                </p>
-                <p style={{ fontSize: 16, color: 'rgba(255,255,255,0.65)', lineHeight: 1.9, marginBottom: 20 }}>
-                  기록을 권유했을 때 돌아온 답은 <strong style={{ color: '#fff' }}>"해봐야 뭐가 달라져?"</strong>였습니다. 귀찮음이 아니라 불신이었습니다. 이 차이가 CareFlow 설계의 출발점입니다.
-                </p>
-                <p style={{ fontSize: 16, color: 'rgba(255,255,255,0.65)', lineHeight: 1.9, marginBottom: 0 }}>
-                  간호학적 전인 돌봄의 관점 — 신체 증상이 정신건강으로 이어지는 악순환 — 이 자기관리 도구의 설계 원리가 됩니다. <strong style={{ color: '#fff' }}>의료와 일상 사이의 공백을 메우는 것</strong>이 CareFlow의 역할입니다.
-                </p>
-              </div>
-
-              <div style={{
-                background: 'rgba(255,255,255,0.05)',
-                border: '1px solid rgba(255,255,255,0.10)',
-                borderRadius: 24, padding: 48,
-              }}>
-                <div style={{ fontSize: 22, fontWeight: 800, color: '#fff', marginBottom: 4, letterSpacing: '-0.5px' }}>정유진</div>
-                <div style={{ fontSize: 11, fontWeight: 700, color: C.sage, letterSpacing: '0.12em', marginBottom: 32, textTransform: 'uppercase' }}>CareFlow · Founder</div>
-                <div style={{ fontSize: 14, color: 'rgba(255,255,255,0.55)', lineHeight: 1.8, marginBottom: 28 }}>서울대학교 간호학과 재학</div>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-                  {['간호학', '자율신경계', '만성 증상 관리', '디지털 헬스케어'].map((tag, i) => (
-                    <span key={i} style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.06em', color: C.sage, border: `1px solid ${C.sage}50`, padding: '5px 12px', borderRadius: 99 }}>{tag}</span>
-                  ))}
-                </div>
-              </div>
+            <div style={{ maxWidth: 760 }}>
+              <p style={{ fontSize: 16, color: 'rgba(255,255,255,0.65)', lineHeight: 1.9, marginBottom: 20 }}>
+                이명과 어지러움을 만성으로 겪는 실제 환자를 곁에서 지켜보며 문제를 발견했습니다. <strong style={{ color: '#fff' }}>돌봄을 기술로 일상에 끌어올 수 있다는 확신</strong>이 있었고, 실제 사용자의 하루를 보았기에 공감이 추상적이지 않았습니다.
+              </p>
+              <p style={{ fontSize: 16, color: 'rgba(255,255,255,0.65)', lineHeight: 1.9, marginBottom: 20 }}>
+                기록을 권유했을 때 돌아온 답은 <strong style={{ color: '#fff' }}>"해봐야 뭐가 달라져?"</strong>였습니다. 귀찮음이 아니라 불신이었습니다. 이 차이가 CareFlow 설계의 출발점입니다.
+              </p>
+              <p style={{ fontSize: 16, color: 'rgba(255,255,255,0.65)', lineHeight: 1.9, marginBottom: 0 }}>
+                간호학적 전인 돌봄의 관점 — 신체 증상이 정신건강으로 이어지는 악순환 — 이 자기돌봄 도구의 설계 원리가 됩니다. <strong style={{ color: '#fff' }}>의료와 일상 사이의 공백을 메우는 것</strong>이 CareFlow의 역할입니다.
+              </p>
             </div>
           </div>
         </section>
 
         {/* ── 면책 ── */}
         <div style={{ maxWidth: 760, margin: '0 auto', padding: '0 32px 40px', fontSize: 13, color: C.light, lineHeight: 1.9, textAlign: 'center' }}>
-          본 서비스는 의료 기기가 아닙니다. 제공되는 기록과 시각화 데이터는 사용자의 자기 관리 및 진료 시 참고를 돕기 위한 정보일 뿐이며, 어떠한 의학적 진단이나 치료 결정도 대신하지 않습니다.
+          본 서비스는 의료 기기가 아닙니다. 제공되는 기록과 시각화 데이터는 자기돌봄과 대화 준비를 돕는 참고 자료이며, 진단이나 치료를 대체하지 않습니다.
         </div>
 
         {/* ── 푸터 ── */}
@@ -607,13 +750,101 @@ export default function HomePage() {
           </div>
           <span style={{ fontSize: 13, color: C.light }}>© 2026 CareFlow. 진료실 밖 일상을 연결합니다.</span>
           <div style={{ display: 'flex', gap: 20 }}>
-            <Link href="/explore"      style={{ fontSize: 13, color: C.light, textDecoration: 'none' }}>기록</Link>
-            <Link href="/notification" style={{ fontSize: 13, color: C.light, textDecoration: 'none' }}>알림</Link>
-            <Link href="/dashboard"    style={{ fontSize: 13, color: C.light, textDecoration: 'none' }}>대시보드</Link>
+            <Link href="/privacy"      style={{ fontSize: 13, color: C.light, textDecoration: 'none' }}>개인정보</Link>
+            <Link href="/terms"        style={{ fontSize: 13, color: C.light, textDecoration: 'none' }}>약관</Link>
           </div>
         </footer>
 
       </div>
+      <style jsx>{`
+        .flow-arrow-wrap {
+          display: flex;
+          align-items: stretch;
+          gap: 0;
+        }
+
+        .flow-step-item {
+          display: flex;
+          align-items: center;
+          flex: 1;
+          min-width: 0;
+        }
+
+        .flow-step-card {
+          min-height: 250px;
+          width: 100%;
+          padding: 38px 30px;
+          border-radius: 24px;
+          border: 1px solid rgba(255, 255, 255, 0.18);
+          background: rgba(255, 255, 255, 0.10);
+          backdrop-filter: blur(12px);
+          -webkit-backdrop-filter: blur(12px);
+          box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+        }
+
+        .flow-arrow {
+          width: 48px;
+          min-width: 48px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          position: relative;
+        }
+
+        .flow-arrow::before {
+          content: '';
+          position: absolute;
+          left: 4px;
+          right: 4px;
+          height: 2px;
+          border-radius: 999px;
+          background: rgba(255, 255, 255, 0.38);
+        }
+
+        .flow-arrow span {
+          width: 14px;
+          height: 14px;
+          border-top: 2px solid rgba(255, 255, 255, 0.72);
+          border-right: 2px solid rgba(255, 255, 255, 0.72);
+          transform: rotate(45deg);
+          background: transparent;
+        }
+
+        @media (max-width: 860px) {
+          .flow-arrow-wrap {
+            flex-direction: column;
+          }
+
+          .flow-step-item {
+            flex-direction: column;
+          }
+
+          .flow-step-card {
+            min-height: 0;
+            padding: 30px 26px;
+          }
+
+          .flow-arrow {
+            width: 100%;
+            min-width: 0;
+            height: 42px;
+          }
+
+          .flow-arrow::before {
+            left: 50%;
+            right: auto;
+            top: 6px;
+            bottom: 6px;
+            width: 2px;
+            height: auto;
+            transform: translateX(-50%);
+          }
+
+          .flow-arrow span {
+            transform: rotate(135deg);
+          }
+        }
+      `}</style>
     </>
   )
 }

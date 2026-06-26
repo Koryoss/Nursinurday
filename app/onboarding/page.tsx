@@ -1,212 +1,163 @@
-// =====================================================
-// 온보딩 페이지 — 수국 버터크림 테마 v2
-// Step 0: 친근/엄격 모드 선택 (ConversationMode)
-// Step 1-3: CareFlow 소개
-// =====================================================
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { createClient } from '@/lib/supabase/client'
+import { CARE_COLORS, CARE_GRADIENTS } from '@/lib/designTokens'
 
-type ConversationMode = '친근' | '엄격' | null
-
-const INTRO_STEPS = [
-  {
-    eyebrow: '🌼 오늘, 잠깐',
-    title: '나를 들여다보는\n일기장이에요',
-    body: '오늘 몸이 어떤 신호를 보냈는지—\n고치려는 게 아니에요\n오늘의 나를 같이 적어 봐요',
-    badge: null,
-  },
-  {
-    eyebrow: '단, 이곳은',
-    title: '병원이 아니에요',
-    body: '진단도 처방도 하지 않아요\n의학적 판단은 꼭 병원을 가세요',
-    badge: { text: '의료 진단·처방을 대체하지 않습니다', warn: true },
-  },
-  {
-    eyebrow: '그러니까 이곳은',
-    title: '오늘의 나를 위한\n기록 공간이에요',
-    body: '말로 설명하기 어려운 어려움이 있을 때\n어디에도 이야기할 곳이 없을 때—\n여기 와서 오늘 있었던 걸 적어 줘요',
-    badge: null,
-  },
-]
+type ConversationMode = 'gentle' | 'formal'
 
 const C = {
-  bg: '#FFFBF3',
-  bgCard: '#FFF8EC',
-  border: '#EAD9BA',
-  accent: '#28C840',
-  accentLight: '#C8F0D0',
-  textDark: '#2C1C10',
-  textMid: '#7A5A3C',
-  textLight: '#B89A6A',
-  badgeWarn: '#FFF3CD',
-  badgeWarnText: '#7A5500',
+  bg: CARE_COLORS.bg,
+  card: CARE_COLORS.card,
+  border: CARE_COLORS.border,
+  accent: CARE_COLORS.primary,
+  accentLight: CARE_COLORS.primarySoft,
+  textDark: CARE_COLORS.text,
+  textMid: CARE_COLORS.mid,
+  textLight: CARE_COLORS.light,
 }
 
 export default function OnboardingPage() {
-  const [mode, setMode] = useState<ConversationMode>(null)
-  const [introStep, setIntroStep] = useState(0)
-  const [phase, setPhase] = useState<'mode' | 'intro'>('mode')
+  const [mode, setMode] = useState<ConversationMode>('gentle')
+  const [terms, setTerms] = useState(false)
+  const [privacy, setPrivacy] = useState(false)
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState('')
   const router = useRouter()
 
-  const isLastIntro = introStep === INTRO_STEPS.length - 1
-  const current = INTRO_STEPS[introStep]
+  const save = async () => {
+    if (!terms || !privacy || saving) return
+    setSaving(true)
+    setError('')
 
-  const handleModeSelect = (m: '친근' | '엄격') => {
-    setMode(m)
-    setTimeout(() => setPhase('intro'), 350)
-  }
+    try {
+      const supabase = createClient()
+      const {
+        data: { user },
+        error: userError,
+      } = await supabase.auth.getUser()
 
-  const handleNext = () => {
-    if (isLastIntro) {
-      if (typeof window !== 'undefined') {
-        sessionStorage.setItem('careflow_mode', mode ?? '엄격')
+      if (userError || !user || user.is_anonymous) {
+        router.replace('/login?next=/onboarding')
+        return
       }
-      router.push('/chat')
-    } else {
-      setIntroStep(s => s + 1)
+
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .upsert(
+          {
+            id: user.id,
+            chat_mode: mode,
+            consented_at: new Date().toISOString(),
+          },
+          { onConflict: 'id' }
+        )
+
+      if (profileError) throw profileError
+      router.push('/explore')
+    } catch (e) {
+      setError('동의 정보를 저장하지 못했어요. 로그인 상태와 Supabase 연결을 함께 볼까요?')
+    } finally {
+      setSaving(false)
     }
   }
 
-  // ── 모드 선택 화면 ──
-  if (phase === 'mode') {
-    return (
-      <div
-        className="min-h-screen flex flex-col items-center justify-center px-6 py-12"
-        style={{ background: `linear-gradient(160deg, ${C.bg} 0%, #FFF5E0 100%)` }}
-      >
-        <span style={{ color: C.accent }} className="font-bold text-xl mb-10 tracking-tight">
-          🌼 CareFlow
-        </span>
-
-        <h2 className="text-2xl font-bold text-center mb-2" style={{ color: C.textDark }}>
-          어떻게 이야기할까요?
-        </h2>
-        <p className="text-sm text-center mb-10 max-w-xs" style={{ color: C.textMid }}>
-          편한 말투를 고르면, 그 방식으로 계속 이야기해요.
-        </p>
-
-        <div className="flex flex-col gap-4 w-full max-w-xs">
-          <button
-            onClick={() => handleModeSelect('친근')}
-            className="rounded-2xl p-5 text-left transition-all duration-200 hover:-translate-y-0.5"
-            style={{
-              background: mode === '친근' ? C.accentLight : C.bgCard,
-              border: `2px solid ${mode === '친근' ? C.accent : C.border}`,
-            }}
-          >
-            <div className="font-bold text-base mb-1" style={{ color: C.textDark }}>
-              💬 친근 모드
-            </div>
-            <div className="text-sm" style={{ color: C.textMid }}>
-              반말로 편하게 — "오늘 어땠어?", "그랬구나."<br />
-              친구한테 이야기하는 느낌이에요.
-            </div>
-          </button>
-
-          <button
-            onClick={() => handleModeSelect('엄격')}
-            className="rounded-2xl p-5 text-left transition-all duration-200 hover:-translate-y-0.5"
-            style={{
-              background: mode === '엄격' ? C.accentLight : C.bgCard,
-              border: `2px solid ${mode === '엄격' ? C.accent : C.border}`,
-            }}
-          >
-            <div className="font-bold text-base mb-1" style={{ color: C.textDark }}>
-              🤝 엄격 모드
-            </div>
-            <div className="text-sm" style={{ color: C.textMid }}>
-              존댓말로 정중하게 — "오늘 어떠셨어요?"<br />
-              차분하고 명확한 대화예요.
-            </div>
-          </button>
-        </div>
-
-        <p className="mt-8 text-xs text-center" style={{ color: C.textLight }}>
-          모드는 언제든 바꿀 수 있어요
-        </p>
-      </div>
-    )
-  }
-
-  // ── 소개 단계 ──
   return (
-    <div
-      className="min-h-screen flex flex-col"
-      style={{ background: `linear-gradient(160deg, ${C.bg} 0%, #FFF5E0 100%)` }}
-    >
-      <header className="px-6 pt-6 pb-2">
-        <span style={{ color: C.accent }} className="font-bold text-lg tracking-tight">
-          🌼 CareFlow
-        </span>
-      </header>
-
-      {/* 진행 점 */}
-      <div className="flex justify-center gap-2 pt-4">
-        {INTRO_STEPS.map((_, i) => (
-          <div
-            key={i}
-            className="h-1.5 rounded-full transition-all duration-300"
-            style={{
-              width: i === introStep ? '24px' : '12px',
-              background: i <= introStep ? C.accent : C.border,
-            }}
-          />
-        ))}
-      </div>
-
-      <main className="flex-1 flex flex-col justify-center px-8 pb-4 max-w-sm mx-auto w-full">
-        <div key={introStep} style={{ animation: 'fadeSlideUp 0.35s ease both' }}>
-          <p className="text-sm font-medium mb-2 tracking-wide" style={{ color: C.textLight }}>
-            {current.eyebrow}
-          </p>
-
-          <h1
-            className="text-3xl font-bold leading-snug mb-5 whitespace-pre-line"
-            style={{ color: C.textDark }}
-          >
-            {current.title}
-          </h1>
-
-          {current.badge && (
-            <div
-              className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full mb-4"
-              style={{ background: C.badgeWarn, color: C.badgeWarnText }}
-            >
-              ⚠️ {current.badge.text}
-            </div>
-          )}
-
-          <p
-            className="text-base leading-relaxed whitespace-pre-line"
-            style={{ color: C.textMid }}
-          >
-            {current.body}
+    <div style={{ minHeight: '100vh', background: CARE_GRADIENTS.app, padding: 24, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+      <div style={{ width: '100%', maxWidth: 520, background: C.card, borderRadius: 28, padding: '28px 26px 32px', boxShadow: '0 24px 60px rgba(0, 0, 0, 0.09)' }}>
+        <div style={{ marginBottom: 24 }}>
+          <span style={{ color: C.accent, fontWeight: 900, fontSize: 18 }}>CareFlow</span>
+          <h1 style={{ margin: '18px 0 12px', fontSize: 34, lineHeight: 1.05, color: C.textDark, fontWeight: 900 }}>오늘의 나를 위한 기록 공간이에요</h1>
+          <p style={{ margin: 0, color: C.textMid, fontSize: 16, lineHeight: 1.75 }}>
+            CareFlow는 진단이나 처방을 하지 않아요. 몸·감정·관계·의미 기록을 저장하고, 나의 변화 흐름을 함께 보기 위한 도구예요.
           </p>
         </div>
-      </main>
 
-      <div className="px-8 pb-10 max-w-sm mx-auto w-full">
+        <div style={{ marginBottom: 24 }}>
+          <div style={{ color: C.textMid, fontWeight: 900, marginBottom: 12 }}>대화 모드</div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+            {[
+              { value: 'gentle' as const, label: '친근 모드', description: '편하게 말해요.' },
+              { value: 'formal' as const, label: '정중 모드', description: '존댓말로 차분하게 말해요.' },
+            ].map(item => (
+              <button
+                key={item.value}
+                type="button"
+                onClick={() => setMode(item.value)}
+                style={{
+                  minHeight: 70,
+                  borderRadius: 20,
+                  border: `1px solid ${mode === item.value ? C.accent : C.border}`,
+                  background: mode === item.value ? C.accentLight : C.card,
+                  padding: '16px',
+                  textAlign: 'left',
+                  cursor: 'pointer',
+                }}
+              >
+                <div style={{ fontSize: 16, fontWeight: 900, color: C.textDark, marginBottom: 6 }}>{item.label}</div>
+                <div style={{ fontSize: 13, color: C.textMid }}>{item.description}</div>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div style={{ background: C.bg, border: `1px solid ${C.border}`, borderRadius: 24, padding: 20, marginBottom: 20 }}>
+          <button
+            type="button"
+            onClick={() => setTerms(prev => !prev)}
+            style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 12, padding: '16px 14px', borderRadius: 18, border: '1px solid transparent', background: terms ? C.accentLight : C.card, cursor: 'pointer' }}
+          >
+            <span style={{ width: 24, height: 24, borderRadius: 8, border: `1px solid ${C.border}`, display: 'grid', placeItems: 'center', background: terms ? C.accent : 'transparent', color: terms ? '#fff' : C.textDark }}>
+              {terms ? '✓' : ''}
+            </span>
+            <span style={{ color: C.textDark, fontSize: 15, lineHeight: 1.6 }}>
+              이용약관과 면책 안내에 동의해요. 비의료기기이며 진단·치료를 대체하지 않아요.
+            </span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setPrivacy(prev => !prev)}
+            style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 12, padding: '16px 14px', borderRadius: 18, border: '1px solid transparent', background: privacy ? C.accentLight : C.card, cursor: 'pointer' }}
+          >
+            <span style={{ width: 24, height: 24, borderRadius: 8, border: `1px solid ${C.border}`, display: 'grid', placeItems: 'center', background: privacy ? C.accent : 'transparent', color: privacy ? '#fff' : C.textDark }}>
+              {privacy ? '✓' : ''}
+            </span>
+            <span style={{ color: C.textDark, fontSize: 15, lineHeight: 1.6 }}>
+              개인정보 수집·이용에 동의해요(필수). 건강 관련 자기기록을 저장하고 본인 기록으로 다시 보여줘요.
+            </span>
+          </button>
+        </div>
+
+        {error ? <div style={{ color: '#A0482C', fontSize: 14, marginBottom: 16 }}>{error}</div> : null}
+
         <button
-          onClick={handleNext}
-          className="w-full py-4 rounded-2xl font-semibold text-base transition-all duration-200 hover:-translate-y-0.5"
+          type="button"
+          onClick={save}
+          disabled={!terms || !privacy || saving}
           style={{
-            background: C.accent,
-            color: C.bg,
-            boxShadow: '0 4px 16px rgba(184, 134, 11, 0.25)',
+            width: '100%',
+            minHeight: 56,
+            borderRadius: 20,
+            border: 'none',
+            background: !terms || !privacy || saving ? 'rgba(163,177,138,0.3)' : CARE_GRADIENTS.primary,
+            color: '#fff',
+            fontSize: 17,
+            fontWeight: 900,
+            cursor: !terms || !privacy || saving ? 'not-allowed' : 'pointer',
           }}
         >
-          {isLastIntro ? '시작하기 →' : '다음 →'}
+          {saving ? '저장 중...' : '기록 시작하기'}
         </button>
-      </div>
 
-      <style>{`
-        @keyframes fadeSlideUp {
-          from { opacity: 0; transform: translateY(16px); }
-          to   { opacity: 1; transform: translateY(0); }
-        }
-      `}</style>
+        <div style={{ marginTop: 16, fontSize: 13, color: C.textLight, lineHeight: 1.7 }}>
+          <p>모드는 언제든 바꿀 수 있어요.</p>
+          <p style={{ marginTop: 8 }}>
+            약관 및 개인정보처리방침은 <Link href="/terms" style={{ color: C.accent, fontWeight: 700 }}>여기</Link>에서 확인할 수 있어요.
+          </p>
+        </div>
+      </div>
     </div>
   )
 }

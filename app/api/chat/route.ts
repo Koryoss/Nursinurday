@@ -1,13 +1,12 @@
 // =====================================================
-// AI 채팅 API 라우트 v4 — NANDA 기반 자기돌봄 지원
+// AI 채팅 API 라우트 — 기록 기반 자기돌봄 대화
 // POST /api/chat
 //
 // ⚠️ 핵심 원칙: CareFlow는 의료 진단을 하지 않습니다
-//    → 사용자의 심리적 반응(불안, 무의미감, 일상 제약)을 함께 관찰합니다
-//    → NANDA는 내부 임상 근거용이며, 사용자에게 노출되지 않습니다
+//    → 사용자의 몸·감정·관계·의미 흐름을 함께 관찰합니다
+//    → 진단명, 예후, 치료·처방 표현을 응답 구조로 사용하지 않습니다
 //
-// 응답 구조: NANDA 6단계 (관찰→자극→경로→반응→정서→함께 관리하기)
-// mockResponses.ts에서 18개 NANDA 기반 응답 제공
+// 응답 구조: 관찰 문장 + 기록으로 이어지는 질문
 //
 // 우선순위:
 //   0. 위기 감지 (Safety Layer) — 최우선 실행, 의료 전문가 연결
@@ -25,8 +24,6 @@ import { assessMessage, buildSystemPrompt, CareflowAssessment, ConversationMode 
 import { getMockResponse, getCrisisResponse } from '@/lib/mockResponses'
 
 // ─── 요청/응답 타입 정의 ───
-// NANDA 간호 진단 응답 구조를 지원하는 타입들
-// 응답: 진단(diagnosis) → 자극(stimulus) → 경로(pathophysiology) → 반응(response) → 정서(emotion) → 치료(therapeuticAction)
 
 export interface ChatMessage {
   role: 'user' | 'assistant'
@@ -39,7 +36,7 @@ export interface ChatRequest {
 }
 
 export interface ChatResponse {
-  reply: string                         // NANDA 6단계 구조로 포맷된 응답
+  reply: string                         // 관찰 문장 + 기록 질문
   primaryDomain?: string                // 관찰 영역: Sleep, Energy, BodySignals, EmotionFlow, Tension, SelfView, Relationship, Direction, Growth, General
   activeDomains?: string[]              // 복수 감지 도메인 (여러 영역이 동시에 활성화된 경우)
   axisScores?: Record<string, number>   // 4축 점수 (Body/Emotion/Connection/Meaning × 0-100)
@@ -48,9 +45,7 @@ export interface ChatResponse {
 }
 
 // ─── 메인 핸들러 (Main Handler) ───
-// CareFlow NANDA 간호 진단 엔진
-// 들어온 메시지를 분석하여 적절한 NANDA 진단을 선택하고,
-// 6단계 NANDA 응답 구조로 포맷된 답변을 생성하는 역할
+// 들어온 메시지를 분석하여 자기돌봄 기록 질문으로 이어주는 역할
 export async function POST(req: NextRequest) {
   try {
     const body: ChatRequest = await req.json()
@@ -65,7 +60,7 @@ export async function POST(req: NextRequest) {
 
     // ─── STEP 0: 위기 감지 (Safety-First Layer) ───
     // 정신건강 위기 여부를 즉시 판단
-    // crisis detection → 적절한 NANDA Crisis 진단 적용
+    // crisis detection → 기록보다 외부 도움 연결을 우선 안내
     // 주요 키워드: 자살, 자해, 극단, 절망, 죽음 등
     const assessment: CareflowAssessment = assessMessage(lastUserMessage)
     const { primaryDomain, activeDomains, crisisLevel } = assessment
@@ -73,7 +68,6 @@ export async function POST(req: NextRequest) {
     if (crisisLevel === 'critical' || crisisLevel === 'urgent') {
       // ─── 즉각 위기 대응 (Immediate Crisis Intervention) ───
       // AI 모델 호출 없이 사전 작성된 안전 메시지 반환
-      // NANDA Crisis 진단 응답: 즉시 개입(Immediate Action) + 지지 메시지(Support Message)
       // critical: 1393(자살예방상담전화) 안내
       // urgent: 1577-0199(정신건강위기상담전화) 안내
       const reply = getCrisisResponse(crisisLevel)
@@ -91,14 +85,11 @@ export async function POST(req: NextRequest) {
     // AI 모드 결정 (.env.local의 AI_MODE 값: 'mock' | 'openai' | 'claude')
     const aiMode = process.env.AI_MODE ?? 'mock'
 
-    // ─── Mock 모드 (API 키 없이 NANDA 기반 응답 제공) ───
+    // ─── Mock 모드 (API 키 없이 안전한 관찰 질문 제공) ───
     // MVP 테스트 및 API 키 없는 환경에서 사용
-    // mockResponses.ts의 18개 NANDA 진단별 응답 활용
-    // 응답 구조: diagnosis(진단명) → stimulus(자극) → pathophysiology(경로) →
-    //           response(반응) → emotion(정서) → therapeuticAction(치료중재)
     if (aiMode === 'mock' || (!process.env.OPENAI_API_KEY && !process.env.ANTHROPIC_API_KEY)) {
 
-      // primaryDomain 기반 NANDA 진단 응답 선택 (Sleep, Energy, BodySignals 등)
+      // primaryDomain 기반 관찰 질문 선택 (Sleep, Energy, BodySignals 등)
       let reply = getMockResponse(primaryDomain)
 
       // monitor 수준 케이스: 자기돌봄 권고 + 지역 정신건강복지센터 연결 정보 추가
@@ -116,16 +107,16 @@ export async function POST(req: NextRequest) {
       } as ChatResponse)
     }
 
-    // ─── OpenAI 모드 (GPT-4o + NANDA 시스템 프롬프트) ───
+    // ─── OpenAI 모드 (GPT-4o + CareFlow 안전 프롬프트) ───
     // buildSystemPrompt(assessment)에서 생성된 시스템 프롬프트:
-    // - 검출된 NANDA 진단 영역(primaryDomain) 기반 컨텍스트
-    // - 4축 점수(axisScores) 반영한 개인화된 간호중재
-    // - NANDA 6단계 응답 구조로 포맷팅 지시
+    // - 검출된 관찰 영역(primaryDomain) 기반 컨텍스트
+    // - 4축 신호(axisScores) 반영
+    // - 진단·예후·처방 없이 질문형 응답
     if (aiMode === 'openai' && process.env.OPENAI_API_KEY) {
       const { default: OpenAI } = await import('openai')
       const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
 
-      // NANDA 평가 결과 기반 동적 시스템 프롬프트 생성
+      // 관찰 결과 기반 동적 시스템 프롬프트 생성
       const systemPrompt = buildSystemPrompt(assessment, convMode as ConversationMode)
 
       const completion = await openai.chat.completions.create({
@@ -155,13 +146,13 @@ export async function POST(req: NextRequest) {
       } as ChatResponse)
     }
 
-    // ─── Claude 모드 (Claude Sonnet + NANDA 시스템 프롬프트) ───
+    // ─── Claude 모드 (Claude Sonnet + CareFlow 안전 프롬프트) ───
     // buildSystemPrompt(assessment)에서 생성된 시스템 프롬프트:
-    // - 검출된 NANDA 진단 영역(primaryDomain) 기반 컨텍스트
-    // - 4축 점수(axisScores) 반영한 개인화된 간호중재
-    // - NANDA 6단계 응답 구조로 포맷팅 지시
+    // - 검출된 관찰 영역(primaryDomain) 기반 컨텍스트
+    // - 4축 신호(axisScores) 반영
+    // - 진단·예후·처방 없이 질문형 응답
     if (aiMode === 'claude' && process.env.ANTHROPIC_API_KEY) {
-      // NANDA 평가 결과 기반 동적 시스템 프롬프트 생성
+      // 관찰 결과 기반 동적 시스템 프롬프트 생성
       const systemPrompt = buildSystemPrompt(assessment, convMode as ConversationMode)
 
       const response = await fetch('https://api.anthropic.com/v1/messages', {
@@ -203,7 +194,7 @@ export async function POST(req: NextRequest) {
 
     // ─── 폴백 (Fallback) ───
     // 모드 설정 오류 또는 API 연결 불가 시 mock 모드로 안전하게 처리
-    // NANDA 응답 구조는 유지하면서 mockResponses.ts의 사전작성 응답 반환
+    // 안전한 사전작성 관찰 질문 반환
     return NextResponse.json({
       reply: getMockResponse(primaryDomain),
       primaryDomain,
