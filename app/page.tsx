@@ -469,10 +469,7 @@ export default function HomePage() {
           WebkitBackdropFilter: 'blur(20px)',
           borderBottom: '1px solid rgba(163,177,138,0.12)',
         }}>
-          <div style={{ maxWidth: 1160, margin: '0 auto', padding: '0 32px', height: 88, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <div style={{ width: 180, height: 72, overflow: 'hidden', display: 'flex', alignItems: 'center' }}>
-              <BrandImage width={180} height={148} priority style={{ marginTop: -28 }} />
-            </div>
+          <div style={{ maxWidth: 1160, margin: '0 auto', padding: '0 32px', height: 72, display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
             <nav style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
               <button
                 onClick={() => setShowSplash(true)}
