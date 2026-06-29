@@ -5,7 +5,11 @@ import OpenAI from 'openai'
 export const runtime = 'nodejs'
 export const maxDuration = 60
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
+function getOpenAI() {
+  const apiKey = process.env.OPENAI_API_KEY
+  if (!apiKey) return null
+  return new OpenAI({ apiKey })
+}
 
 function chunkText(text: string, maxLen = 1600, overlap = 150): string[] {
   const chunks: string[] = []
@@ -31,6 +35,8 @@ export async function POST(req: NextRequest) {
   if (!file.name.toLowerCase().endsWith('.pdf')) {
     return NextResponse.json({ error: 'PDF 파일만 지원합니다' }, { status: 400 })
   }
+  const openai = getOpenAI()
+  if (!openai) return NextResponse.json({ error: 'OPENAI_API_KEY is not configured' }, { status: 503 })
 
   const buffer = Buffer.from(await file.arrayBuffer())
   // eslint-disable-next-line @typescript-eslint/no-require-imports

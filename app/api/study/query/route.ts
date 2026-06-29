@@ -5,7 +5,11 @@ import OpenAI from 'openai'
 export const runtime = 'nodejs'
 export const maxDuration = 30
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
+function getOpenAI() {
+  const apiKey = process.env.OPENAI_API_KEY
+  if (!apiKey) return null
+  return new OpenAI({ apiKey })
+}
 
 const SYSTEM_PROMPT = `당신은 메니에르병 관련 논문을 분석하는 학술 리서치 보조 도구입니다.
 
@@ -26,6 +30,8 @@ export async function POST(req: NextRequest) {
 
   const { question } = await req.json() as { question?: string }
   if (!question?.trim()) return NextResponse.json({ error: 'question required' }, { status: 400 })
+  const openai = getOpenAI()
+  if (!openai) return NextResponse.json({ error: 'OPENAI_API_KEY is not configured' }, { status: 503 })
 
   const embRes = await openai.embeddings.create({
     model: 'text-embedding-3-small',

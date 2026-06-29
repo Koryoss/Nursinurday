@@ -6,7 +6,11 @@ import OpenAI from 'openai'
 export const runtime = 'nodejs'
 export const maxDuration = 30
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
+function getOpenAI() {
+  const apiKey = process.env.OPENAI_API_KEY
+  if (!apiKey) return null
+  return new OpenAI({ apiKey })
+}
 
 const SYSTEM_PROMPT = `당신은 메니에르병 연구 근거를 분석하는 학술 도구입니다.
 
@@ -31,7 +35,7 @@ const SYSTEM_PROMPT = `당신은 메니에르병 연구 근거를 분석하는 �
 
 type Chunk = { doc_title: string; page_num: number; content: string; similarity: number; source_file?: string }
 
-async function buildDraft(chunks: Chunk[], claim: string) {
+async function buildDraft(openai: OpenAI, chunks: Chunk[], claim: string) {
   if (!chunks.length) {
     return { source_summary: '출처 미확인', strength: '출처 미확인', application_context: '', safety_note: '' }
   }
@@ -70,6 +74,8 @@ export async function POST(req: NextRequest) {
 
   const { claim } = await req.json() as { claim?: string }
   if (!claim?.trim()) return NextResponse.json({ error: 'claim required' }, { status: 400 })
+  const openai = getOpenAI()
+  if (!openai) return NextResponse.json({ error: 'OPENAI_API_KEY is not configured' }, { status: 503 })
 
   const embRes = await openai.embeddings.create({
     model: 'text-embedding-3-small',
@@ -83,7 +89,7 @@ export async function POST(req: NextRequest) {
   if (searchErr) return NextResponse.json({ error: searchErr.message }, { status: 500 })
 
   const chunks: Chunk[] = data ?? []
-  const draft = await buildDraft(chunks, claim.trim())
+  const draft = await buildDraft(openai, chunks, claim.trim())
   const topChunk = chunks[0] ?? null
   const registryEvidence = matchEvidenceForClaim([
     claim.trim(),
