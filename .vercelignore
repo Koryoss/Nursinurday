@@ -1,0 +1,12 @@
+careflow-app
+careflow-app/**
+ui_snapshots
+ui_snapshots/**
+node_modules
+node_modules/**
+.next
+.next/**
+.expo
+.expo/**
+.expo-shared
+.expo-shared/**
