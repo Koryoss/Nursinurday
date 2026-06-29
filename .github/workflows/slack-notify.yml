@@ -1,0 +1,227 @@
+name: Slack notifications
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  changes:
+    name: Detect changed areas
+    runs-on: ubuntu-latest
+    outputs:
+      web: ${{ steps.filter.outputs.web }}
+      app: ${{ steps.filter.outputs.app }}
+      study: ${{ steps.filter.outputs.study }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Detect path changes
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            web:
+              - 'app/page.tsx'
+              - 'app/dashboard/**'
+              - 'app/explore/**'
+              - 'app/notification/**'
+              - 'app/chat/**'
+              - 'app/history/**'
+              - 'app/login/**'
+              - 'app/onboarding/**'
+              - 'lib/designTokens.ts'
+              - 'lib/socialReturnIndicators.ts'
+              - 'middleware.ts'
+              - 'next.config.js'
+              - 'package.json'
+              - 'package-lock.json'
+              - 'tsconfig.json'
+              - 'vercel.json'
+              - '.vercelignore'
+            app:
+              - 'careflow-app/**'
+              - 'app/app-web/**'
+            study:
+              - 'app/study/**'
+              - 'app/api/study/**'
+              - 'lib/evidenceRegistry.ts'
+              - 'docs/**'
+
+  notify-web:
+    name: Notify CareFlow web
+    needs: changes
+    if: needs.changes.outputs.web == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send Slack message
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_CAREFLOW_WEB }}
+          REPOSITORY: ${{ github.repository }}
+          REF_NAME: ${{ github.ref_name }}
+          SHA: ${{ github.sha }}
+          ACTOR: ${{ github.actor }}
+          EVENT_NAME: ${{ github.event_name }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          COMMIT_URL: ${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}
+        run: |
+          if [ -z "$SLACK_WEBHOOK_URL" ]; then
+            echo "SLACK_WEBHOOK_CAREFLOW_WEB is not set. Skipping."
+            exit 0
+          fi
+          short_sha="${SHA:0:7}"
+          payload=$(cat <<JSON
+          {
+            "text": "CareFlow 기존 웹 변경이 감지됐습니다.",
+            "blocks": [
+              {
+                "type": "section",
+                "text": {
+                  "type": "mrkdwn",
+                  "text": "*CareFlow 기존 웹 변경*\\n• 저장소: \`$REPOSITORY\`\\n• 브랜치: \`$REF_NAME\`\\n• 커밋: <$COMMIT_URL|\`$short_sha\`>\\n• 실행자: \`$ACTOR\`\\n• 이벤트: \`$EVENT_NAME\`"
+                }
+              },
+              {
+                "type": "context",
+                "elements": [
+                  {
+                    "type": "mrkdwn",
+                    "text": "확인 범위: \`app/page.tsx\`, \`app/dashboard/**\`, \`app/explore/**\`, \`app/notification/**\`, \`app/chat/**\`, \`lib/designTokens.ts\`, \`lib/socialReturnIndicators.ts\`"
+                  }
+                ]
+              },
+              {
+                "type": "actions",
+                "elements": [
+                  {
+                    "type": "button",
+                    "text": { "type": "plain_text", "text": "GitHub Actions 보기" },
+                    "url": "$RUN_URL"
+                  }
+                ]
+              }
+            ]
+          }
+          JSON
+          )
+          curl -X POST -H 'Content-type: application/json' --data "$payload" "$SLACK_WEBHOOK_URL"
+
+  notify-app:
+    name: Notify CareFlow app
+    needs: changes
+    if: needs.changes.outputs.app == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send Slack message
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_CAREFLOW_APP }}
+          REPOSITORY: ${{ github.repository }}
+          REF_NAME: ${{ github.ref_name }}
+          SHA: ${{ github.sha }}
+          ACTOR: ${{ github.actor }}
+          EVENT_NAME: ${{ github.event_name }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          COMMIT_URL: ${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}
+        run: |
+          if [ -z "$SLACK_WEBHOOK_URL" ]; then
+            echo "SLACK_WEBHOOK_CAREFLOW_APP is not set. Skipping."
+            exit 0
+          fi
+          short_sha="${SHA:0:7}"
+          payload=$(cat <<JSON
+          {
+            "text": "CareFlow 앱/앱미러 변경이 감지됐습니다.",
+            "blocks": [
+              {
+                "type": "section",
+                "text": {
+                  "type": "mrkdwn",
+                  "text": "*CareFlow 앱 / 앱 미러 변경*\\n• 저장소: \`$REPOSITORY\`\\n• 브랜치: \`$REF_NAME\`\\n• 커밋: <$COMMIT_URL|\`$short_sha\`>\\n• 실행자: \`$ACTOR\`\\n• 이벤트: \`$EVENT_NAME\`"
+                }
+              },
+              {
+                "type": "context",
+                "elements": [
+                  {
+                    "type": "mrkdwn",
+                    "text": "확인 범위: \`careflow-app/**\`, \`app/app-web/**\` | 기준: 앱 먼저 수정 후 앱 미러 웹에 반영"
+                  }
+                ]
+              },
+              {
+                "type": "actions",
+                "elements": [
+                  {
+                    "type": "button",
+                    "text": { "type": "plain_text", "text": "GitHub Actions 보기" },
+                    "url": "$RUN_URL"
+                  }
+                ]
+              }
+            ]
+          }
+          JSON
+          )
+          curl -X POST -H 'Content-type: application/json' --data "$payload" "$SLACK_WEBHOOK_URL"
+
+  notify-study:
+    name: Notify CareFlow study
+    needs: changes
+    if: needs.changes.outputs.study == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send Slack message
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_CAREFLOW_STUDY }}
+          REPOSITORY: ${{ github.repository }}
+          REF_NAME: ${{ github.ref_name }}
+          SHA: ${{ github.sha }}
+          ACTOR: ${{ github.actor }}
+          EVENT_NAME: ${{ github.event_name }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          COMMIT_URL: ${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}
+        run: |
+          if [ -z "$SLACK_WEBHOOK_URL" ]; then
+            echo "SLACK_WEBHOOK_CAREFLOW_STUDY is not set. Skipping."
+            exit 0
+          fi
+          short_sha="${SHA:0:7}"
+          payload=$(cat <<JSON
+          {
+            "text": "CareFlow 스터디 변경이 감지됐습니다.",
+            "blocks": [
+              {
+                "type": "section",
+                "text": {
+                  "type": "mrkdwn",
+                  "text": "*CareFlow 스터디 워크스페이스 변경*\\n• 저장소: \`$REPOSITORY\`\\n• 브랜치: \`$REF_NAME\`\\n• 커밋: <$COMMIT_URL|\`$short_sha\`>\\n• 실행자: \`$ACTOR\`\\n• 이벤트: \`$EVENT_NAME\`"
+                }
+              },
+              {
+                "type": "context",
+                "elements": [
+                  {
+                    "type": "mrkdwn",
+                    "text": "확인 범위: \`app/study/**\`, \`app/api/study/**\`, \`lib/evidenceRegistry.ts\`, \`docs/**\`"
+                  }
+                ]
+              },
+              {
+                "type": "actions",
+                "elements": [
+                  {
+                    "type": "button",
+                    "text": { "type": "plain_text", "text": "GitHub Actions 보기" },
+                    "url": "$RUN_URL"
+                  }
+                ]
+              }
+            ]
+          }
+          JSON
+          )
+          curl -X POST -H 'Content-type: application/json' --data "$payload" "$SLACK_WEBHOOK_URL"
