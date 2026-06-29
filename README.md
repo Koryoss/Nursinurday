@@ -2,7 +2,7 @@
 
 CareFlow는 어지럼, 이명, 수면, 감정, 관계 기록을 바탕으로 일상 회복 흐름을 함께 관찰하는 웹/앱 프로토타입입니다.
 
-이 저장소는 Next.js 기반 웹 프로젝트이며, 현재 화면은 세 갈래로 분리되어 관리합니다.
+이 저장소는 CareFlow의 웹, 앱 미러 웹, 스터디 워크스페이스, Expo 앱을 함께 관리하는 통합 저장소입니다.
 
 ## 현재 구조
 
@@ -23,7 +23,25 @@ CareFlow는 어지럼, 이명, 수면, 감정, 관계 기록을 바탕으로 일
 
 기존 웹은 Vercel 배포 화면과 연결되는 트랙입니다. 앱 화면을 그대로 따라가는 작업은 이 라우트에 바로 섞지 않습니다.
 
-### 2. 앱 미러 웹
+### 2. Expo 앱
+
+실제 앱 화면과 기능을 구현하는 React Native/Expo 프로젝트입니다.
+
+- 위치: `careflow-app/`
+- 주요 화면:
+  - `careflow-app/src/screens/DashboardScreen.tsx`
+  - `careflow-app/src/screens/RecordScreen.tsx`
+  - `careflow-app/src/screens/NotificationScreen.tsx`
+  - `careflow-app/src/screens/ChatScreen.tsx`
+- 공통 컴포넌트:
+  - `careflow-app/src/components/AppHeader.tsx`
+  - `careflow-app/src/components/BottomNav.tsx`
+- 지표 로직:
+  - `careflow-app/src/lib/socialReturnIndicators.ts`
+
+앱 화면이 CareFlow의 기준 화면입니다.
+
+### 3. 앱 미러 웹
 
 Expo 앱 화면과 같은 내용을 웹에서 확인하기 위한 별도 트랙입니다.
 
@@ -39,7 +57,7 @@ Expo 앱 화면과 같은 내용을 웹에서 확인하기 위한 별도 트랙�
 3. 같은 내용을 `/app-web/*`에 반영합니다.
 4. 기존 웹 라우트와 `/study` 라우트는 별도로 유지합니다.
 
-### 3. 스터디 워크스페이스
+### 4. 스터디 워크스페이스
 
 연구계획서, 근거 문헌, claim/audit 흐름을 다루는 별도 화면입니다.
 
@@ -81,6 +99,18 @@ careflow/
 │       ├── indicators/
 │       ├── weekly-checkins/
 │       └── study/
+├── careflow-app/
+│   ├── App.tsx
+│   ├── app.json
+│   ├── assets/
+│   ├── src/
+│   │   ├── components/
+│   │   ├── constants/
+│   │   ├── lib/
+│   │   ├── screens/
+│   │   └── types/
+│   ├── package.json
+│   └── tsconfig.json
 ├── lib/
 │   ├── designTokens.ts
 │   ├── socialReturnIndicators.ts
@@ -107,6 +137,8 @@ CareFlow는 의료기기가 아니며 의학적 진단을 제공하지 않습니
 
 ## 개발 명령어
 
+웹:
+
 ```bash
 npm install
 npm run dev
@@ -125,17 +157,29 @@ http://localhost:3001
 npm run dev -- --hostname 127.0.0.1 --port 3001
 ```
 
+앱:
+
+```bash
+cd careflow-app
+npm install
+npx expo start
+npx tsc --noEmit
+```
+
 ## GitHub 업로드 기준
 
 변경사항은 가능하면 다음 단위로 분리해 커밋합니다.
 
 1. 기존 웹 변경
-2. 앱 미러 웹 변경
-3. 스터디 워크스페이스 변경
-4. README/문서 변경
+2. Expo 앱 변경
+3. 앱 미러 웹 변경
+4. 스터디 워크스페이스 변경
+5. README/문서 변경
 
 현재 원격 저장소:
 
 ```txt
 https://github.com/Koryoss/Nursinurday.git
 ```
+
+이전 별도 앱 저장소인 `Koryoss/careflow-app`은 더 이상 기준 저장소로 사용하지 않습니다.

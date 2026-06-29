@@ -4,6 +4,7 @@
 
 # 의존성 폴더 (npm install 하면 자동 생성됨)
 /node_modules
+**/node_modules
 /.pnp
 .pnp.js
 
@@ -11,6 +12,9 @@
 /.next/
 /out/
 /build
+**/.expo
+**/.expo-shared
+**/dist
 
 # 환경 변수 (API 키가 담겨 있어서 절대 올리면 안 됨!)
 .env
