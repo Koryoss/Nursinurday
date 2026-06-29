@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, type CSSProperties } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import Link from 'next/link'
@@ -20,6 +20,29 @@ const C = {
 }
 
 const FONT = CARE_FONT
+
+function BrandImage({
+  width,
+  height,
+  priority = false,
+  style,
+}: {
+  width: number
+  height: number
+  priority?: boolean
+  style?: CSSProperties
+}) {
+  return (
+    <img
+      src="/careflow-brand.png"
+      alt="CareFlow"
+      width={width}
+      height={height}
+      loading={priority ? 'eager' : 'lazy'}
+      style={{ display: 'block', width, height, objectFit: 'contain', ...style }}
+    />
+  )
+}
 
 /* ── 로고 SVG ── */
 function CareFlowLogo({ width = 260 }: { width?: number }) {
@@ -115,8 +138,17 @@ function SplashScreen({ onNavigate }: { onNavigate: () => void }) {
         {/* Dynamic Island */}
         <div style={{ position: 'absolute', top: 14, left: '50%', transform: 'translateX(-50%)', width: 120, height: 36, background: '#1C1C1E', borderRadius: 18, zIndex: 20 }} />
 
+        <motion.div
+          initial={{ opacity: 0, scale: 0.96, y: 12 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          transition={{ duration: 1, ease: 'easeOut' }}
+          style={{ marginBottom: 10 }}
+        >
+          <BrandImage width={286} height={234} priority />
+        </motion.div>
+
         {/* 파동 SVG — 오른쪽→왼쪽으로 그려짐 */}
-        <svg width={280} height={146} viewBox="0 0 500 260" fill="none">
+        <svg width={250} height={130} viewBox="0 0 500 260" fill="none">
           <defs>
             <linearGradient id="spWave1" x1="490" y1="0" x2="0" y2="0" gradientUnits="userSpaceOnUse">
               <stop offset="0%"   stopColor="#6BAE96"/>
@@ -179,9 +211,9 @@ function SplashScreen({ onNavigate }: { onNavigate: () => void }) {
               initial={{ opacity: 0, y: 14 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, ease: [0.34, 1.4, 0.64, 1] }}
-              style={{ fontSize: 52, fontWeight: 800, letterSpacing: '-3px', color: C.text, margin: '20px 0 0', lineHeight: 1 }}
+              style={{ fontSize: 24, fontWeight: 800, letterSpacing: '-0.5px', color: C.mid, margin: '8px 0 0', lineHeight: 1 }}
             >
-              CareFlow
+              오늘의 흐름을 함께 볼까요?
             </motion.h1>
           )}
         </AnimatePresence>
@@ -437,12 +469,9 @@ export default function HomePage() {
           WebkitBackdropFilter: 'blur(20px)',
           borderBottom: '1px solid rgba(163,177,138,0.12)',
         }}>
-          <div style={{ maxWidth: 1160, margin: '0 auto', padding: '0 32px', height: 68, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <div style={{ width: 30, height: 30, borderRadius: 9, background: `linear-gradient(135deg, ${C.sage}, ${C.sageDk})`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <span style={{ fontSize: 15 }}>🌿</span>
-              </div>
-              <span style={{ fontSize: 20, fontWeight: 800, letterSpacing: '-0.5px', color: C.text }}>CareFlow</span>
+          <div style={{ maxWidth: 1160, margin: '0 auto', padding: '0 32px', height: 88, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div style={{ width: 180, height: 72, overflow: 'hidden', display: 'flex', alignItems: 'center' }}>
+              <BrandImage width={180} height={148} priority style={{ marginTop: -28 }} />
             </div>
             <nav style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
               <button
@@ -459,21 +488,17 @@ export default function HomePage() {
         </header>
 
         {/* ── 히어로 ── */}
-        <section style={{ position: 'relative', maxWidth: 1160, margin: '0 auto', padding: '80px 32px 100px', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', overflow: 'hidden' }}>
+        <section style={{ position: 'relative', maxWidth: 1160, margin: '0 auto', padding: '56px 32px 100px', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', overflow: 'hidden' }}>
           {/* 흐린 배경 로고 — 텍스트 뒤에 위치 */}
-          <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -54%)', opacity: 0.07, pointerEvents: 'none', zIndex: 0 }}>
-            <CareFlowLogo width={900} />
+          <div style={{ position: 'absolute', top: '48%', left: '50%', transform: 'translate(-50%, -52%)', opacity: 0.06, pointerEvents: 'none', zIndex: 0 }}>
+            <BrandImage width={900} height={738} priority />
           </div>
 
           {/* 텍스트 콘텐츠 */}
           <div style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-            <div style={{ marginBottom: 24 }}>
-              <CareFlowLogo width={320} />
+            <div style={{ marginBottom: 6 }}>
+              <BrandImage width={430} height={352} priority />
             </div>
-
-            <h1 style={{ fontSize: 'clamp(52px, 8vw, 96px)', fontWeight: 800, letterSpacing: '-3px', lineHeight: 1, margin: '0 0 24px', color: C.text }}>
-              CareFlow
-            </h1>
 
             <p style={{ fontSize: 'clamp(18px, 3vw, 26px)', fontWeight: 500, color: C.mid, lineHeight: 1.6, maxWidth: 520, margin: '0 0 12px' }}>
               베타 참여자를 모집하고 있어요.
@@ -742,11 +767,8 @@ export default function HomePage() {
 
         {/* ── 푸터 ── */}
         <footer style={{ borderTop: '1px solid rgba(163,177,138,0.12)', padding: '28px 32px 40px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16, maxWidth: 1160, margin: '0 auto' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <div style={{ width: 24, height: 24, borderRadius: 7, background: `linear-gradient(135deg, ${C.sage}, ${C.sageDk})`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <span style={{ fontSize: 12 }}>🌿</span>
-            </div>
-            <span style={{ fontSize: 14, fontWeight: 700, color: C.text }}>CareFlow</span>
+          <div style={{ width: 132, height: 54, overflow: 'hidden', display: 'flex', alignItems: 'center' }}>
+            <BrandImage width={132} height={108} style={{ marginTop: -20 }} />
           </div>
           <span style={{ fontSize: 13, color: C.light }}>© 2026 CareFlow. 진료실 밖 일상을 연결합니다.</span>
           <div style={{ display: 'flex', gap: 20 }}>
