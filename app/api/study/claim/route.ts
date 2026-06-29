@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { matchEvidenceForClaim, safetyGuidanceForEvidence } from '@/lib/evidenceRegistry'
 import OpenAI from 'openai'
 
 export const runtime = 'nodejs'
@@ -84,6 +85,12 @@ export async function POST(req: NextRequest) {
   const chunks: Chunk[] = data ?? []
   const draft = await buildDraft(chunks, claim.trim())
   const topChunk = chunks[0] ?? null
+  const registryEvidence = matchEvidenceForClaim([
+    claim.trim(),
+    draft.source_summary,
+    draft.application_context,
+    draft.safety_note,
+  ].join(' '))
 
   const sources = chunks.map(c => ({
     doc_title:   c.doc_title,
@@ -96,6 +103,9 @@ export async function POST(req: NextRequest) {
   return NextResponse.json({
     claim: claim.trim(),
     draft,
+    registry_numbers: registryEvidence.map(entry => `#${entry.id}`),
+    registry_evidence: registryEvidence,
+    registry_guidance: safetyGuidanceForEvidence(registryEvidence),
     sources,
     top_source: topChunk
       ? { title: topChunk.doc_title, page: topChunk.page_num, file: topChunk.source_file, similarity: topChunk.similarity }
@@ -115,5 +125,20 @@ export async function GET() {
     .order('created_at', { ascending: false })
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-  return NextResponse.json({ claims: data })
+  return NextResponse.json({
+    claims: (data ?? []).map(claim => {
+      const registryEvidence = matchEvidenceForClaim([
+        claim.claim,
+        claim.source_title ?? '',
+        claim.application_context ?? '',
+        claim.safety_note ?? '',
+      ].join(' '))
+
+      return {
+        ...claim,
+        registry_numbers: registryEvidence.map(entry => `#${entry.id}`),
+        registry_evidence: registryEvidence,
+      }
+    }),
+  })
 }

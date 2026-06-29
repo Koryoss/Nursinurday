@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { matchEvidenceForClaim } from '@/lib/evidenceRegistry'
 
 // POST /api/study/claim/save — 사용자 확인 후 레지스트리에 저장
 export async function POST(req: NextRequest) {
@@ -31,5 +32,17 @@ export async function POST(req: NextRequest) {
     .single()
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-  return NextResponse.json({ id: data.id })
+
+  const registryEvidence = matchEvidenceForClaim([
+    claim.trim(),
+    draft.source_summary ?? '',
+    draft.application_context ?? '',
+    draft.safety_note ?? '',
+  ].join(' '))
+
+  return NextResponse.json({
+    id: data.id,
+    registry_numbers: registryEvidence.map(entry => `#${entry.id}`),
+    registry_evidence: registryEvidence,
+  })
 }

@@ -1,5 +1,13 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import {
+  CORE_COPY_EVIDENCE_MAP,
+  auditCopyMapping,
+  evidenceRefs,
+  findCopyMappingsForLine,
+  type CopyAuditFlag,
+  type EvidenceRef,
+} from '@/lib/evidenceRegistry'
 import { readdir, readFile } from 'fs/promises'
 import { join, resolve, relative } from 'path'
 
@@ -45,6 +53,14 @@ const RULES = [
   },
 ]
 
+const ASSERTION_RULE = {
+  id: 'ASSERT-01', label: '근거 없는 단정 표현',
+  desc: '근거 #번호가 없는 핵심 사용자 문구의 단정 표현 후보',
+}
+
+const CORE_COPY_RE = /지표|band|기준선|최근\s*기록|관찰|흐름|걸음|활동\s*범위|DHI|THI|HADS|VSS|외부자원|비의료기기/
+const ASSERTIVE_COPY_RE = /입니다|합니다|됩니다|제공합니다|돕습니다|확인합니다|말하지\s*않습니다|이어가며|만들어요/
+
 const EXEMPT_RE = [
   /대체하지\s*않습니다/,
   /의료\s*자문이\s*아닙니다/,
@@ -76,6 +92,19 @@ type Finding = {
   ruleId: string
   label: string
   desc: string
+  registry_numbers?: string[]
+  registry_evidence?: EvidenceRef[]
+  unmapped_assertion?: boolean
+}
+
+type CoreCopyClaimAudit = {
+  key: string
+  phrase: string
+  surface: string
+  note: string
+  registry_numbers: string[]
+  registry_evidence: EvidenceRef[]
+  flags: CopyAuditFlag[]
 }
 
 async function collectFiles(dir: string, exts: string[]): Promise<string[]> {
@@ -99,6 +128,9 @@ function lintFile(filePath: string, content: string): Finding[] {
     if (!/[가-힣]/.test(line)) continue
     if (SKIP_LINE_RE.some(r => r.test(line))) continue
     if (EXEMPT_RE.some(r => r.test(line))) continue
+    const mappings = findCopyMappingsForLine(line)
+    const registryEvidence = evidenceRefs(Array.from(new Set(mappings.flatMap(mapping => mapping.evidenceIds))))
+
     for (const rule of RULES) {
       const match = rule.re.exec(line)
       if (!match) continue
@@ -111,6 +143,23 @@ function lintFile(filePath: string, content: string): Finding[] {
         ruleId: rule.id,
         label: rule.label,
         desc: rule.desc,
+        registry_numbers: registryEvidence.map(entry => `#${entry.id}`),
+        registry_evidence: registryEvidence,
+      })
+    }
+
+    if (CORE_COPY_RE.test(line) && ASSERTIVE_COPY_RE.test(line) && registryEvidence.length === 0) {
+      const match = ASSERTIVE_COPY_RE.exec(line)
+      findings.push({
+        file: filePath,
+        line: i + 1,
+        col: (match?.index ?? 0) + 1,
+        matched: match?.[0] ?? line.trim().slice(0, 30),
+        context: line.trim().slice(0, 120),
+        ruleId: ASSERTION_RULE.id,
+        label: ASSERTION_RULE.label,
+        desc: ASSERTION_RULE.desc,
+        unmapped_assertion: true,
       })
     }
   }
@@ -133,16 +182,31 @@ export async function GET() {
     violations.push(...lintFile(relative(root, f), content))
   }
 
+  const allRules = [...RULES, ASSERTION_RULE]
   const byRule = Object.fromEntries(
-    RULES.map(r => [r.id, violations.filter(v => v.ruleId === r.id)])
+    allRules.map(r => [r.id, violations.filter(v => v.ruleId === r.id)])
   )
+  const coreCopyClaims: CoreCopyClaimAudit[] = CORE_COPY_EVIDENCE_MAP.map(mapping => {
+    const refs = evidenceRefs(mapping.evidenceIds)
+    return {
+      key: mapping.key,
+      phrase: mapping.phrase,
+      surface: mapping.surface,
+      note: mapping.note,
+      registry_numbers: refs.map(entry => `#${entry.id}`),
+      registry_evidence: refs,
+      flags: auditCopyMapping(mapping),
+    }
+  })
 
   return NextResponse.json({
     scanned: tsxFiles.length,
     total: violations.length,
     violations,
     by_rule: byRule,
-    rules: RULES.map(r => ({ id: r.id, label: r.label, count: byRule[r.id].length })),
+    rules: allRules.map(r => ({ id: r.id, label: r.label, count: byRule[r.id].length })),
+    core_copy_claims: coreCopyClaims,
+    core_copy_flagged: coreCopyClaims.filter(item => item.flags.length > 0).length,
     run_at: new Date().toISOString(),
   })
 }

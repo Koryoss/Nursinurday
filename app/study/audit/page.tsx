@@ -15,6 +15,20 @@ const T = {
   font: "Pretendard, -apple-system, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif",
 }
 
+type RegistryEvidence = {
+  id: number
+  claim: string
+  source: string
+  strength: string
+  safety: string
+  safetyNote: string
+}
+
+type CopyAuditFlag = {
+  code: string
+  message: string
+}
+
 type Finding = {
   file: string
   line: number
@@ -24,6 +38,19 @@ type Finding = {
   ruleId: string
   label: string
   desc: string
+  registry_numbers?: string[]
+  registry_evidence?: RegistryEvidence[]
+  unmapped_assertion?: boolean
+}
+
+type CoreCopyClaimAudit = {
+  key: string
+  phrase: string
+  surface: string
+  note: string
+  registry_numbers: string[]
+  registry_evidence: RegistryEvidence[]
+  flags: CopyAuditFlag[]
 }
 
 type AuditResult = {
@@ -31,6 +58,8 @@ type AuditResult = {
   total: number
   violations: Finding[]
   rules: { id: string; label: string; count: number }[]
+  core_copy_claims: CoreCopyClaimAudit[]
+  core_copy_flagged: number
   run_at: string
 }
 
@@ -42,6 +71,7 @@ const RULE_COLORS: Record<string, string> = {
   'PRESC-01':  '#4F9B6A',
   'CUTOFF-01': '#9B8A4F',
   'CAUSAL-01': '#7A4F9B',
+  'ASSERT-01': '#B45E42',
 }
 
 export default function AuditPage() {
@@ -125,8 +155,38 @@ export default function AuditPage() {
                   — 각 항목을 검토해 실제 위반인지 판단하세요
                 </span>
               )}
+              <span style={{ color: T.sub, marginLeft: 8 }}>
+                핵심 문구 {result.core_copy_claims.length}개 근거 매핑 · 제한 플래그 {result.core_copy_flagged}건
+              </span>
             </div>
           </div>
+
+          {/* 핵심 문구 근거 매핑 */}
+          {result.core_copy_claims.length > 0 && (
+            <div style={{ background: T.card, borderRadius: 12, border: `1px solid ${T.border}`, padding: 18, marginBottom: 20 }}>
+              <div style={{ fontWeight: 600, fontSize: 14, marginBottom: 12 }}>핵심 문구 근거 매핑</div>
+              <div style={{ display: 'grid', gap: 8 }}>
+                {result.core_copy_claims.map(item => (
+                  <div key={item.key} style={{ background: T.bg, borderRadius: 8, padding: '10px 12px', fontSize: 12, lineHeight: 1.5 }}>
+                    <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center', marginBottom: 4 }}>
+                      <strong style={{ color: T.body }}>{item.surface}</strong>
+                      {item.registry_numbers.map(num => (
+                        <span key={num} style={{ color: T.primary, fontWeight: 700 }}>{num}</span>
+                      ))}
+                      {item.flags.length > 0 && <span style={{ color: T.warn, fontWeight: 700 }}>제한 검토</span>}
+                    </div>
+                    <div style={{ color: T.body }}>{item.phrase}</div>
+                    <div style={{ color: T.sub }}>{item.note}</div>
+                    {item.flags.map(flag => (
+                      <div key={`${item.key}-${flag.code}`} style={{ color: T.warn, marginTop: 3 }}>
+                        {flag.code}: {flag.message}
+                      </div>
+                    ))}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* 규칙별 필터 탭 */}
           {result.total > 0 && (
@@ -216,6 +276,11 @@ export default function AuditPage() {
                     </code>
                     {'  '}
                     <strong>사유:</strong> {v.desc}
+                    {v.registry_numbers && v.registry_numbers.length > 0 && (
+                      <span style={{ marginLeft: 8 }}>
+                        <strong>근거:</strong> {v.registry_numbers.join(', ')}
+                      </span>
+                    )}
                   </div>
                 </div>
               ))}

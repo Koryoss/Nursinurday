@@ -43,9 +43,21 @@ type TopSource = {
   similarity: number
 } | null
 
+type RegistryEvidence = {
+  id: number
+  claim: string
+  source: string
+  strength: string
+  safety: string
+  safetyNote: string
+}
+
 type ClaimResult = {
   claim: string
   draft: Draft
+  registry_numbers: string[]
+  registry_evidence: RegistryEvidence[]
+  registry_guidance: string[]
   sources: Source[]
   top_source: TopSource
 }
@@ -58,6 +70,8 @@ type SavedClaim = {
   strength: string
   application_context: string | null
   safety_note: string | null
+  registry_numbers?: string[]
+  registry_evidence?: RegistryEvidence[]
   created_at: string
 }
 
@@ -170,6 +184,12 @@ export default function ClaimPage() {
             <tbody>
               {[
                 { label: '주장', value: result.claim },
+                {
+                  label: '근거#',
+                  value: result.registry_numbers.length > 0
+                    ? result.registry_numbers.join(', ')
+                    : '매핑 필요',
+                },
                 { label: '출처', value: result.draft.source_summary },
                 {
                   label: '근거강도',
@@ -201,6 +221,23 @@ export default function ClaimPage() {
               ))}
             </tbody>
           </table>
+
+          {result.registry_evidence.length > 0 && (
+            <div style={{ marginTop: 14, display: 'grid', gap: 8 }}>
+              {result.registry_evidence.map(ref => (
+                <div key={ref.id} style={{ background: T.bg, borderRadius: 8, padding: '9px 12px', fontSize: 12, color: T.sub, lineHeight: 1.5 }}>
+                  <strong style={{ color: T.body }}>#{ref.id}</strong> {ref.source} · 근거강도 {ref.strength} · 안전도 {ref.safety}
+                  <div>{ref.claim}</div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {result.registry_guidance.length > 0 && (
+            <div style={{ marginTop: 12, color: T.warn, fontSize: 12, lineHeight: 1.6 }}>
+              {result.registry_guidance.map(item => <div key={item}>{item}</div>)}
+            </div>
+          )}
 
           {/* 검색된 청크 */}
           {result.sources.length > 0 && (
@@ -284,6 +321,11 @@ export default function ClaimPage() {
                       }}>{c.strength}</span>
                       <div style={{ flex: 1 }}>
                         <div style={{ fontWeight: 500, lineHeight: 1.4, marginBottom: 4 }}>{c.claim}</div>
+                        {c.registry_numbers && c.registry_numbers.length > 0 && (
+                          <div style={{ color: T.primary, fontSize: 12, fontWeight: 600, marginBottom: 4 }}>
+                            근거 {c.registry_numbers.join(', ')}
+                          </div>
+                        )}
                         {c.source_title && (
                           <div style={{ color: T.sub }}>
                             {c.source_title} {c.source_page ? `p.${c.source_page}` : ''}
