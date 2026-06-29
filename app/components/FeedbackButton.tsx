@@ -51,6 +51,8 @@ export default function FeedbackButton() {
     }
   }
 
+  if (pathname?.startsWith('/study')) return null
+
   return (
     <>
       <button

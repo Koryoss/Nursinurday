@@ -14,6 +14,7 @@ const PROTECTED_PREFIXES = [
   '/history',
   '/notification',
   '/onboarding',
+  '/study',
 ]
 
 function isProtectedPath(pathname: string) {
