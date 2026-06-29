@@ -83,7 +83,7 @@ export default function AppWebHomePage() {
           {[42, 55, 50, 68].map((height, index) => <span key={index} style={{ flex: 1, height: `${height}%`, minHeight: 28, borderRadius: '6px 6px 0 0', background: '#D6E2D6' }} />)}
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10, color: TEXT_LIGHT, fontSize: 13, fontWeight: 800, textAlign: 'center' }}>
-          <span>1주</span><span>2주</span><span>3주</span><span>4주</span>
+          <span>06/01</span><span>06/08</span><span>06/15</span><span>06/22</span>
         </div>
       </Card>
 

@@ -145,11 +145,18 @@ function BandGauge({
 }
 
 function TrendBars({ points }: { points: TrendPoint[] }) {
-  const recent = points.slice(-4)
-  const fallback = [42, 55, 50, 68]
-  const values = recent.length
-    ? recent.map(point => Math.max(26, Math.min(76, 34 + (point.gait ?? point.dizziness ?? 2) * 9)))
-    : fallback
+  const recent = points
+    .filter(point => typeof point.gait === 'number' || typeof point.dizziness === 'number')
+    .slice(-4)
+  const values = recent.map(point => Math.max(26, Math.min(76, 34 + (point.gait ?? point.dizziness ?? 0) * 9)))
+
+  if (recent.length === 0) {
+    return (
+      <p style={{ margin: 0, color: TEXT_LIGHT, fontSize: 13, lineHeight: 1.5, fontWeight: 700 }}>
+        아직 그래프로 볼 기록이 없어요.
+      </p>
+    )
+  }
 
   return (
     <div>
@@ -167,15 +174,11 @@ function TrendBars({ points }: { points: TrendPoint[] }) {
           />
         ))}
       </div>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10, color: TEXT_LIGHT, fontSize: 13, fontWeight: 800, textAlign: 'center' }}>
-        <span>1주</span>
-        <span>2주</span>
-        <span>3주</span>
-        <span>4주</span>
+      <div style={{ display: 'grid', gridTemplateColumns: `repeat(${recent.length}, 1fr)`, gap: 10, color: TEXT_LIGHT, fontSize: 13, fontWeight: 800, textAlign: 'center' }}>
+        {recent.map(point => (
+          <span key={point.date}>{point.date.slice(5).replace('-', '/')}</span>
+        ))}
       </div>
-      <p style={{ margin: '9px 4px 0', color: TEXT_LIGHT, fontSize: 13, lineHeight: 1.45, fontWeight: 700 }}>
-        시작 ~ 최근 · 전체 기록 기준
-      </p>
     </div>
   )
 }
