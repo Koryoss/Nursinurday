@@ -179,19 +179,9 @@ function buildDailyMetricPoints(logs: DailyLogRow[], symptoms: SymptomRow[], aff
 }
 
 function indicatorCopy(name: string, band: Band) {
-  if (band === 'high') return `${name}이 평소보다 높게 관찰돼요. 오늘 기록과 함께 볼까요?`
-  if (band === 'low') return `${name}이 평소보다 낮게 관찰돼요. 부담을 줄일 방법을 고려해볼까요?`
-  return `${name}이 평소와 비슷하게 관찰돼요. 기록을 이어가며 함께 볼까요?`
-}
-
-function correlationCopy(item: CorrelationItem) {
-  if (item.direction === 'together') {
-    return `${item.pair}은 같은 방향으로 움직이는 흐름이 관찰돼요. 같은 날의 기록을 함께 볼까요?`
-  }
-  if (item.direction === 'opposite') {
-    return `${item.pair}은 서로 다른 방향으로 움직이는 흐름이 관찰돼요. 어떤 날에 달라졌는지 함께 볼까요?`
-  }
-  return `${item.pair}은 아직 흐름이 뚜렷하지 않아요. 기록이 더 쌓이면 함께 볼까요?`
+  if (band === 'high') return `${name}가 평소보다 높게 관찰돼요. 오늘 기록과 함께 볼까요?`
+  if (band === 'low') return `${name}가 평소보다 낮게 관찰돼요. 부담을 줄일 방법을 고려해볼까요?`
+  return `${name}가 평소와 비슷하게 관찰돼요. 기록을 이어가 볼까요?`
 }
 
 function BandCard({ title, band }: { title: string; band: Band }) {
@@ -437,7 +427,7 @@ function TrendGraph({ trend }: { trend: TrendPoint[] }) {
       }
     }).filter((point): point is { x: number; y: number } => point !== null)
     return { metric, points }
-  }).filter(group => group.points.length > 0)
+  }).filter(group => group.points.length > 1)
 
   return (
     <View style={styles.graphWrap}>
@@ -476,10 +466,10 @@ function TrendGraph({ trend }: { trend: TrendPoint[] }) {
         </View>
       </ScrollView>
       <View style={styles.waveLegendRow}>
-        {metrics.map(metric => (
-          <View key={metric.key} style={styles.waveLegendItem}>
-            <View style={[styles.waveLegendDot, { backgroundColor: metric.color }]} />
-            <Text style={styles.waveLegendText}>{metric.label}</Text>
+        {waveGroups.map(group => (
+          <View key={group.metric.key} style={styles.waveLegendItem}>
+            <View style={[styles.waveLegendDot, { backgroundColor: group.metric.color }]} />
+            <Text style={styles.waveLegendText}>{group.metric.label}</Text>
           </View>
         ))}
       </View>
@@ -674,14 +664,7 @@ export default function DashboardScreen({ onOpenRecord, onOpenNotification }: Da
 
         <View style={styles.card}>
           <Text style={styles.sectionTitle}>관찰된 연관</Text>
-          <Text style={styles.note}>누적 기록에서 함께 움직인 항목을 조심스럽게 묶어 보여줘요.</Text>
-          {(data?.correlations ?? []).map(item => (
-            <View key={item.pair} style={styles.correlationRow}>
-              <Text style={styles.correlationTitle}>{item.pair}</Text>
-              <Text style={styles.correlationText}>{correlationCopy(item)}</Text>
-            </View>
-          ))}
-          {data && data.correlations.length === 0 ? <Text style={styles.empty}>연관을 살펴볼 기록이 더 필요해요.</Text> : null}
+          <Text style={styles.empty}>연관을 살펴볼 기록이 더 필요해요</Text>
         </View>
 
         {message ? <Text style={styles.message}>{message}</Text> : null}
@@ -729,12 +712,12 @@ const styles = StyleSheet.create({
   dateOptionTextActive: { color: Colors.white },
   dateModalClose: { minHeight: 52, marginTop: 14, borderRadius: Radius.md, backgroundColor: Colors.bg, paddingVertical: 14, alignItems: 'center', justifyContent: 'center' },
   dateModalCloseText: { color: Colors.brandDark, fontSize: 16, fontWeight: '900' },
-  bandCard: { borderWidth: 1, borderColor: Colors.border, borderRadius: Radius.md, padding: 14, backgroundColor: Colors.white },
-  bandTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 8 },
+  bandCard: { borderWidth: 1, borderColor: Colors.border, borderRadius: Radius.md, padding: 16, backgroundColor: Colors.white, gap: 10 },
+  bandTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 8, flexWrap: 'wrap' },
   bandTitle: { color: Colors.text, fontSize: 19, fontWeight: '900' },
   bandPill: { borderRadius: Radius.md, paddingHorizontal: 12, paddingVertical: 7 },
   bandPillText: { color: Colors.white, fontSize: 15, fontWeight: '900' },
-  bandCopy: { color: Colors.textMuted, fontSize: 16, lineHeight: 24, marginTop: 10 },
+  bandCopy: { color: Colors.textMuted, fontSize: 16, lineHeight: 25, flexShrink: 1 },
   note: { color: Colors.textLight, fontSize: 15, lineHeight: 23 },
   savedGraphic: { borderWidth: 1, borderColor: Colors.border, borderRadius: Radius.card, padding: 16, backgroundColor: Colors.white, gap: 13 },
   savedGraphicTitle: { color: Colors.text, fontSize: 19, fontWeight: '900' },
@@ -764,9 +747,6 @@ const styles = StyleSheet.create({
   waveLegendText: { color: Colors.textMuted, fontSize: 13, fontWeight: '900' },
   rangeRow: { flexDirection: 'row', justifyContent: 'space-between', gap: 10 },
   graphRangeText: { color: Colors.textLight, fontSize: 13, lineHeight: 19 },
-  correlationRow: { borderWidth: 1, borderColor: Colors.border, borderRadius: Radius.md, padding: 13, marginBottom: 8, backgroundColor: Colors.white },
-  correlationTitle: { color: Colors.text, fontSize: 16, fontWeight: '900' },
-  correlationText: { color: Colors.textMuted, fontSize: 16, lineHeight: 24, marginTop: 5 },
   empty: { color: Colors.textLight, fontSize: 16, lineHeight: 24 },
   message: { color: Colors.danger, fontSize: 16, lineHeight: 24, paddingHorizontal: 4 },
 })

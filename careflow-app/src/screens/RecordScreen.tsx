@@ -1,9 +1,10 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { ActivityIndicator, Modal, ScrollView, StyleSheet, Text, TouchableOpacity, View, useWindowDimensions } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import AppHeader from '../components/AppHeader'
 import { Colors, Radius } from '../constants/colors'
 import { supabase } from '../lib/supabase'
+import { logUsage } from '../lib/usageLog'
 import { formatKstDate } from '../lib/socialReturnIndicators'
 import {
   AFFECTS,
@@ -141,6 +142,23 @@ export default function RecordScreen({
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState('')
 
+  // 베타 사용성 로깅: 화면 진입 시각 + 저장 여부 (H1 검증)
+  const enteredAtRef = useRef(Date.now())
+  const savedRef = useRef(false)
+
+  useEffect(() => {
+    enteredAtRef.current = Date.now()
+    savedRef.current = false
+    logUsage('record_start', 'record')
+    return () => {
+      if (!savedRef.current) {
+        logUsage('record_abandon', 'record', {
+          duration_sec: Math.round((Date.now() - enteredAtRef.current) / 1000),
+        })
+      }
+    }
+  }, [])
+
   const saveDaily = async () => {
     if (saving) return
     setSaving(true)
@@ -182,6 +200,13 @@ export default function RecordScreen({
         .insert(activeAffects.map(affect => ({ daily_log_id: dailyLogId, affect, score: affects[affect] })))
 
       setMessage(affectScoresError ? '기본 기록이 저장됐어요. 추가 감정 저장은 설정을 함께 볼까요?' : '오늘 기록이 저장됐어요.')
+      savedRef.current = true
+      logUsage('record_save', 'record', {
+        kind: 'daily',
+        duration_sec: Math.round((Date.now() - enteredAtRef.current) / 1000),
+        symptom_count: activeSymptoms.length,
+        affect_count: activeAffects.length,
+      })
       setSymptoms(emptySymptoms())
       setActiveSymptoms(DEFAULT_SYMPTOMS)
       setAffects(emptyAffects())
@@ -215,6 +240,11 @@ export default function RecordScreen({
       setMessage('수면을 저장하지 못했어요. 연결을 함께 볼까요?')
     } else {
       setMessage('수면이 저장됐어요.')
+      savedRef.current = true
+      logUsage('record_save', 'record', {
+        kind: 'sleep',
+        duration_sec: Math.round((Date.now() - enteredAtRef.current) / 1000),
+      })
       setBedtime('')
       setWaketime('')
       setPsqi({ psqi_q1: 0, psqi_q2: 0, psqi_q3: 0 })

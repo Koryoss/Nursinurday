@@ -11,6 +11,7 @@ import AuthScreen from './src/screens/AuthScreen'
 import OnboardingScreen from './src/screens/OnboardingScreen'
 import { Colors } from './src/constants/colors'
 import { supabase } from './src/lib/supabase'
+import { logUsage } from './src/lib/usageLog'
 
 type AppSection = 'dashboard' | 'record' | 'notification' | 'chat'
 
@@ -88,6 +89,13 @@ export default function App() {
       useNativeDriver: true,
     }).start()
   }, [activeSection, transition])
+
+  // 베타 사용성 로깅: 화면 전환 (screen analytics)
+  useEffect(() => {
+    if (session?.user && !session.user.is_anonymous) {
+      logUsage('screen_view', activeSection)
+    }
+  }, [activeSection, session])
 
   if (loading) {
     return (
