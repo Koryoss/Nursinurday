@@ -65,6 +65,7 @@ Expo 앱 화면과 같은 내용을 웹에서 확인하기 위한 별도 트랙�
   - `/study`
   - `/study/claim`
   - `/study/audit`
+  - `/study/linknote`
 - 주요 API:
   - `/api/study/query`
   - `/api/study/claim`
@@ -72,10 +73,22 @@ Expo 앱 화면과 같은 내용을 웹에서 확인하기 위한 별도 트랙�
   - `/api/study/audit`
   - `/api/study/docs`
   - `/api/study/ingest`
+  - `/api/study/linknote/auth`
+  - `/api/study/linknote/library`
+  - `/api/study/linknote/import`
+  - `/api/study/linknote/export`
 - 근거 레지스트리:
   - `lib/evidenceRegistry.ts`
 
 스터디 화면은 CareFlow 앱/웹 UI와 별개로 동작합니다.
+
+#### LinkNote 연동
+
+`/study/linknote`에서 별도 앱인 LinkNote(FastAPI + ChromaDB) 계정으로 로그인해 데이터를 주고받습니다.
+
+- 가져오기: LinkNote 서재의 자료(청크 텍스트)를 받아 스터디와 같은 임베딩(`text-embedding-3-small`)으로 재임베딩 후 `study_docs`/`study_chunks`에 저장합니다. 가져온 문서의 `source_file`은 `linknote:` 접두사로 구분합니다.
+- 내보내기: 스터디 논문 텍스트를 LinkNote의 `add_pdf_pages_to_db(pages=[{page, text}])` 입력과 같은 페이지 형식 JSON(`linknote-pages-v1`)으로 내려받습니다.
+- LinkNote 서버 주소·토큰은 브라우저(localStorage)에만 보관하며, CORS 회피를 위해 요청은 Next.js API가 프록시합니다.
 
 ## 프로젝트 디렉터리
 
