@@ -1,8 +1,18 @@
 # CareFlow
 
-CareFlow는 어지럼, 이명, 수면, 감정, 관계 기록을 바탕으로 일상 회복 흐름을 함께 관찰하는 웹/앱 프로토타입입니다.
+CareFlow는 어지럼, 이명, 수면, 감정, 관계 기록을 바탕으로 일상 회복 흐름을 함께 관찰하는 **기록 중심 Digital Health Journal**입니다. AI는 건강을 판단·진단하는 주체가 아니라, 사용자의 기록을 정리·구조화·연결하는 보조 도구로만 쓰입니다.
 
 이 저장소는 CareFlow의 웹, 앱 미러 웹, 스터디 워크스페이스, Expo 앱을 함께 관리하는 통합 저장소입니다.
+
+## 설계 문서
+
+CareFlow의 방향과 구조는 아래 문서를 단일 기준으로 삼습니다. 새 기능·화면·데이터는 이 문서들과 어긋나지 않게 작업합니다.
+
+- [docs/architecture.md](docs/architecture.md) — 전체 아키텍처, 4개 서비스 구성, 데이터 흐름, 설계 원칙
+- [docs/ai-flow.md](docs/ai-flow.md) — AI Orchestrator·Assistant 구조와 처리 흐름 (AI가 하지 않는 일 포함)
+- [docs/decisions.md](docs/decisions.md) — 주요 설계 결정 기록 (ADR)
+- [docs/SPEC.md](docs/SPEC.md) — 제품·측정·DB 단일 기준
+- [docs/README.md](docs/README.md) — 문서 전체 인덱스와 다음 단계
 
 ## 현재 구조
 
