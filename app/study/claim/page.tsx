@@ -84,7 +84,12 @@ export default function ClaimPage() {
   const [registry, setRegistry] = useState<SavedClaim[]>([])
   const [showRegistry, setShowRegistry] = useState(false)
 
-  useEffect(() => { fetchRegistry() }, [])
+  useEffect(() => {
+    fetchRegistry()
+    // 논문 질문 화면의 "주장 근거화로 정리" 링크로 넘어온 주제를 미리 채운다.
+    const fromQuery = new URLSearchParams(window.location.search).get('claim')
+    if (fromQuery?.trim()) setInput(fromQuery.trim())
+  }, [])
 
   async function fetchRegistry() {
     const res = await fetch('/api/study/claim')
