@@ -42,7 +42,7 @@ export default function StudyLayout({ children }: { children: React.ReactNode })
         {/* Logo */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
           <div style={{ width: 8, height: 8, borderRadius: '50%', background: T.primary }} />
-          <span style={{ fontWeight: 600, fontSize: 15 }}>CareFlow Agent</span>
+          <span style={{ fontWeight: 600, fontSize: 15 }}>CareFlow Study Workspace</span>
         </div>
 
         {/* Tab nav */}
@@ -78,7 +78,7 @@ export default function StudyLayout({ children }: { children: React.ReactNode })
           whiteSpace: 'nowrap',
           flexShrink: 0,
         }}>
-          논문 근거 인용 · 비의료 자문
+          관리자 전용 · 논문 근거 인용 · 비의료 자문
         </span>
       </header>
 
