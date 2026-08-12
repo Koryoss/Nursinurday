@@ -1,208 +1,42 @@
-# CareFlow
+# Nursinurday — CareFlow 작업공간 안내
 
-CareFlow는 어지럼, 이명, 수면, 감정, 관계 기록을 바탕으로 일상 회복 흐름을 함께 관찰하는 **기록 중심 Digital Health Journal**입니다. AI는 건강을 판단·진단하는 주체가 아니라, 사용자의 기록을 정리·구조화·연결하는 보조 도구로만 쓰입니다.
+이 폴더(`Nursinurday/`)는 **여러 저장소와 자료를 담는 로컬 작업공간**입니다. 폴더 자체는 git 저장소가 아니며, 아래처럼 독립 저장소·자료가 함께 놓여 있습니다.
 
-이 저장소는 CareFlow의 웹, 앱 미러 웹, 스터디 워크스페이스, Expo 앱을 함께 관리하는 통합 저장소입니다.
+## 폴더 = 저장소 매핑
 
-## 설계 문서
+| 로컬 폴더 | 정체 | GitHub |
+|---|---|---|
+| `careflow/` | **CareFlow 통합 저장소** (Next.js 웹 + 앱미러 + Study + 모바일앱) | Koryoss/**Nursinurday** |
+| `careflow/careflow-app/` | 모바일 앱 (Expo/React Native) — 위 저장소에 포함 | (같은 repo) |
+| `CareFlowWatch/` | Apple Watch·iPhone 네이티브 센서 앱 | Koryoss/CareFlowWatch |
 
-CareFlow의 방향과 구조는 아래 문서를 단일 기준으로 삼습니다. 새 기능·화면·데이터는 이 문서들과 어긋나지 않게 작업합니다.
+> ⚠️ 헷갈리기 쉬운 점: GitHub의 **Nursinurday** 저장소는 최상위 폴더가 아니라 **`careflow/` 하위 폴더**에 매핑됩니다. 개발·배포·git 작업은 `careflow/` 안에서 합니다.
 
-- [docs/architecture.md](docs/architecture.md) — 전체 아키텍처, 4개 서비스 구성, 데이터 흐름, 설계 원칙
-- [docs/ai-flow.md](docs/ai-flow.md) — AI Orchestrator·Assistant 구조와 처리 흐름 (AI가 하지 않는 일 포함)
-- [docs/decisions.md](docs/decisions.md) — 주요 설계 결정 기록 (ADR)
-- [docs/SPEC.md](docs/SPEC.md) — 제품·측정·DB 단일 기준
-- [docs/README.md](docs/README.md) — 문서 전체 인덱스와 다음 단계
+## git에 없는 로컬 자료 (버전관리·백업 안 됨)
 
-## 현재 구조
+| 폴더 | 내용 | 비고 |
+|---|---|---|
+| `docs/` | 발전보고서, 베타테스트 계획 | 프로젝트 산출물 |
+| `지원/` | 설계안·시장통계·근거 레지스트리 등 지원 자료 | 대용량·비공개 자료 |
+| `논문 읽기/` | 원문 PDF + 개념 노트 | 근거 자료 |
+| `(추후에 반영)…와이어프레임.html` | 초기 와이어프레임 | 참고용 |
 
-### 1. 기존 웹
+이 자료들은 의도적으로 웹 저장소 밖에 둡니다(대용량 PDF·비공개). 백업이 필요하면 별도 저장소나 클라우드에 두는 것을 권장합니다.
 
-배포된 웹사이트 버전입니다.
+## 관련 저장소 (다른 위치)
 
-- 운영/배포 기준 URL: https://careflow-delta.vercel.app/
-- 주요 라우트:
-  - `/`
-  - `/dashboard`
-  - `/explore`
-  - `/notification`
-  - `/chat`
-  - `/history`
-  - `/login`
-  - `/onboarding`
+- **LinkNote** (Koryoss/LinkNote) — 의료·간호 지식 RAG 엔진. `careflow/` 의 Study Workspace가 연동. (로컬 위치: `~/Desktop/LINKNOTE`)
 
-기존 웹은 Vercel 배포 화면과 연결되는 트랙입니다. 앱 화면을 그대로 따라가는 작업은 이 라우트에 바로 섞지 않습니다.
-
-### 2. Expo 앱
-
-실제 앱 화면과 기능을 구현하는 React Native/Expo 프로젝트입니다.
-
-- 위치: `careflow-app/`
-- 주요 화면:
-  - `careflow-app/src/screens/DashboardScreen.tsx`
-  - `careflow-app/src/screens/RecordScreen.tsx`
-  - `careflow-app/src/screens/NotificationScreen.tsx`
-  - `careflow-app/src/screens/ChatScreen.tsx`
-- 공통 컴포넌트:
-  - `careflow-app/src/components/AppHeader.tsx`
-  - `careflow-app/src/components/BottomNav.tsx`
-- 지표 로직:
-  - `careflow-app/src/lib/socialReturnIndicators.ts`
-
-앱 화면이 CareFlow의 기준 화면입니다.
-
-### 3. 앱 미러 웹
-
-Expo 앱 화면과 같은 내용을 웹에서 확인하기 위한 별도 트랙입니다.
-
-- 주요 라우트:
-  - `/app-web`
-  - `/app-web/record`
-  - `/app-web/notification`
-
-작업 원칙:
-
-1. 앱 화면을 먼저 수정합니다.
-2. 앱 변경사항을 확인합니다.
-3. 같은 내용을 `/app-web/*`에 반영합니다.
-4. 기존 웹 라우트와 `/study` 라우트는 별도로 유지합니다.
-
-### 4. 스터디 워크스페이스
-
-연구계획서, 근거 문헌, claim/audit 흐름을 다루는 별도 화면입니다.
-
-- 주요 라우트:
-  - `/study`
-  - `/study/claim`
-  - `/study/audit`
-  - `/study/linknote`
-- 주요 API:
-  - `/api/study/query`
-  - `/api/study/claim`
-  - `/api/study/claim/save`
-  - `/api/study/audit`
-  - `/api/study/docs`
-  - `/api/study/ingest`
-  - `/api/study/linknote/auth`
-  - `/api/study/linknote/library`
-  - `/api/study/linknote/import`
-  - `/api/study/linknote/export`
-- 근거 레지스트리:
-  - `lib/evidenceRegistry.ts`
-
-스터디 화면은 CareFlow 앱/웹 UI와 별개로 동작합니다.
-
-#### LinkNote 연동
-
-`/study/linknote`에서 별도 앱인 LinkNote(FastAPI + ChromaDB) 계정으로 로그인해 데이터를 주고받습니다.
-
-- 가져오기: LinkNote 서재의 자료(청크 텍스트)를 받아 스터디와 같은 임베딩(`text-embedding-3-small`)으로 재임베딩 후 `study_docs`/`study_chunks`에 저장합니다. 가져온 문서의 `source_file`은 `linknote:` 접두사로 구분합니다.
-- 내보내기: 스터디 논문 텍스트를 LinkNote의 `add_pdf_pages_to_db(pages=[{page, text}])` 입력과 같은 페이지 형식 JSON(`linknote-pages-v1`)으로 내려받습니다.
-- LinkNote 서버 주소·토큰은 브라우저(localStorage)에만 보관하며, CORS 회피를 위해 요청은 Next.js API가 프록시합니다.
-
-## 프로젝트 디렉터리
-
-```txt
-careflow/
-├── app/
-│   ├── page.tsx
-│   ├── dashboard/
-│   ├── explore/
-│   ├── notification/
-│   ├── app-web/
-│   │   ├── page.tsx
-│   │   ├── record/
-│   │   └── notification/
-│   ├── study/
-│   │   ├── page.tsx
-│   │   ├── claim/
-│   │   └── audit/
-│   └── api/
-│       ├── chat/
-│       ├── indicators/
-│       ├── weekly-checkins/
-│       └── study/
-├── careflow-app/
-│   ├── App.tsx
-│   ├── app.json
-│   ├── assets/
-│   ├── src/
-│   │   ├── components/
-│   │   ├── constants/
-│   │   ├── lib/
-│   │   ├── screens/
-│   │   └── types/
-│   ├── package.json
-│   └── tsconfig.json
-├── lib/
-│   ├── designTokens.ts
-│   ├── socialReturnIndicators.ts
-│   └── evidenceRegistry.ts
-└── README.md
-```
-
-## 그래프 표시 원칙
-
-누적 기록 그래프는 실제 기록된 데이터만 사용합니다.
-
-- 빈 주차를 임의로 만들지 않습니다.
-- 실제 값이 없는 지표는 중간값으로 보정해 표시하지 않습니다.
-- `시작 ~ 최근` 같은 모호한 문구 대신 실제 기록 날짜 또는 실제 기록 주 범위를 기준으로 표시합니다.
-- 기록이 없으면 fallback 그래프가 아니라 “아직 그래프로 볼 기록이 없어요.” 문구를 표시합니다.
-
-## 의료/안전 원칙
-
-CareFlow는 의료기기가 아니며 의학적 진단을 제공하지 않습니다.
-
-- 질병명 진단, 정상/비정상 판정, 약물 처방을 하지 않습니다.
-- 사용자의 기록과 흐름을 자기관찰 목적으로 보여줍니다.
-- 증상이나 불안이 큰 경우 의료진 또는 외부 자원 연결을 우선 안내합니다.
-
-## 개발 명령어
-
-웹:
+## 자주 하는 작업
 
 ```bash
-npm install
-npm run dev
-npm run build
+# CareFlow 웹/앱 (= Nursinurday 저장소)
+cd careflow
+npm run dev                 # 웹 개발 서버
+cd careflow-app && npx expo start   # 모바일 앱
+
+# 워치 앱
+open CareFlowWatch/CareFlowWatch.xcodeproj
 ```
 
-로컬 개발 서버 기본 주소:
-
-```txt
-http://localhost:3001
-```
-
-필요 시 포트를 지정해 실행합니다.
-
-```bash
-npm run dev -- --hostname 127.0.0.1 --port 3001
-```
-
-앱:
-
-```bash
-cd careflow-app
-npm install
-npx expo start
-npx tsc --noEmit
-```
-
-## GitHub 업로드 기준
-
-변경사항은 가능하면 다음 단위로 분리해 커밋합니다.
-
-1. 기존 웹 변경
-2. Expo 앱 변경
-3. 앱 미러 웹 변경
-4. 스터디 워크스페이스 변경
-5. README/문서 변경
-
-현재 원격 저장소:
-
-```txt
-https://github.com/Koryoss/Nursinurday.git
-```
-
-이전 별도 앱 저장소인 `Koryoss/careflow-app`은 더 이상 기준 저장소로 사용하지 않습니다.
+각 저장소의 상세 구조·문서는 해당 폴더의 `README.md`와 `docs/`를 참조하세요 (`careflow/README.md`, `careflow/docs/README.md`).
