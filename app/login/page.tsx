@@ -2,8 +2,8 @@
 
 import { Suspense, useEffect, useMemo, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { createClient } from '@/lib/supabase/client'
-import { CARE_COLORS, CARE_FONT, CARE_GRADIENTS, CARE_RADIUS, CARE_SHADOW } from '@/lib/designTokens'
+import { createClient } from '@/lib/integrations/supabase/client'
+import { CARE_COLORS, CARE_FONT, CARE_GRADIENTS, CARE_RADIUS, CARE_SHADOW } from '@/lib/ui/designTokens'
 
 const C = {
   bg: CARE_COLORS.bg,
@@ -27,14 +27,14 @@ function LoginForm() {
 
   const nextPath = useMemo(() => {
     const next = searchParams.get('next')
-    return next?.startsWith('/') && !next.startsWith('//') ? next : '/explore'
+    return next?.startsWith('/') && !next.startsWith('//') ? next : '/study'
   }, [searchParams])
 
   useEffect(() => {
     const supabase = createClient()
     supabase.auth.getUser().then(({ data }) => {
       if (data.user && !data.user.is_anonymous) {
-        router.replace('/explore')
+        router.replace('/study')
       }
     })
   }, [router])

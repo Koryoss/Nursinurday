@@ -1,10 +1,16 @@
 'use client'
 
 import { useState, useEffect, useCallback, type CSSProperties } from 'react'
-import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import Link from 'next/link'
-import { CARE_COLORS, CARE_FONT, CARE_GRADIENTS, CARE_RADIUS, CARE_SHADOW } from '@/lib/designTokens'
+import { CARE_COLORS, CARE_FONT, CARE_GRADIENTS, CARE_RADIUS, CARE_SHADOW } from '@/lib/ui/designTokens'
+
+// TODO: 실제 배포되면 TestFlight/APK 다운로드 링크로 교체
+const APP_DOWNLOAD_URL = '#app-download-link-todo'
+
+function goToAppDownload() {
+  window.open(APP_DOWNLOAD_URL, '_blank', 'noopener,noreferrer')
+}
 
 /* ── 디자인 토큰 ── */
 const C = {
@@ -436,13 +442,12 @@ function PreviewPhone({ kind }: { kind: string }) {
 }
 
 export default function HomePage() {
-  const router = useRouter()
   const [showSplash, setShowSplash] = useState(false)
   const [previewIndex, setPreviewIndex] = useState(0)
 
   const handleNavigate = useCallback(() => {
-    router.push('/login')
-  }, [router])
+    goToAppDownload()
+  }, [])
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -506,7 +511,7 @@ export default function HomePage() {
             </p>
 
             <button
-              onClick={() => router.push('/login')}
+              onClick={goToAppDownload}
               style={{
                 fontSize: 17, fontWeight: 700, color: '#fff',
                 padding: '16px 48px', borderRadius: CARE_RADIUS.lg, border: 'none', cursor: 'pointer',
@@ -515,7 +520,7 @@ export default function HomePage() {
                 letterSpacing: '-0.3px',
               }}
             >
-              시작하기 →
+              앱 다운로드 →
             </button>
           </div>
         </section>

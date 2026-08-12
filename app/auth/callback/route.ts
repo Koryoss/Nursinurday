@@ -1,10 +1,10 @@
 import { NextResponse } from 'next/server'
 import type { EmailOtpType } from '@supabase/supabase-js'
-import { createClient } from '@/lib/supabase/server'
+import { createClient } from '@/lib/integrations/supabase/server'
 
 function safeNextPath(value: string | null) {
   if (!value || !value.startsWith('/') || value.startsWith('//')) {
-    return '/explore'
+    return '/study'
   }
 
   return value
@@ -17,14 +17,7 @@ async function resolvePostLoginPath(supabase: ReturnType<typeof createClient>, n
 
   if (!user || user.is_anonymous) return '/login'
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('consented_at')
-    .eq('id', user.id)
-    .maybeSingle()
-
-  if (!profile?.consented_at) return '/onboarding'
-  return next === '/onboarding' ? '/explore' : next
+  return next
 }
 
 export async function GET(request: Request) {

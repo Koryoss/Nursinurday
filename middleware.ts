@@ -7,13 +7,9 @@ type CookieToSet = {
   options?: Parameters<NextResponse['cookies']['set']>[2]
 }
 
+// 환자용 제품 화면은 모바일 앱(careflow-app)으로 이전됨.
+// 웹에 남은 인증 보호 대상은 창업자/연구용 내부 도구(study 워크스페이스)뿐.
 const PROTECTED_PREFIXES = [
-  '/chat',
-  '/dashboard',
-  '/explore',
-  '/history',
-  '/notification',
-  '/onboarding',
   '/study',
 ]
 
