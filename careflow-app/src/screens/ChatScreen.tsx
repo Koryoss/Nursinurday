@@ -3,9 +3,10 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { useRef, useState } from 'react'
 import AppHeader from '../components/AppHeader'
 import { Colors, Radius } from '../constants/colors'
-import { formatKstDate } from '../lib/socialReturnIndicators'
+import { formatKstDate } from '../../../lib/domain/socialReturnIndicators'
+import { detectCrisisLevel, buildReferralInfo } from '../../../lib/domain/nursingLogic'
 import { saveDailyRecord } from '../lib/recordStorage'
-import { parseVoiceText, type VoiceRecordDraft } from '../lib/voiceDraft'
+import { parseVoiceDraftText, type VoiceRecordDraft } from '../../../lib/voice/voiceDraft'
 import {
   AFFECTS,
   BUCKETS,
@@ -121,15 +122,36 @@ export default function ChatScreen({ onBack }: { onBack?: () => void }) {
   const analyzeText = async () => {
     const text = input.trim()
     if (!text || analyzing) return
-    setAnalyzing(true)
-    setMessage('')
-    try {
-      const parsed = await parseVoiceText(text)
+
+    // 안전망 확인 — 위기 신호는 기록보다 외부 도움 연결을 우선한다 (SPEC §0, nursingLogic.ts).
+    const crisisLevel = detectCrisisLevel(text)
+    const referral = buildReferralInfo(crisisLevel)
+
+    if (referral && (crisisLevel === 'critical' || crisisLevel === 'urgent')) {
+      // critical/urgent: 기록 초안 생성을 건너뛰고 외부 자원 연계를 바로 안내한다.
       setMessages(prev => [
         ...prev,
         { role: 'user', text },
-        { role: 'ai', text: '기록 초안을 만들었어요. 저장하기 전에 함께 확인해 볼까요?' },
+        { role: 'ai', text: referral.message },
       ])
+      setInput('')
+      setVoiceHint('')
+      return
+    }
+
+    setAnalyzing(true)
+    setMessage('')
+    try {
+      const parsed = parseVoiceDraftText(text)
+      const aiMessages: Message[] = [
+        { role: 'user', text },
+        { role: 'ai', text: '기록 초안을 만들었어요. 저장하기 전에 함께 확인해 볼까요?' },
+      ]
+      if (referral) {
+        // monitor 수준: 기록은 계속 진행하되 외부 자원 안내를 함께 보여준다.
+        aiMessages.push({ role: 'ai', text: referral.message })
+      }
+      setMessages(prev => [...prev, ...aiMessages])
       setInput('')
       setVoiceHint('')
       openDraft(parsed)
