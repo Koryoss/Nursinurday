@@ -22,7 +22,7 @@ import {
   SensorToCareFlowMapping,
   SensorAlert,
   healthKitToCareFlow,
-} from '@/lib/dizzinessMonitor';
+} from '@/lib/domain/dizzinessMonitor';
 
 // ── 인메모리 저장소 (MVP용, 추후 DB로 교체) ────────────────────────────
 

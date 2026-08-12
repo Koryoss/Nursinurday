@@ -5,7 +5,7 @@ import AppHeader from '../components/AppHeader'
 import { Colors, Radius } from '../constants/colors'
 import { supabase } from '../lib/supabase'
 import { logUsage } from '../lib/usageLog'
-import { formatKstDate } from '../lib/socialReturnIndicators'
+import { formatKstDate } from '../../../lib/domain/socialReturnIndicators'
 import {
   AFFECTS,
   BUCKETS,

@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { CARE_COLORS, CARE_FONT, CARE_GRADIENTS, CARE_RADIUS, CARE_SHADOW } from '@/lib/designTokens'
+import { CARE_COLORS, CARE_FONT, CARE_GRADIENTS, CARE_RADIUS, CARE_SHADOW } from '@/lib/ui/designTokens'
 
 const sections = [
   {

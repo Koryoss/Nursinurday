@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
-import { matchEvidenceForClaim } from '@/lib/evidenceRegistry'
+import { createClient } from '@/lib/integrations/supabase/server'
+import { matchEvidenceForClaim } from '@/lib/domain/evidenceRegistry'
 
 // POST /api/study/claim/save — 사용자 확인 후 레지스트리에 저장
 export async function POST(req: NextRequest) {

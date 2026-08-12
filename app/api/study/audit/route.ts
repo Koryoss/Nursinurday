@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createClient } from '@/lib/integrations/supabase/server'
 import {
   CORE_COPY_EVIDENCE_MAP,
   auditCopyMapping,
@@ -7,7 +7,7 @@ import {
   findCopyMappingsForLine,
   type CopyAuditFlag,
   type EvidenceRef,
-} from '@/lib/evidenceRegistry'
+} from '@/lib/domain/evidenceRegistry'
 import { readdir, readFile } from 'fs/promises'
 import { join, resolve, relative } from 'path'
 

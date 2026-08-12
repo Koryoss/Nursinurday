@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
-import { matchEvidenceForClaim, safetyGuidanceForEvidence } from '@/lib/evidenceRegistry'
+import { createClient } from '@/lib/integrations/supabase/server'
+import { matchEvidenceForClaim, safetyGuidanceForEvidence } from '@/lib/domain/evidenceRegistry'
 import OpenAI from 'openai'
 
 export const runtime = 'nodejs'

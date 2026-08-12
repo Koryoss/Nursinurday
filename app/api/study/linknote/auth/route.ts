@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
-import { LinkNoteError, linknoteLogin, normalizeServerUrl } from '@/lib/linknote'
+import { createClient } from '@/lib/integrations/supabase/server'
+import { LinkNoteError, linknoteLogin, normalizeServerUrl } from '@/lib/integrations/linknote'
 
 export const runtime = 'nodejs'
 

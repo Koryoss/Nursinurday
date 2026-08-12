@@ -2,8 +2,8 @@
 
 import { useState } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
-import { createClient } from '@/lib/supabase/client'
-import { CARE_COLORS, CARE_GRADIENTS, CARE_RADIUS, CARE_SHADOW } from '@/lib/designTokens'
+import { createClient } from '@/lib/integrations/supabase/client'
+import { CARE_COLORS, CARE_GRADIENTS, CARE_RADIUS, CARE_SHADOW } from '@/lib/ui/designTokens'
 
 export default function FeedbackButton() {
   const pathname = usePathname()
