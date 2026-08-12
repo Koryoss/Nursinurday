@@ -26,7 +26,8 @@
     ],
     "ios": {
       "icon": "./assets/icon.png",
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.koryoss.careflow"
     },
     "android": {
       "icon": "./assets/icon.png",

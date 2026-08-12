@@ -95,9 +95,25 @@ create table feedback (
   created_at timestamptz default now()
 );
 
+-- 워치 기록: 워치는 입력만, 결과 확인은 로그인한 CareFlow iPhone 앱에서 한다.
+-- 의료적 판정값은 저장하지 않으며, 관찰 시각·입력 방식·사용자 메모만 보관한다.
+create table watch_observations (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users on delete cascade,
+  episode_id text not null,
+  observed_at timestamptz not null,
+  is_manual_report boolean not null default false,
+  posture text,
+  note text,
+  sample_count integer not null default 0 check (sample_count >= 0),
+  source text not null default 'apple_watch',
+  created_at timestamptz not null default now(),
+  unique (user_id, episode_id)
+);
+
 -- RLS
 do $$ declare t text; begin
-  foreach t in array array['profiles','daily_logs','symptom_scores','affect_logs','affect_scores','social_logs','context_tags','sleep_logs','weekly_checkins','meaning_notes','baselines','social_return_indicators','feedback']
+  foreach t in array array['profiles','daily_logs','symptom_scores','affect_logs','affect_scores','social_logs','context_tags','sleep_logs','weekly_checkins','meaning_notes','baselines','social_return_indicators','feedback','watch_observations']
   loop execute format('alter table %I enable row level security;', t); end loop;
 end $$;
 -- 정책 예시(직접 user_id 가진 테이블): 본인만
@@ -108,3 +124,5 @@ create policy own_feedback_select on feedback for select using (user_id = auth.u
 create policy own_affect_scores on affect_scores for all
   using (exists (select 1 from daily_logs d where d.id = daily_log_id and d.user_id = auth.uid()))
   with check (exists (select 1 from daily_logs d where d.id = daily_log_id and d.user_id = auth.uid()));
+create policy "watch observations belong to their user" on watch_observations for all
+  using (user_id = auth.uid()) with check (user_id = auth.uid());

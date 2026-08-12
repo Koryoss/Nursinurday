@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import AppHeader from '../components/AppHeader'
 import { Colors, Radius } from '../constants/colors'
 import { supabase } from '../lib/supabase'
+import { subscribeToWatchObservations, syncPendingWatchObservations } from '../lib/watchStorage'
 import { BUCKETS, type TimeBucket } from '../types/careflow'
 import {
   addDays,
@@ -16,7 +17,7 @@ import {
   type DailyMetricPoint,
   type MetricKey,
   type TrendPoint,
-} from '../lib/socialReturnIndicators'
+} from '../../../lib/domain/socialReturnIndicators'
 
 type DailyLogRow = { id: string; log_date: string; bucket: TimeBucket }
 type SymptomRow = { daily_log_id: string; symptom: MetricKey | string; score: number | null }
@@ -40,6 +41,15 @@ type SavedDailyLog = {
   relationCount: number
 }
 type SavedSleepLog = { id?: string; bedtime: string | null; waketime: string | null }
+type WatchObservation = {
+  id: string
+  episode_id: string
+  observed_at: string
+  is_manual_report: boolean
+  posture: string | null
+  note: string | null
+  sample_count: number
+}
 
 type DashboardData = {
   date: string
@@ -49,6 +59,7 @@ type DashboardData = {
   correlations: CorrelationItem[]
   savedDailyLogs: SavedDailyLog[]
   savedSleepLogs: SavedSleepLog[]
+  watchObservations: WatchObservation[]
 }
 
 type WeeklyTrendPoint = TrendPoint & { range: string }
@@ -201,6 +212,43 @@ function BandCard({ title, band }: { title: string; band: Band }) {
 function formatSleepTime(value: string | null) {
   if (!value) return '-'
   return value.slice(0, 5)
+}
+
+function formatWatchTime(value: string) {
+  return new Date(value).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Seoul' })
+}
+
+function isKstDate(value: string, date: string) {
+  return new Date(value).toLocaleDateString('en-CA', { timeZone: 'Asia/Seoul' }) === date
+}
+
+function WatchRecordsCard({ observations }: { observations: WatchObservation[] }) {
+  return (
+    <View style={styles.watchCard}>
+      <View style={styles.watchCardTop}>
+        <View>
+          <Text style={styles.savedGraphicTitle}>워치 기록</Text>
+          <Text style={styles.watchCardDescription}>워치에서 남긴 기록을 이곳에서 함께 볼 수 있어요.</Text>
+        </View>
+        <View style={styles.watchCountPill}>
+          <Text style={styles.watchCountText}>{observations.length}건</Text>
+        </View>
+      </View>
+      {observations.length === 0 ? (
+        <Text style={styles.empty}>선택한 날짜에 동기화된 워치 기록이 없어요.</Text>
+      ) : observations.slice(0, 5).map(observation => (
+        <View key={observation.id} style={styles.watchRecordRow}>
+          <View style={styles.watchRecordTime}>
+            <Text style={styles.watchRecordTimeText}>{formatWatchTime(observation.observed_at)}</Text>
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.watchRecordTitle}>{observation.is_manual_report ? '워치에서 직접 남긴 기록' : '워치 센서 기록'}</Text>
+            <Text style={styles.watchRecordNote}>{observation.note || '기록의 세부 내용은 필요할 때 CareFlow 기록과 함께 살펴볼 수 있어요.'}</Text>
+          </View>
+        </View>
+      ))}
+    </View>
+  )
 }
 
 function dateParts(date: string) {
@@ -499,7 +547,9 @@ export default function DashboardScreen({ onOpenRecord, onOpenNotification }: Da
       return
     }
 
-    const [logsResult, sleepsResult] = await Promise.all([
+    await syncPendingWatchObservations()
+
+    const [logsResult, sleepsResult, watchResult] = await Promise.all([
       supabase
         .from('daily_logs')
         .select('id,log_date,bucket')
@@ -510,6 +560,11 @@ export default function DashboardScreen({ onOpenRecord, onOpenNotification }: Da
         .select('id,sleep_date,bedtime,waketime,psqi_q1,psqi_q2,psqi_q3')
         .eq('user_id', user.id)
         .order('sleep_date', { ascending: true }),
+      supabase
+        .from('watch_observations')
+        .select('id,episode_id,observed_at,is_manual_report,posture,note,sample_count')
+        .eq('user_id', user.id)
+        .order('observed_at', { ascending: false }),
     ])
 
     if (logsResult.error || sleepsResult.error) {
@@ -522,6 +577,7 @@ export default function DashboardScreen({ onOpenRecord, onOpenNotification }: Da
     const allSleeps = (sleepsResult.data ?? []) as SleepRow[]
     const availableDatesAsc = Array.from(new Set([...allLogs.map(log => log.log_date), ...allSleeps.map(sleep => sleep.sleep_date)])).sort()
     const basisDate = selectedDate
+    const watchObservations = ((watchResult.data ?? []) as WatchObservation[]).filter(observation => isKstDate(observation.observed_at, basisDate))
     const availableDates = [...availableDatesAsc].reverse()
     const baselineFrom = addDays(basisDate, -7)
     const logs = allLogs.filter(log => log.log_date <= basisDate)
@@ -613,6 +669,7 @@ export default function DashboardScreen({ onOpenRecord, onOpenNotification }: Da
       correlations: buildCorrelations(weeklyTrend),
       savedDailyLogs,
       savedSleepLogs,
+      watchObservations,
     })
     setLoading(false)
   }, [selectedDate])
@@ -620,6 +677,8 @@ export default function DashboardScreen({ onOpenRecord, onOpenNotification }: Da
   useEffect(() => {
     loadDashboard()
   }, [loadDashboard])
+
+  useEffect(() => subscribeToWatchObservations(loadDashboard), [loadDashboard])
 
   const displayDate = data?.date ?? selectedDate
 
@@ -645,6 +704,7 @@ export default function DashboardScreen({ onOpenRecord, onOpenNotification }: Da
         <DateDropdown date={displayDate} onSelect={setSelectedDate} />
 
         {data ? <SavedRecordsGraphic dailyLogs={data.savedDailyLogs} sleepLogs={data.savedSleepLogs} /> : null}
+        {data ? <WatchRecordsCard observations={data.watchObservations} /> : null}
 
         <View style={styles.card}>
           <Text style={styles.sectionTitle}>지표 요약</Text>
@@ -721,6 +781,16 @@ const styles = StyleSheet.create({
   note: { color: Colors.textLight, fontSize: 15, lineHeight: 23 },
   savedGraphic: { borderWidth: 1, borderColor: Colors.border, borderRadius: Radius.card, padding: 16, backgroundColor: Colors.white, gap: 13 },
   savedGraphicTitle: { color: Colors.text, fontSize: 19, fontWeight: '900' },
+  watchCard: { borderWidth: 1, borderColor: Colors.border, borderRadius: Radius.card, padding: 16, backgroundColor: Colors.card, gap: 12 },
+  watchCardTop: { flexDirection: 'row', justifyContent: 'space-between', gap: 12, alignItems: 'flex-start' },
+  watchCardDescription: { color: Colors.textMuted, fontSize: 15, lineHeight: 22, marginTop: 4, maxWidth: 260 },
+  watchCountPill: { borderRadius: Radius.pill, backgroundColor: Colors.environmentSoft, paddingHorizontal: 11, paddingVertical: 7 },
+  watchCountText: { color: Colors.environment, fontSize: 15, fontWeight: '900' },
+  watchRecordRow: { flexDirection: 'row', gap: 10, borderRadius: Radius.md, backgroundColor: Colors.bg, padding: 12 },
+  watchRecordTime: { minWidth: 58, alignItems: 'center', justifyContent: 'center' },
+  watchRecordTimeText: { color: Colors.brandDark, fontSize: 15, fontWeight: '900' },
+  watchRecordTitle: { color: Colors.text, fontSize: 16, lineHeight: 23, fontWeight: '900' },
+  watchRecordNote: { color: Colors.textMuted, fontSize: 14, lineHeight: 20, marginTop: 3 },
   axisSummaryRow: { flexDirection: 'row', gap: 8 },
   axisSummaryCard: { flex: 1, minHeight: 56, borderRadius: Radius.md, borderWidth: 1, alignItems: 'center', justifyContent: 'center' },
   axisSummaryText: { fontSize: 18, fontWeight: '900' },
