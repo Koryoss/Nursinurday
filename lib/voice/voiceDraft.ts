@@ -100,7 +100,7 @@ export function parseVoiceDraftText(input: string): VoiceRecordDraft {
     (Object.keys(voiceDraftSynonyms.context) as VoiceContextKey[]).map(key => [key, hasAny(text, voiceDraftSynonyms.context[key])]),
   ) as Record<VoiceContextKey, boolean>
 
-  if (!bucket) needsConfirmation.push('기록 시점은 아침, 오후, 저녁, 취침 전, 응급 중 어디였나요?')
+  if (!bucket) needsConfirmation.push('기록 시점은 아침, 점심, 저녁, 취침 전, 응급 중 어디였나요?')
   if (hasAny(text, degreeWords) && symptoms.length === 0 && affects.length === 0) {
     needsConfirmation.push('어떤 몸 신호나 감정 신호였는지 함께 볼까요?')
   }
