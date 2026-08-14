@@ -769,8 +769,8 @@ export default function HomePage() {
 
         {/* ── 푸터 ── */}
         <footer style={{ borderTop: '1px solid rgba(163,177,138,0.12)', padding: '28px 32px 40px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16, maxWidth: 1160, margin: '0 auto' }}>
-          <div style={{ width: 132, height: 54, overflow: 'hidden', display: 'flex', alignItems: 'center' }}>
-            <BrandImage width={132} height={108} style={{ marginTop: -20 }} />
+          <div style={{ width: 132, height: 108, display: 'flex', alignItems: 'center' }}>
+            <BrandImage width={132} height={108} />
           </div>
           <span style={{ fontSize: 13, color: C.light }}>© 2026 CareFlow. 진료실 밖 일상을 연결합니다.</span>
           <div style={{ display: 'flex', gap: 20 }}>

@@ -40,3 +40,6 @@ next-env.d.ts
 careflow_timeline.html
 .vercel
 ui_snapshots/
+
+# Supabase CLI 로컬 프로젝트 상태 (project-ref, pooler-url 등 환경별 정보)
+supabase/.temp/

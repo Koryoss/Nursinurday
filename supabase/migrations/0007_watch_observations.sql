@@ -17,7 +17,11 @@ create table if not exists watch_observations (
 
 alter table watch_observations enable row level security;
 
+-- 대시보드는 로그인한 사용자의 기록을 최신순으로 조회한다.
+create index watch_observations_user_observed_at_idx
+  on watch_observations (user_id, observed_at desc);
+
 create policy "watch observations belong to their user"
-  on watch_observations for all
+  on watch_observations for all to authenticated
   using (user_id = auth.uid())
   with check (user_id = auth.uid());
