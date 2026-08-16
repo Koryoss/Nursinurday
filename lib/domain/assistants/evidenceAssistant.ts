@@ -5,13 +5,14 @@
  * 책임: LinkNote/Study Workspace 검색, 관련 논문 연결, 임상 가이드라인 제공.
  * 원칙: 의료 근거를 생성하거나 해석하지 않으며, 검토된 자료를 연결하는 역할만 수행한다.
  *
- * app/api/study/query/route.ts와 동일한 임베딩 검색(match_study_chunks RPC) 패턴을 쓴다.
+ * app/api/study/query/route.ts는 이 함수를 그대로 재사용한다 (단일 구현).
  * 이 Assistant는 관리자 전용(Study Workspace)이며 환자용 화면에는 노출하지 않는다.
  */
 
 import type OpenAI from 'openai'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { EvidenceAssistantInput, EvidenceAssistantOutput, EvidenceSource } from './types'
+import { searchStudyChunks } from './studyChunkSearch'
 
 export const EVIDENCE_ASSISTANT_SYSTEM_PROMPT = `당신은 CareFlow의 Evidence Assistant입니다.
 관리자(연구/제품 담당자)가 참고할 의료 근거와 학습 자료를 연결하는 것이 유일한 역할입니다.
@@ -26,13 +27,6 @@ export const EVIDENCE_ASSISTANT_SYSTEM_PROMPT = `당신은 CareFlow의 Evidence 
 한국어로 답변하고, 마지막 줄에 반드시 이 문구를 붙입니다:
 "⚠️ 이 내용은 자료 근거 인용이며 의료 자문이 아닙니다."`
 
-type MatchedChunk = {
-  doc_title: string
-  page_num: number | null
-  similarity: number
-  content: string
-}
-
 export async function runEvidenceAssistant(
   openai: OpenAI,
   supabase: SupabaseClient,
@@ -42,25 +36,15 @@ export async function runEvidenceAssistant(
     ? `${input.keyword}\n\n(참고 맥락: ${input.healthContext})`
     : input.keyword
 
-  const embRes = await openai.embeddings.create({
-    model: 'text-embedding-3-small',
-    input: question.trim(),
-  })
-
-  const { data: chunks, error } = await supabase.rpc('match_study_chunks', {
-    query_embedding: embRes.data[0].embedding,
-    match_count: 6,
-    match_threshold: 0.3,
-  })
+  const { chunks: matched, error } = await searchStudyChunks(openai, supabase, question)
 
   if (error) {
     return {
-      answer: `근거 자료 검색 중 문제가 있었어요: ${error.message}`,
+      answer: `근거 자료 검색 중 문제가 있었어요: ${error}`,
       sources: [],
     }
   }
 
-  const matched = (chunks ?? []) as MatchedChunk[]
   if (matched.length === 0) {
     return {
       answer: '제공된 자료에서 관련 내용을 찾을 수 없습니다.\n\n⚠️ 이 내용은 자료 근거 인용이며 의료 자문이 아닙니다.',
@@ -83,8 +67,8 @@ export async function runEvidenceAssistant(
   })
 
   const sources: EvidenceSource[] = matched.map(chunk => ({
-    docTitle: chunk.doc_title,
-    pageNum: chunk.page_num,
+    doc_title: chunk.doc_title,
+    page_num: chunk.page_num,
     similarity: Math.round(chunk.similarity * 100),
     excerpt: chunk.content.slice(0, 130) + '…',
   }))

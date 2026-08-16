@@ -13,9 +13,9 @@
 
 import type { Band, MetricKey } from '../socialReturnIndicators'
 
-// ─────────────────────────────────────────────────────
+// ────────────────────────────────────────────────────
 // 공통: 하루 단위 건강 기록 (Assistant 입력 공통 단위)
-// ─────────────────────────────────────────────────────
+// ────────────────────────────────────────────────────
 export type TimeBucket = 'morning' | 'afternoon' | 'evening' | 'before_sleep' | 'attack'
 
 export type HealthRecordSymptom = {
@@ -98,7 +98,7 @@ export type TimelineAssistantOutput = {
 
 // ─────────────────────────────────────────────────────
 // Context Assistant
-// 목적: 현재 기록과 이전 기록을 연결해 건강 맥락을 이해하도록 지원
+// 목적: 현재 기록과 이전 기록을 이해하도록 지원
 // 원칙: 의료적 해석이나 원인 분석은 수행하지 않는다.
 // ─────────────────────────────────────────────────────
 export type ContextMatch = {
@@ -122,6 +122,9 @@ export type ContextAssistantOutput = {
 // Evidence Assistant
 // 목적: 관리자가 참고할 수 있는 의료 근거·학습 자료를 연결 (진단 도구 아님)
 // 원칙: 의료 근거를 생성·해석하지 않으며, 검토된 자료를 연결하는 역할만 수행한다.
+//
+// 필드명은 snake_case를 쓴다 — match_study_chunks RPC/DB 컬럼, app/api/study/*의
+// 기존 응답 규약(app/study/page.tsx가 소비하는 Source 타입 등)과 일치시키기 위함이다.
 // ─────────────────────────────────────────────────────
 export type EvidenceAssistantInput = {
   keyword: string // 검색 키워드/질문
@@ -129,8 +132,8 @@ export type EvidenceAssistantInput = {
 }
 
 export type EvidenceSource = {
-  docTitle: string
-  pageNum: number | null
+  doc_title: string
+  page_num: number | null
   similarity: number // 0~100
   excerpt: string
 }

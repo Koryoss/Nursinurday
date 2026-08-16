@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/integrations/supabase/server'
 import { matchEvidenceForClaim, safetyGuidanceForEvidence } from '@/lib/domain/evidenceRegistry'
+import { searchStudyChunks, type StudyChunk } from '@/lib/domain/assistants/studyChunkSearch'
 import OpenAI from 'openai'
 
 export const runtime = 'nodejs'
@@ -33,9 +34,7 @@ const SYSTEM_PROMPT = `당신은 메니에르병 연구 근거를 분석하는 �
 - 진단·예후·처방 관련 주장은 safety_note에 경고 필수
 - 인과관계 주장이면 safety_note에 "상관관계로만 표현 필요" 추가`
 
-type Chunk = { doc_title: string; page_num: number; content: string; similarity: number; source_file?: string }
-
-async function buildDraft(openai: OpenAI, chunks: Chunk[], claim: string) {
+async function buildDraft(openai: OpenAI, chunks: StudyChunk[], claim: string) {
   if (!chunks.length) {
     return { source_summary: '출처 미확인', strength: '출처 미확인', application_context: '', safety_note: '' }
   }
@@ -77,18 +76,9 @@ export async function POST(req: NextRequest) {
   const openai = getOpenAI()
   if (!openai) return NextResponse.json({ error: 'OPENAI_API_KEY is not configured' }, { status: 503 })
 
-  const embRes = await openai.embeddings.create({
-    model: 'text-embedding-3-small',
-    input: claim.trim(),
-  })
-  const { data, error: searchErr } = await supabase.rpc('match_study_chunks', {
-    query_embedding: embRes.data[0].embedding,
-    match_count: 5,
-    match_threshold: 0.3,
-  })
-  if (searchErr) return NextResponse.json({ error: searchErr.message }, { status: 500 })
+  const { chunks, error: searchErr } = await searchStudyChunks(openai, supabase, claim.trim(), { matchCount: 5 })
+  if (searchErr) return NextResponse.json({ error: searchErr }, { status: 500 })
 
-  const chunks: Chunk[] = data ?? []
   const draft = await buildDraft(openai, chunks, claim.trim())
   const topChunk = chunks[0] ?? null
   const registryEvidence = matchEvidenceForClaim([
