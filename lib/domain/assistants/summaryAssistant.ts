@@ -7,6 +7,10 @@
  *
  * 증상 집계·반복 메모 추출은 순수 JS로 처리하고, 자연어 요약 문장만 OpenAI에 위임한다.
  * (숫자 집계를 LLM에 맡기면 재현 불가능해지므로 분리한다.)
+ *
+ * 경계 가드: 시스템 프롬프트만으로는 SPEC §0 위반(진단/중증도/예후/처방/인과 표현)을
+ * 100% 막을 수 없으므로, findBoundaryViolation()으로 LLM 출력을 사후 검증하고
+ * 위반 시 BOUNDARY_SAFE_FALLBACK_SUMMARY로 대체한다.
  */
 
 import type OpenAI from 'openai'
@@ -24,7 +28,7 @@ export const SUMMARY_ASSISTANT_SYSTEM_PROMPT = `당신은 CareFlow의 Record Sum
 6. 문장은 단정형이 아닌 관찰형·질문형으로 마무리합니다 ("~게 보여요", "함께 볼까요?").
 7. 한국어로, 3~5문장 이내로 간결하게 답합니다.`
 
-function buildSummaryUserPrompt(entries: HealthRecordEntry[], keySymptoms: SummaryKeySymptom[], weeklyNotes: string[]): string {
+export function buildSummaryUserPrompt(entries: HealthRecordEntry[], keySymptoms: SummaryKeySymptom[], weeklyNotes: string[]): string {
   const entryLines = entries
     .map(entry => {
       const symptomText = entry.symptoms
@@ -57,7 +61,7 @@ ${symptomSummary}
 ${noteText}`
 }
 
-function aggregateKeySymptoms(entries: HealthRecordEntry[]): SummaryKeySymptom[] {
+export function aggregateKeySymptoms(entries: HealthRecordEntry[]): SummaryKeySymptom[] {
   const bySymptom = new Map<string, number[]>()
   entries.forEach(entry => {
     entry.symptoms.forEach(({ symptom, score }) => {
@@ -77,7 +81,7 @@ function aggregateKeySymptoms(entries: HealthRecordEntry[]): SummaryKeySymptom[]
     .sort((a, b) => b.count - a.count)
 }
 
-function extractRepeatedNotes(weeklyNotes: string[]): string[] {
+export function extractRepeatedNotes(weeklyNotes: string[]): string[] {
   const seen = new Map<string, number>()
   weeklyNotes.forEach(note => {
     const trimmed = note.trim()
@@ -89,6 +93,36 @@ function extractRepeatedNotes(weeklyNotes: string[]): string[] {
     .map(([note]) => note)
     .slice(0, 5)
 }
+
+// ─────────────────────────────────────────────────────
+// SPEC §0 경계 가드: LLM이 규칙을 어긴 문장을 만들어내는 경우를 잡아내는 안전망.
+// 시스템 프롬프트만으로는 100% 보장되지 않으므로, 출력 사후 검증을 둔다.
+// ─────────────────────────────────────────────────────
+export type BoundaryViolationLabel = 'diagnosis' | 'severity' | 'prognosis' | 'prescription' | 'causal'
+
+const BOUNDARY_VIOLATION_PATTERNS: { label: BoundaryViolationLabel; pattern: RegExp }[] = [
+  // 진단: "~병입니다", "~장애로 보여요", "~증후군이에요" 등 병명 단정
+  { label: 'diagnosis', pattern: /(병|질환|장애|증후군|질병)(입니다|이에요|예요|이네요|같아요|로\s?보여요|로\s?보입니다)/ },
+  // 중증도 판정
+  { label: 'severity', pattern: /(중증|경증|중등도|심각한\s?수준|위험한\s?수준|정상\s?범위)/ },
+  // 예후 예측: 미래 상태 단정
+  { label: 'prognosis', pattern: /(회복될|악화될|나아질|나빠질|호전될)\s?(것|가능성이\s?높|거예요|겁니다)/ },
+  // 치료/재활 처방
+  { label: 'prescription', pattern: /(처방합니다|복용하세요|약을\s?드세요|치료(를|가)\s?(받으세요|필요합니다)|재활을\s?(하세요|받으세요)|운동을\s?하세요)/ },
+  // 인과 표현 (상관≠인과)
+  { label: 'causal', pattern: /(때문에|원인은|로\s?인해|탓에)/ },
+]
+
+/** 텍스트가 SPEC §0 경계를 위반하는지 검사한다. 위반 시 첫 번째로 매치된 라벨을, 아니면 null을 반환한다. */
+export function findBoundaryViolation(text: string): BoundaryViolationLabel | null {
+  for (const { label, pattern } of BOUNDARY_VIOLATION_PATTERNS) {
+    if (pattern.test(text)) return label
+  }
+  return null
+}
+
+export const BOUNDARY_SAFE_FALLBACK_SUMMARY =
+  '최근 기록을 정리했어요. 아래 증상 집계와 메모를 함께 살펴볼까요?'
 
 export async function runSummaryAssistant(
   openai: OpenAI,
@@ -117,8 +151,15 @@ export async function runSummaryAssistant(
     max_tokens: 500,
   })
 
+  const rawSummary = completion.choices[0]?.message?.content ?? ''
+  const violation = findBoundaryViolation(rawSummary)
+
+  if (violation) {
+    console.warn(`[summaryAssistant] boundary violation detected in LLM output (${violation}); falling back to safe summary.`)
+  }
+
   return {
-    summary: completion.choices[0]?.message?.content ?? '',
+    summary: violation ? BOUNDARY_SAFE_FALLBACK_SUMMARY : rawSummary,
     keySymptoms,
     keyNotes,
     structuredRecord,

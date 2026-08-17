@@ -27,12 +27,20 @@ export async function POST(req: NextRequest) {
   const to = toInput || formatKstDate()
   const from = fromInput || addDays(to, -7)
 
-  const [entries, weeklyNotes] = await Promise.all([
-    fetchHealthRecordEntries(supabase, user.id, from, to),
-    fetchWeeklyNotes(supabase, user.id, addDays(from, -7), to),
-  ])
+  try {
+    const [entries, weeklyNotes] = await Promise.all([
+      fetchHealthRecordEntries(supabase, user.id, from, to),
+      fetchWeeklyNotes(supabase, user.id, addDays(from, -7), to),
+    ])
 
-  const result = await runSummaryAssistant(openai, { entries, weeklyNotes })
+    const result = await runSummaryAssistant(openai, { entries, weeklyNotes })
 
-  return NextResponse.json({ from, to, ...result })
+    return NextResponse.json({ from, to, ...result })
+  } catch (err) {
+    console.error('[POST /api/assistants/summary] failed to build summary:', err)
+    return NextResponse.json(
+      { error: '기록을 요약하는 중 문제가 생겼어요. 잠시 후 다시 시도해볼까요?' },
+      { status: 502 }
+    )
+  }
 }
