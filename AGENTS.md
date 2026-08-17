@@ -22,3 +22,5 @@
 - 사람(정유진): 제품·임상·카피 최종 검수, 머지.
 - Claude: 스펙·설계·데이터/지표 로직·리뷰·복잡 작업.
 - Codex: 반복 구현(CRUD·폼·뷰·테스트)을 SPEC 기준으로.
+
+## Imported Claude Cowork project instructions
