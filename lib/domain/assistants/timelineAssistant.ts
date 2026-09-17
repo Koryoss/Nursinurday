@@ -46,6 +46,25 @@ function affectAverage(entry: HealthRecordEntry, affect: string): number | null 
   return mean(scores)
 }
 
+/**
+ * 수면 자기보고(PSQI 축약 3문항)를 다른 지표와 동일한 0~10 스케일로 선형 변환한다.
+ * 문항 합(0~9, 각 0~3점 가정 — 표준 PSQI 구성요소 점수 범위)이 클수록 수면 문제가 큰 것으로 보고,
+ * anxiety/tension과 같은 방향성(값이 높을수록 부정적 신호)을 유지한다.
+ * — socialReturnIndicators.calculateIndicatorBands가 anxiety/tension/sleep을 함께 묶어
+ *   readiness를 반전 계산하므로, 방향성이 달라지면 그 지표도 잘못된 값을 낸다.
+ * 취침/기상 시각은 아직 점수화하지 않는다 (Phase 1 범위 밖 — 필요 시 별도 파생 지표로 검토).
+ */
+function sleepScore(entry: HealthRecordEntry): number | null {
+  const sleep = entry.sleep
+  if (!sleep) return null
+  const scores = [sleep.psqi_q1, sleep.psqi_q2, sleep.psqi_q3].filter((v): v is number => typeof v === 'number')
+  if (scores.length === 0) return null
+  const sum = scores.reduce((total, value) => total + value, 0)
+  const maxPossible = scores.length * 3
+  if (maxPossible === 0) return null
+  return (sum / maxPossible) * 10
+}
+
 /** HealthRecordEntry[] → 기존 지표 로직이 쓰는 DailyMetricPoint[]로 변환 (하루에 여러 기록이 있으면 평균) */
 export function entriesToDailyMetricPoints(entries: HealthRecordEntry[]): DailyMetricPoint[] {
   const byDate = new Map<string, HealthRecordEntry[]>()
@@ -63,10 +82,12 @@ export function entriesToDailyMetricPoints(entries: HealthRecordEntry[]): DailyM
       const gait = dayEntries.map(e => symptomAverage(e, 'gait')).filter((v): v is number => v !== null)
       const anxiety = dayEntries.map(e => affectAverage(e, 'anxiety')).filter((v): v is number => v !== null)
       const tension = dayEntries.map(e => affectAverage(e, 'tension')).filter((v): v is number => v !== null)
+      const sleep = dayEntries.map(e => sleepScore(e)).filter((v): v is number => v !== null)
       if (dizziness.length) point.dizziness = mean(dizziness)
       if (gait.length) point.gait = mean(gait)
       if (anxiety.length) point.anxiety = mean(anxiety)
       if (tension.length) point.tension = mean(tension)
+      if (sleep.length) point.sleep = mean(sleep)
       return point
     })
 }

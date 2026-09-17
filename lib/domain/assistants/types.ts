@@ -34,6 +34,20 @@ export type HealthRecordContextTags = {
   crowded: boolean
 }
 
+/**
+ * 하루 단위 수면 자기보고 (supabase: sleep_logs)
+ * PSQI 축약 3문항(psqi_q1~3, 각 0~3점 가정 — 표준 PSQI 구성요소 점수 범위) + 취침/기상 시각.
+ * daily_log_id가 아닌 날짜(sleep_date) 단위 레코드이므로, 해당 날짜의 모든 HealthRecordEntry에
+ * 동일한 값이 붙는다 (fetchHealthRecords.ts 참고).
+ */
+export type HealthRecordSleep = {
+  bedtime: string | null // HH:MM(:SS)
+  waketime: string | null // HH:MM(:SS)
+  psqi_q1: number | null // 값이 높을수록 수면 문제가 큼
+  psqi_q2: number | null
+  psqi_q3: number | null
+}
+
 export type HealthRecordEntry = {
   dailyLogId: string
   date: string // YYYY-MM-DD
@@ -42,6 +56,7 @@ export type HealthRecordEntry = {
   affects: HealthRecordAffect[]
   contextTags: HealthRecordContextTags
   understood: boolean | null // 관계 축: 오늘 이해받았는가
+  sleep?: HealthRecordSleep | null // 해당 날짜의 수면 기록 (없으면 null/undefined)
   note?: string | null // 자유 메모 (주간 meaning_notes에서 연결)
 }
 

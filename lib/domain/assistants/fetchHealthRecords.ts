@@ -7,7 +7,7 @@
  */
 
 import type { SupabaseClient } from '@supabase/supabase-js'
-import type { HealthRecordAffect, HealthRecordContextTags, HealthRecordEntry, HealthRecordSymptom, TimeBucket } from './types'
+import type { HealthRecordAffect, HealthRecordContextTags, HealthRecordEntry, HealthRecordSleep, HealthRecordSymptom, TimeBucket } from './types'
 
 type DailyLogRow = { id: string; log_date: string; bucket: TimeBucket }
 type SymptomRow = { daily_log_id: string; symptom: string; score: number | null }
@@ -15,6 +15,14 @@ type AffectLogRow = { daily_log_id: string; anxiety: number | null; tension: num
 type AffectScoreRow = { daily_log_id: string; affect: string; score: number }
 type SocialRow = { daily_log_id: string; understood: boolean | null }
 type ContextTagRow = { daily_log_id: string; noise: boolean | null; weather_change: boolean | null; crowded: boolean | null }
+type SleepRow = {
+  sleep_date: string
+  bedtime: string | null
+  waketime: string | null
+  psqi_q1: number | null
+  psqi_q2: number | null
+  psqi_q3: number | null
+}
 
 export async function fetchHealthRecordEntries(
   supabase: SupabaseClient,
@@ -35,12 +43,19 @@ export async function fetchHealthRecordEntries(
   const dailyLogs = logs as DailyLogRow[]
   const ids = dailyLogs.map(log => log.id)
 
-  const [symptomsRes, affectLogsRes, affectScoresRes, socialRes, contextRes] = await Promise.all([
+  const [symptomsRes, affectLogsRes, affectScoresRes, socialRes, contextRes, sleepRes] = await Promise.all([
     supabase.from('symptom_scores').select('daily_log_id,symptom,score').in('daily_log_id', ids),
     supabase.from('affect_logs').select('daily_log_id,anxiety,tension').in('daily_log_id', ids),
     supabase.from('affect_scores').select('daily_log_id,affect,score').in('daily_log_id', ids),
     supabase.from('social_logs').select('daily_log_id,understood').in('daily_log_id', ids),
     supabase.from('context_tags').select('daily_log_id,noise,weather_change,crowded').in('daily_log_id', ids),
+    // sleep_logs는 daily_log_id가 아닌 날짜(sleep_date) 단위 레코드라 user_id + 기간으로 별도 조회한다.
+    supabase
+      .from('sleep_logs')
+      .select('sleep_date,bedtime,waketime,psqi_q1,psqi_q2,psqi_q3')
+      .eq('user_id', userId)
+      .gte('sleep_date', fromDate)
+      .lte('sleep_date', toDate),
   ])
 
   const symptomRows = (symptomsRes.data ?? []) as SymptomRow[]
@@ -48,6 +63,7 @@ export async function fetchHealthRecordEntries(
   const affectScoreRows = (affectScoresRes.data ?? []) as AffectScoreRow[]
   const socialRows = (socialRes.data ?? []) as SocialRow[]
   const contextRows = (contextRes.data ?? []) as ContextTagRow[]
+  const sleepRows = (sleepRes.data ?? []) as SleepRow[]
 
   const symptomsByLog = new Map<string, HealthRecordSymptom[]>()
   symptomRows.forEach(row => {
@@ -81,6 +97,17 @@ export async function fetchHealthRecordEntries(
     })
   })
 
+  const sleepByDate = new Map<string, HealthRecordSleep>()
+  sleepRows.forEach(row => {
+    sleepByDate.set(row.sleep_date, {
+      bedtime: row.bedtime,
+      waketime: row.waketime,
+      psqi_q1: row.psqi_q1,
+      psqi_q2: row.psqi_q2,
+      psqi_q3: row.psqi_q3,
+    })
+  })
+
   return dailyLogs.map(log => ({
     dailyLogId: log.id,
     date: log.log_date,
@@ -89,6 +116,7 @@ export async function fetchHealthRecordEntries(
     affects: affectsByLog.get(log.id) ?? [],
     contextTags: contextByLog.get(log.id) ?? { noise: false, weather_change: false, crowded: false },
     understood: understoodByLog.get(log.id) ?? null,
+    sleep: sleepByDate.get(log.log_date) ?? null,
   }))
 }
 
