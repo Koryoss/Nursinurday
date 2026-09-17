@@ -8,11 +8,17 @@
 
 import { supabase } from './supabase'
 import { API_BASE_URL } from '../constants/api'
-import type { ContextAssistantOutput, SummaryAssistantOutput } from '../../../lib/domain/assistants/types'
+import type { ContextAssistantOutput, SummaryAssistantOutput, TimelineAssistantOutput, TimelineGranularity } from '../../../lib/domain/assistants/types'
 
 export type WeeklySummaryResponse = SummaryAssistantOutput & {
   from: string
   to: string
+}
+
+export type TimelinePatternsResponse = TimelineAssistantOutput & {
+  from: string
+  to: string
+  granularity: TimelineGranularity
 }
 
 /** 오늘(또는 지정한 날짜) 기록과 비슷한 과거 기록을 Context Assistant에서 조회한다.
@@ -32,6 +38,36 @@ export async function fetchContextMatches(date: string, limit = 5): Promise<Cont
     return (await response.json()) as ContextAssistantOutput
   } catch {
     return null
+  }
+}
+
+/** 지정한 기간을 granularity 단위로 묶어 Timeline Assistant의 반복 패턴 관찰을 조회한다.
+ *  DashboardScreen이 이미 클라이언트에서 계산하는 오늘의 band/trend를 대체하는 용도가 아니라,
+ *  거기 없는 값(여러 구간에 걸친 반복 패턴 관찰)만 새로 보여주기 위한 것이다.
+ *  실패하거나 로그인 세션이 없으면 null을 반환한다 (UI는 이 경우 섹션을 표시하지 않는다). */
+export async function fetchTimelinePatterns(
+  from: string,
+  to: string,
+  granularity: TimelineGranularity = 'week'
+): Promise<TimelinePatternsResponse | null> {
+  const { data: { session } } = await supabase.auth.getSession()
+  const token = session?.access_token
+  if (!token) return null
+
+  const controller = new AbortController()
+  const timeout = setTimeout(() => controller.abort(), 8000)
+  try {
+    const params = new URLSearchParams({ from, to, granularity })
+    const response = await fetch(`${API_BASE_URL}/api/assistants/timeline?${params.toString()}`, {
+      headers: { Authorization: `Bearer ${token}` },
+      signal: controller.signal,
+    })
+    if (!response.ok) return null
+    return (await response.json()) as TimelinePatternsResponse
+  } catch {
+    return null
+  } finally {
+    clearTimeout(timeout)
   }
 }
 

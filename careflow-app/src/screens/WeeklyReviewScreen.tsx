@@ -14,11 +14,11 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 
 import AppHeader from '../components/AppHeader'
 import { Colors, Radius } from '../constants/colors'
-import { fetchWeeklySummary } from '../lib/assistants'
+import { fetchTimelinePatterns, fetchWeeklySummary } from '../lib/assistants'
 import { supabase } from '../lib/supabase'
 import { AFFECTS, BUCKETS, CONTEXT_LABELS, SYMPTOMS } from '../types/careflow'
-import type { HealthRecordEntry, HealthRecordSleep } from '../../../lib/domain/assistants/types'
-import { addDays } from '../../../lib/domain/socialReturnIndicators'
+import type { HealthRecordEntry, HealthRecordSleep, RecurringPattern } from '../../../lib/domain/assistants/types'
+import { addDays, type MetricKey } from '../../../lib/domain/socialReturnIndicators'
 import { buildReferralInfo, detectCrisisLevel } from '../../../lib/domain/nursingLogic'
 
 type DailyLogRow = {
@@ -48,6 +48,17 @@ type SavedQuestion = {
 const symptomLabels = new Map<string, string>(SYMPTOMS.map(item => [item.key, item.label]))
 const affectLabels = new Map<string, string>(AFFECTS.map(item => [item.key, item.label]))
 const bucketLabels = new Map<string, string>(BUCKETS.map(item => [item.value, item.label]))
+// DashboardScreen의 METRIC_LABELS와 동일한 한글 표기를 재사용해 지표 이름 표기를 통일한다.
+const metricLabels: Record<MetricKey, string> = {
+  dizziness: '어지럼',
+  gait: '걷기불안',
+  anxiety: '불안',
+  tension: '긴장',
+  sleep: '수면',
+}
+// 반복 패턴은 여러 구간(최근 4개)에 걸친 관찰이라 7일보다 넉넉한 기간이 필요하다 (주 단위 8구간 확보).
+const PATTERNS_LOOKBACK_DAYS = 55
+
 function formatPeriodDate(date: string) {
   const [, month, day] = date.split('-')
   return `${Number(month)}월 ${Number(day)}일`
@@ -269,6 +280,8 @@ export default function WeeklyReviewScreen({ endDate, onBack, onOpenRecord }: { 
   const [savedQuestions, setSavedQuestions] = useState<SavedQuestion[]>([])
   const [customQuestion, setCustomQuestion] = useState('')
   const [userId, setUserId] = useState<string | null>(null)
+  const [patterns, setPatterns] = useState<RecurringPattern[] | null>(null)
+  const [patternsLoading, setPatternsLoading] = useState(false)
 
   const storageKey = useMemo(
     () => userId ? `careflow:visit-questions:${userId}:${from}:${endDate}` : null,
@@ -307,6 +320,20 @@ export default function WeeklyReviewScreen({ endDate, onBack, onOpenRecord }: { 
   useEffect(() => {
     loadReview()
   }, [loadReview])
+
+  useEffect(() => {
+    let cancelled = false
+    setPatternsLoading(true)
+    setPatterns(null)
+    fetchTimelinePatterns(addDays(endDate, -PATTERNS_LOOKBACK_DAYS), endDate, 'week').then(result => {
+      if (cancelled) return
+      setPatterns(result?.patterns ?? null)
+      setPatternsLoading(false)
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [endDate])
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => setUserId(data.user?.id ?? null))
@@ -387,8 +414,32 @@ export default function WeeklyReviewScreen({ endDate, onBack, onOpenRecord }: { 
           <Text style={styles.helper}>{summarySource === 'ai' ? 'AI가 원기록을 읽기 쉽게 정리했어요.' : 'AI 연결 없이 앱이 원기록을 간단히 정리했어요.'} 진단이나 원인 판단은 하지 않아요.</Text>
         </View>
 
+        {patternsLoading || patterns !== null ? (
+          <View style={styles.card}>
+            <Text style={styles.stepLabel}>2. 반복 패턴 관찰</Text>
+            <Text style={styles.sectionIntro}>
+              최근 몇 주간 지표 흐름에서 반복해서 관찰된 변화예요. 원인이나 진단이 아니라, 개인 기준선 대비
+              함께 살펴볼 만한 신호만 보여드려요.
+            </Text>
+            {patternsLoading ? (
+              <ActivityIndicator color={Colors.brand} />
+            ) : patterns && patterns.length > 0 ? (
+              <View style={styles.patternList}>
+                {patterns.map(pattern => (
+                  <View key={pattern.metric} style={styles.patternRow}>
+                    <Text style={styles.patternMetric}>{metricLabels[pattern.metric] ?? pattern.metric}</Text>
+                    <Text style={styles.patternText}>{pattern.description}</Text>
+                  </View>
+                ))}
+              </View>
+            ) : (
+              <Text style={styles.helper}>최근 몇 주간 기준선보다 반복해서 높게 관찰된 신호는 없었어요.</Text>
+            )}
+          </View>
+        ) : null}
+
         <View style={styles.card}>
-          <Text style={styles.stepLabel}>2. 원기록 확인</Text>
+          <Text style={styles.stepLabel}>3. 원기록 확인</Text>
           <Text style={styles.sectionIntro}>날짜를 누르면 그날 직접 남긴 기록을 볼 수 있어요.</Text>
           {groupedEntries.length === 0 ? (
             <View style={styles.emptyBox}>
@@ -415,7 +466,7 @@ export default function WeeklyReviewScreen({ endDate, onBack, onOpenRecord }: { 
         </View>
 
         <View style={styles.card}>
-          <Text style={styles.stepLabel}>3. 진료 질문 준비</Text>
+          <Text style={styles.stepLabel}>4. 진료 질문 준비</Text>
           <Text style={styles.sectionIntro}>묻고 싶은 문장을 고르거나 직접 적어주세요. 선택한 내용만 저장돼요.</Text>
           <View style={styles.questionList}>
             {suggestions.map(question => {
@@ -479,6 +530,10 @@ const styles = StyleSheet.create({
   summary: { color: Colors.text, fontSize: 17, lineHeight: 27, fontWeight: '700' },
   helper: { color: Colors.textMuted, fontSize: 14, lineHeight: 21 },
   sectionIntro: { color: Colors.textMuted, fontSize: 16, lineHeight: 24 },
+  patternList: { gap: 10 },
+  patternRow: { borderRadius: Radius.md, borderWidth: 1, borderColor: Colors.border, backgroundColor: Colors.white, padding: 12, gap: 4 },
+  patternMetric: { color: Colors.brandDark, fontSize: 15, fontWeight: '900' },
+  patternText: { color: Colors.text, fontSize: 15, lineHeight: 22 },
   dayCard: { borderWidth: 1, borderColor: Colors.border, borderRadius: Radius.md, overflow: 'hidden', backgroundColor: Colors.white },
   dayHeader: { minHeight: 64, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12, padding: 13 },
   dayTitle: { color: Colors.text, fontSize: 17, fontWeight: '900' },
