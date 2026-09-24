@@ -4,6 +4,7 @@ import {
   buildSummaryUserPrompt,
   extractRepeatedNotes,
   findBoundaryViolation,
+  hasScoredSignal,
   runSummaryAssistant,
   BOUNDARY_SAFE_FALLBACK_SUMMARY,
 } from '../summaryAssistant'
@@ -59,6 +60,27 @@ describe('extractRepeatedNotes', () => {
 
   it('입력이 없으면 빈 배열을 반환한다', () => {
     expect(extractRepeatedNotes([])).toEqual([])
+  })
+})
+
+describe('hasScoredSignal', () => {
+  it('증상 점수가 하나라도 있으면 true', () => {
+    expect(hasScoredSignal([makeEntry({ symptoms: [{ symptom: 'dizziness', score: 3 }] })])).toBe(true)
+  })
+
+  it('감정 점수가 하나라도 있으면 true', () => {
+    expect(hasScoredSignal([makeEntry({ affects: [{ affect: 'anxiety', score: 2 }] })])).toBe(true)
+  })
+
+  it('증상/감정 점수가 전부 null이면 false', () => {
+    const entries = [
+      makeEntry({ symptoms: [{ symptom: 'dizziness', score: null }], affects: [{ affect: 'anxiety', score: null }] }),
+    ]
+    expect(hasScoredSignal(entries)).toBe(false)
+  })
+
+  it('entries가 비어있으면 false', () => {
+    expect(hasScoredSignal([])).toBe(false)
   })
 })
 
@@ -149,16 +171,15 @@ describe('runSummaryAssistant', () => {
     warnSpy.mockRestore()
   })
 
-  it('entries는 있지만 점수가 전부 null이어도 LLM을 호출한다 (현재 동작 스냅샷)', async () => {
-    const create = vi.fn().mockResolvedValue({
-      choices: [{ message: { content: '기록을 확인했어요. 함께 볼까요?' } }],
-    })
+  it('entries는 있지만 점수가 전부 null이면 LLM을 호출하지 않고 안내 문구를 반환한다', async () => {
+    const create = vi.fn()
     const openai = { chat: { completions: { create } } } as any
 
-    await runSummaryAssistant(openai, {
-      entries: [makeEntry({ symptoms: [{ symptom: 'dizziness', score: null }] })],
+    const result = await runSummaryAssistant(openai, {
+      entries: [makeEntry({ symptoms: [{ symptom: 'dizziness', score: null }], affects: [{ affect: 'anxiety', score: null }] })],
     })
 
-    expect(create).toHaveBeenCalledTimes(1)
+    expect(create).not.toHaveBeenCalled()
+    expect(result.summary).toContain('점수가 없어요')
   })
 })

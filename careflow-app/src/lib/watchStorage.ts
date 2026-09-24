@@ -8,6 +8,12 @@ export type WatchObservationInput = {
   posture?: string | null
   note?: string | null
   sampleCount: number
+  /** HealthKit 최신 심박 샘플(bpm). 권한이 없거나 값이 없으면 undefined. */
+  heartRateBpm?: number | null
+  /** HealthKit environmentalAudioExposure 최신 샘플(dB). 권한이 없거나 값이 없으면 undefined. */
+  ambientNoiseDb?: number | null
+  /** 버튼 탭 후 5초간 가속도 크기 평균(원시 파형 아님). 값이 없으면 undefined. */
+  movementLevel?: number | null
 }
 
 type WatchBridge = {
@@ -34,6 +40,9 @@ async function saveObservations(observations: WatchObservationInput[]) {
         posture: observation.posture ?? null,
         note: observation.note ?? null,
         sample_count: observation.sampleCount,
+        heart_rate_bpm: observation.heartRateBpm ?? null,
+        ambient_noise_db: observation.ambientNoiseDb ?? null,
+        movement_level: observation.movementLevel ?? null,
         source: 'apple_watch',
       })),
       { onConflict: 'user_id,episode_id' }

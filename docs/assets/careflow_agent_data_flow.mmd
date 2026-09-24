@@ -1,0 +1,60 @@
+%%{init: {
+  "theme": "base",
+  "themeVariables": {
+    "fontFamily": "Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif",
+    "primaryTextColor": "#26312A",
+    "lineColor": "#5C7A5E",
+    "clusterBkg": "#F8FAF7",
+    "clusterBorder": "#B8C8B8",
+    "fontSize": "18px"
+  },
+  "flowchart": {
+    "curve": "basis",
+    "nodeSpacing": 46,
+    "rankSpacing": 62,
+    "htmlLabels": true
+  }
+}}%%
+
+flowchart LR
+    subgraph INPUT["생활기록 데이터 ·"]
+        direction TB
+        P["<div style='width:170px'>기록하는 사람<br/>이명과 어지럼을<br/>겪는 당사자</div>"]
+        M["<div style='width:190px'>직접 입력<br/>이명, 어지럼, 수면<br/>감정, 관계, 생활환경<br/>자유 메모</div>"]
+        W["<div style='width:190px'>선택형 워치<br/>움직임, 심박<br/>주변 소리 크기<br/>어지럼 순간 기록</div>"]
+        P --> M
+        P -.-> W
+    end
+
+    M --> S["<div style='width:170px'>허용한 생활기록<br/>계정별 저장</div>"]
+    W -.-> S
+
+    S --> O["<div style='width:190px'>에이전트 조정 기능<br/>사용할 기간과 항목 선택</div>"]
+    O --> A["<div style='width:190px'>기록 정리 에이전트<br/>한 주의 생활 흐름 정리<br/>원기록 연결</div>"]
+    A --> R["<div style='width:210px'>기록을 다시 보는 사람<br/>주간 회고 확인<br/>내용 수정</div>"]
+
+    subgraph EVIDENCE["근거 데이터 ·"]
+        direction TB
+        D["<div style='width:160px'>검토된 논문<br/>공공자료</div>"]
+        E["<div style='width:190px'>근거 확인 에이전트<br/>출처와 표현 확인</div>"]
+        G["<div style='width:160px'>검토된 안내문</div>"]
+        D --> E --> G
+    end
+
+    G -.-> R
+
+    N["<div style='width:180px'>진단하지 않음<br/>원인을 단정하지 않음<br/>치료를 권하지 않음</div>"] --- O
+
+    classDef person fill:#EEF5ED,stroke:#3F5F46,stroke-width:2px,color:#26312A;
+    classDef data fill:#F8FBF7,stroke:#7E9A80,stroke-width:1.5px,color:#26312A;
+    classDef agent fill:#FFF9F0,stroke:#C58F5B,stroke-width:2px,color:#5A402B;
+    classDef result fill:#EEF4FB,stroke:#4F7F8F,stroke-width:2px,color:#26312A;
+    classDef evidence fill:#F5F1FB,stroke:#9B8AC6,stroke-width:1.5px,color:#3F3357;
+    classDef boundary fill:#FFF7F3,stroke:#B86B54,stroke-width:1.5px,color:#6A3529;
+
+    class P person;
+    class M,W,S data;
+    class O,A agent;
+    class R result;
+    class D,E,G evidence;
+    class N boundary;

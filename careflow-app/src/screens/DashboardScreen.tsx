@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useState } from 'react'
-import { ActivityIndicator, Modal, RefreshControl, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { ActivityIndicator, Alert, Modal, RefreshControl, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import AppHeader from '../components/AppHeader'
 import { Colors, Radius } from '../constants/colors'
 import { supabase } from '../lib/supabase'
+import { deleteDemoWeek, prepareDemoWeek } from '../lib/demoData'
 import { subscribeToWatchObservations, syncPendingWatchObservations } from '../lib/watchStorage'
 import { BUCKETS, type TimeBucket } from '../types/careflow'
 import {
@@ -19,7 +20,13 @@ import {
   type TrendPoint,
 } from '../../../lib/domain/socialReturnIndicators'
 
-type DailyLogRow = { id: string; log_date: string; bucket: TimeBucket }
+type DailyLogRow = {
+  id: string
+  log_date: string
+  bucket: TimeBucket
+  record_source: 'direct' | 'historical_weekly_recall'
+  source_period_end: string | null
+}
 type SymptomRow = { daily_log_id: string; symptom: MetricKey | string; score: number | null }
 type AffectRow = { daily_log_id: string; anxiety: number | null; tension: number | null }
 type AffectScoreRow = { daily_log_id: string; affect: string; score: number | null }
@@ -53,6 +60,7 @@ type WatchObservation = {
 
 type DashboardData = {
   date: string
+  reviewEndDate: string
   availableDates: string[]
   indicators: { readiness: Band; steadiness: Band; activity_range: Band }
   trend: TrendPoint[]
@@ -67,6 +75,7 @@ type WeeklyTrendPoint = TrendPoint & { range: string }
 type DashboardScreenProps = {
   onOpenRecord?: () => void
   onOpenNotification?: () => void
+  onOpenWeeklyReview?: (date: string) => void
 }
 
 const BAND_LABELS: Record<Band, string> = {
@@ -531,11 +540,13 @@ function TrendGraph({ trend }: { trend: TrendPoint[] }) {
   )
 }
 
-export default function DashboardScreen({ onOpenRecord, onOpenNotification }: DashboardScreenProps) {
+export default function DashboardScreen({ onOpenRecord, onOpenNotification, onOpenWeeklyReview }: DashboardScreenProps) {
   const [data, setData] = useState<DashboardData | null>(null)
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState('')
   const [selectedDate, setSelectedDate] = useState(formatKstDate())
+  const [demoLoading, setDemoLoading] = useState(false)
+  const [demoMessage, setDemoMessage] = useState('')
 
   const loadDashboard = useCallback(async () => {
     setLoading(true)
@@ -552,7 +563,7 @@ export default function DashboardScreen({ onOpenRecord, onOpenNotification }: Da
     const [logsResult, sleepsResult, watchResult] = await Promise.all([
       supabase
         .from('daily_logs')
-        .select('id,log_date,bucket')
+        .select('id,log_date,bucket,record_source,source_period_end')
         .eq('user_id', user.id)
         .order('log_date', { ascending: true }),
       supabase
@@ -663,6 +674,7 @@ export default function DashboardScreen({ onOpenRecord, onOpenNotification }: Da
 
     setData({
       date: basisDate,
+      reviewEndDate: allLogs.find(log => log.log_date === basisDate && log.record_source === 'historical_weekly_recall')?.source_period_end ?? basisDate,
       availableDates,
       indicators,
       trend,
@@ -679,6 +691,48 @@ export default function DashboardScreen({ onOpenRecord, onOpenNotification }: Da
   }, [loadDashboard])
 
   useEffect(() => subscribeToWatchObservations(loadDashboard), [loadDashboard])
+
+  const createDemoWeek = async () => {
+    setDemoLoading(true)
+    setDemoMessage('')
+    try {
+      const verification = await prepareDemoWeek(formatKstDate())
+      setSelectedDate(verification.to)
+      setDemoMessage(`가상자료 ${verification.dayCount}일과 원기록 ${verification.logCount}개를 확인했어요.`)
+      onOpenWeeklyReview?.(verification.to)
+    } catch {
+      setDemoMessage('가상자료를 만들지 못했어요. 연결 상태를 확인한 뒤 다시 시도해볼까요?')
+    } finally {
+      setDemoLoading(false)
+    }
+  }
+
+  const confirmDeleteDemoWeek = () => {
+    Alert.alert(
+      '가상자료를 지울까요?',
+      '시연용으로 만든 자료만 지워요. 직접 작성한 기록과 9주 회고 자료는 그대로 남아요.',
+      [
+        { text: '취소', style: 'cancel' },
+        {
+          text: '가상자료 지우기',
+          style: 'destructive',
+          onPress: async () => {
+            setDemoLoading(true)
+            setDemoMessage('')
+            try {
+              await deleteDemoWeek()
+              setDemoMessage('시연용 가상자료만 지웠어요.')
+              await loadDashboard()
+            } catch {
+              setDemoMessage('가상자료를 지우지 못했어요. 연결 상태를 확인해볼까요?')
+            } finally {
+              setDemoLoading(false)
+            }
+          },
+        },
+      ]
+    )
+  }
 
   const displayDate = data?.date ?? selectedDate
 
@@ -702,6 +756,31 @@ export default function DashboardScreen({ onOpenRecord, onOpenNotification }: Da
         refreshControl={<RefreshControl refreshing={loading} onRefresh={loadDashboard} tintColor={Colors.brand} />}
       >
         <DateDropdown date={displayDate} onSelect={setSelectedDate} />
+
+        <TouchableOpacity
+          style={styles.weeklyReviewButton}
+          onPress={() => onOpenWeeklyReview?.(data?.reviewEndDate ?? displayDate)}
+          accessibilityRole="button"
+          accessibilityLabel="지난 7일 돌아보기"
+        >
+          <View style={{ flex: 1 }}>
+            <Text style={styles.weeklyReviewTitle}>지난 7일 돌아보기</Text>
+            <Text style={styles.weeklyReviewCopy}>주간 회고를 읽고 원기록을 확인한 뒤 진료 질문을 준비해요.</Text>
+          </View>
+          <Text style={styles.weeklyReviewArrow}>›</Text>
+        </TouchableOpacity>
+
+        <View style={styles.demoCard}>
+          <Text style={styles.demoTitle}>시연용 가상자료</Text>
+          <Text style={styles.demoCopy}>실제 환자 기록과 구분되는 7일 가상자료를 내 계정에 만들어요. 다시 만들면 이전 가상자료만 바뀌어요.</Text>
+          <TouchableOpacity style={styles.demoPrimaryButton} onPress={createDemoWeek} disabled={demoLoading}>
+            <Text style={styles.demoPrimaryText}>{demoLoading ? '확인하고 있어요' : '7일 가상자료 만들고 회고 열기'}</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.demoSecondaryButton} onPress={confirmDeleteDemoWeek} disabled={demoLoading}>
+            <Text style={styles.demoSecondaryText}>가상자료 지우기</Text>
+          </TouchableOpacity>
+          {demoMessage ? <Text style={styles.demoMessage}>{demoMessage}</Text> : null}
+        </View>
 
         {data ? <SavedRecordsGraphic dailyLogs={data.savedDailyLogs} sleepLogs={data.savedSleepLogs} /> : null}
         {data ? <WatchRecordsCard observations={data.watchObservations} /> : null}
@@ -751,6 +830,18 @@ const styles = StyleSheet.create({
   quickActionSecondary: { backgroundColor: Colors.white, borderColor: Colors.border },
   quickActionText: { color: Colors.text, fontSize: 22, fontWeight: '900' },
   card: { backgroundColor: Colors.card, borderRadius: Radius.card, padding: 16, borderWidth: 1, borderColor: Colors.border },
+  weeklyReviewButton: { minHeight: 92, flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: Colors.card, borderRadius: Radius.card, padding: 16, borderWidth: 1, borderColor: Colors.brand },
+  weeklyReviewTitle: { color: Colors.brandDark, fontSize: 19, lineHeight: 27, fontWeight: '900' },
+  weeklyReviewCopy: { color: Colors.textMuted, fontSize: 15, lineHeight: 22, marginTop: 3 },
+  weeklyReviewArrow: { color: Colors.brandDark, fontSize: 36, lineHeight: 40, fontWeight: '700' },
+  demoCard: { backgroundColor: Colors.card, borderRadius: Radius.card, padding: 16, borderWidth: 1, borderColor: Colors.border, gap: 10 },
+  demoTitle: { color: Colors.text, fontSize: 19, lineHeight: 27, fontWeight: '900' },
+  demoCopy: { color: Colors.textMuted, fontSize: 15, lineHeight: 23 },
+  demoPrimaryButton: { minHeight: 52, borderRadius: Radius.md, backgroundColor: Colors.brand, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 12 },
+  demoPrimaryText: { color: Colors.white, fontSize: 16, fontWeight: '900', textAlign: 'center' },
+  demoSecondaryButton: { minHeight: 48, borderRadius: Radius.md, borderWidth: 1, borderColor: Colors.border, alignItems: 'center', justifyContent: 'center' },
+  demoSecondaryText: { color: Colors.danger, fontSize: 15, fontWeight: '900' },
+  demoMessage: { color: Colors.textMuted, fontSize: 14, lineHeight: 21 },
   sectionTitle: { fontSize: 18, fontWeight: '900', color: Colors.text, marginBottom: 12 },
   dateDropdownCard: { backgroundColor: Colors.card, borderRadius: Radius.card, padding: 16, borderWidth: 1, borderColor: Colors.border, gap: 10 },
   dateDropdownTitle: { color: Colors.textMuted, fontSize: 18, fontWeight: '900' },

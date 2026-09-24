@@ -9,6 +9,7 @@ import { formatKstDate } from '../../../lib/domain/socialReturnIndicators'
 import {
   AFFECTS,
   BUCKETS,
+  CONTEXT_LABELS,
   DEFAULT_AFFECTS,
   DEFAULT_SYMPTOMS,
   OPTIONAL_AFFECTS,
@@ -19,6 +20,8 @@ import {
   type SymptomKey,
   type TimeBucket,
 } from '../types/careflow'
+import { fetchContextMatches } from '../lib/assistants'
+import type { ContextAssistantOutput } from '../../../lib/domain/assistants/types'
 
 type AxisKey = 'body' | 'emotion' | 'relation' | 'meaning'
 type RelationKey = 'together' | 'isolated' | 'communicationHard'
@@ -43,6 +46,23 @@ const RELATION_LABELS: { key: RelationKey; label: string }[] = [
 ]
 
 const emptyRelation = () => ({ together: false, isolated: false, communicationHard: false })
+
+// Context Assistant가 반환하는 matchedOn 라벨(예: 'symptom:dizziness')을
+// 화면에 표시할 한국어 문구로 바꾼다. SPEC §0: 인과·진단 표현 없이 "무엇이 겹쳤는지"만 나열한다.
+function describeMatchedOn(matchedOn: string[]): string {
+  return matchedOn
+    .map(tag => {
+      const [kind, key] = tag.split(':')
+      if (kind === 'symptom') return SYMPTOMS.find(item => item.key === key)?.label ?? key
+      if (kind === 'affect') return AFFECTS.find(item => item.key === key)?.label ?? key
+      if (kind === 'context') return CONTEXT_LABELS[key as ContextKey] ?? key
+      if (kind === 'bucket') return BUCKETS.find(item => item.value === key)?.label ?? key
+      if (kind === 'social') return '이해받음 여부'
+      return key
+    })
+    .join(' · ')
+}
+
 type SleepTimeTarget = 'bedtime' | 'waketime'
 
 const TIME_OPTIONS = Array.from({ length: 96 }, (_, index) => {
@@ -141,6 +161,8 @@ export default function RecordScreen({
   const [psqi, setPsqi] = useState({ psqi_q1: 0, psqi_q2: 0, psqi_q3: 0 })
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState('')
+  const [contextResult, setContextResult] = useState<ContextAssistantOutput | null>(null)
+  const [contextLoading, setContextLoading] = useState(false)
 
   // 베타 사용성 로깅: 화면 진입 시각 + 저장 여부 (H1 검증)
   const enteredAtRef = useRef(Date.now())
@@ -206,6 +228,12 @@ export default function RecordScreen({
         duration_sec: Math.round((Date.now() - enteredAtRef.current) / 1000),
         symptom_count: activeSymptoms.length,
         affect_count: activeAffects.length,
+      })
+      setContextResult(null)
+      setContextLoading(true)
+      fetchContextMatches(logDate).then(result => {
+        setContextResult(result)
+        setContextLoading(false)
       })
       setSymptoms(emptySymptoms())
       setActiveSymptoms(DEFAULT_SYMPTOMS)
@@ -411,6 +439,25 @@ export default function RecordScreen({
           {saving ? <ActivityIndicator color={Colors.white} /> : <Text style={styles.primaryText}>기록 저장</Text>}
         </TouchableOpacity>
 
+        {contextLoading || contextResult ? (
+          <View style={styles.card}>
+            <Text style={styles.sectionTitle}>비슷한 과거 기록</Text>
+            {contextLoading ? (
+              <ActivityIndicator color={Colors.brand} />
+            ) : (
+              <>
+                <Text style={styles.contextMessage}>{contextResult?.message}</Text>
+                {contextResult?.relatedEntries.map(match => (
+                  <View key={match.entry.dailyLogId} style={styles.contextMatchRow}>
+                    <Text style={styles.contextMatchDate}>{match.entry.date}</Text>
+                    <Text style={styles.contextMatchTags}>{describeMatchedOn(match.matchedOn)}</Text>
+                  </View>
+                ))}
+              </>
+            )}
+          </View>
+        ) : null}
+
         <View style={styles.card}>
           <View style={styles.sleepHeaderRow}>
             <Text style={[styles.axisTitle, { marginBottom: 0 }]}>수면</Text>
@@ -556,6 +603,10 @@ const styles = StyleSheet.create({
   timeSelectLabel: { color: Colors.textMuted, fontSize: 14, fontWeight: '900', marginBottom: 4 },
   timeSelectValue: { color: Colors.text, fontSize: 20, fontWeight: '900' },
   message: { color: Colors.textMuted, fontSize: 15, lineHeight: 22, paddingHorizontal: 4 },
+  contextMessage: { color: Colors.text, fontSize: 16, lineHeight: 23, fontWeight: '700', marginBottom: 10 },
+  contextMatchRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 10, borderTopWidth: 1, borderColor: Colors.border, gap: 10 },
+  contextMatchDate: { color: Colors.textMuted, fontSize: 14, fontWeight: '900' },
+  contextMatchTags: { color: Colors.brandDark, fontSize: 14, fontWeight: '800', flexShrink: 1, textAlign: 'right' },
   modalBackdrop: { flex: 1, backgroundColor: 'rgba(38,49,42,0.24)', justifyContent: 'center', padding: 18 },
   calendarCard: { backgroundColor: Colors.card, borderRadius: Radius.card, borderWidth: 1, borderColor: Colors.border, padding: 16, alignSelf: 'center', width: '100%', maxWidth: 390 },
   calendarHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14, gap: 10 },

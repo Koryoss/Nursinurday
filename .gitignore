@@ -43,3 +43,7 @@ ui_snapshots/
 
 # Supabase CLI 로컬 프로젝트 상태 (project-ref, pooler-url 등 환경별 정보)
 supabase/.temp/
+
+# 빌드 에러 로그 (임시 산출물)
+build-error.log
+**/build-error.log

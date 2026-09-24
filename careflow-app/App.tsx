@@ -7,13 +7,14 @@ import RecordScreen from './src/screens/RecordScreen'
 import NotificationScreen from './src/screens/NotificationScreen'
 import ChatScreen from './src/screens/ChatScreen'
 import DashboardScreen from './src/screens/DashboardScreen'
+import WeeklyReviewScreen from './src/screens/WeeklyReviewScreen'
 import AuthScreen from './src/screens/AuthScreen'
 import OnboardingScreen from './src/screens/OnboardingScreen'
 import { Colors } from './src/constants/colors'
 import { supabase } from './src/lib/supabase'
 import { logUsage } from './src/lib/usageLog'
 
-type AppSection = 'dashboard' | 'record' | 'notification' | 'chat'
+type AppSection = 'dashboard' | 'record' | 'notification' | 'chat' | 'weeklyReview'
 
 function paramsFromUrl(url: string) {
   const parsed = new URL(url)
@@ -32,6 +33,7 @@ export default function App() {
   const [profileReady, setProfileReady] = useState(false)
   const [loading, setLoading] = useState(true)
   const [activeSection, setActiveSection] = useState<AppSection>('dashboard')
+  const [weeklyReviewEndDate, setWeeklyReviewEndDate] = useState(() => new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Seoul' }))
   const transition = useRef(new Animated.Value(1)).current
 
   const loadProfile = async (user: User | null) => {
@@ -146,6 +148,10 @@ export default function App() {
             <DashboardScreen
               onOpenRecord={() => setActiveSection('record')}
               onOpenNotification={() => setActiveSection('notification')}
+              onOpenWeeklyReview={date => {
+                setWeeklyReviewEndDate(date)
+                setActiveSection('weeklyReview')
+              }}
             />
           )}
           {activeSection === 'record' && (
@@ -162,6 +168,13 @@ export default function App() {
             />
           )}
           {activeSection === 'chat' && <ChatScreen onBack={() => setActiveSection('record')} />}
+          {activeSection === 'weeklyReview' && (
+            <WeeklyReviewScreen
+              endDate={weeklyReviewEndDate}
+              onBack={() => setActiveSection('dashboard')}
+              onOpenRecord={() => setActiveSection('record')}
+            />
+          )}
         </Animated.View>
       </View>
     </SafeAreaProvider>

@@ -9,7 +9,15 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { HealthRecordAffect, HealthRecordContextTags, HealthRecordEntry, HealthRecordSleep, HealthRecordSymptom, TimeBucket } from './types'
 
-type DailyLogRow = { id: string; log_date: string; bucket: TimeBucket }
+type DailyLogRow = {
+  id: string
+  log_date: string
+  bucket: TimeBucket
+  record_source: 'direct' | 'historical_weekly_recall'
+  source_period_start: string | null
+  source_period_end: string | null
+  is_demo: boolean
+}
 type SymptomRow = { daily_log_id: string; symptom: string; score: number | null }
 type AffectLogRow = { daily_log_id: string; anxiety: number | null; tension: number | null }
 type AffectScoreRow = { daily_log_id: string; affect: string; score: number }
@@ -32,7 +40,7 @@ export async function fetchHealthRecordEntries(
 ): Promise<HealthRecordEntry[]> {
   const { data: logs, error: logsError } = await supabase
     .from('daily_logs')
-    .select('id,log_date,bucket')
+    .select('id,log_date,bucket,record_source,source_period_start,source_period_end,is_demo')
     .eq('user_id', userId)
     .gte('log_date', fromDate)
     .lte('log_date', toDate)
@@ -112,6 +120,10 @@ export async function fetchHealthRecordEntries(
     dailyLogId: log.id,
     date: log.log_date,
     bucket: log.bucket,
+    recordSource: log.record_source,
+    sourcePeriodStart: log.source_period_start,
+    sourcePeriodEnd: log.source_period_end,
+    isDemo: log.is_demo,
     symptoms: symptomsByLog.get(log.id) ?? [],
     affects: affectsByLog.get(log.id) ?? [],
     contextTags: contextByLog.get(log.id) ?? { noise: false, weather_change: false, crowded: false },
@@ -139,4 +151,27 @@ export async function fetchWeeklyNotes(
   return (data as { note: string | null }[])
     .map(row => row.note?.trim())
     .filter((note): note is string => Boolean(note))
+}
+
+// ─────────────────────────────────────────────────────
+// 날짜 파라미터 검증 (app/api/assistants/summary/route.ts에서 사용)
+// ─────────────────────────────────────────────────────
+const DATE_FORMAT_RE = /^\d{4}-\d{2}-\d{2}$/
+
+function isValidCalendarDate(value: string): boolean {
+  if (!DATE_FORMAT_RE.test(value)) return false
+  const [y, m, d] = value.split('-').map(Number)
+  const date = new Date(Date.UTC(y, m - 1, d))
+  return date.getUTCFullYear() === y && date.getUTCMonth() === m - 1 && date.getUTCDate() === d
+}
+
+/** from/to 날짜 파라미터를 검증한다. 문제가 있으면 사용자에게 보여줄 에러 메시지를, 문제 없으면 null을 반환한다. */
+export function isValidDateRange(from: string, to: string): string | null {
+  if (!isValidCalendarDate(from) || !isValidCalendarDate(to)) {
+    return 'from/to는 YYYY-MM-DD 형식의 날짜여야 해요.'
+  }
+  if (from > to) {
+    return 'from은 to보다 이후일 수 없어요.'
+  }
+  return null
 }

@@ -18,8 +18,18 @@ create table daily_logs (
   user_id uuid not null references auth.users on delete cascade,
   log_date date not null,
   bucket time_bucket not null,
+  record_source text not null default 'direct' check (record_source in ('direct', 'historical_weekly_recall')),
+  source_period_start date,
+  source_period_end date,
+  is_demo boolean not null default false,
+  check (
+    record_source <> 'historical_weekly_recall'
+    or (source_period_start is not null and source_period_end is not null and source_period_start <= source_period_end)
+  ),
   created_at timestamptz default now()
 );
+
+create index daily_logs_user_date_idx on daily_logs (user_id, log_date);
 
 create table symptom_scores (   -- 몸 (0-10)
   id uuid primary key default gen_random_uuid(),
@@ -57,7 +67,8 @@ create table sleep_logs (
   user_id uuid not null references auth.users on delete cascade,
   sleep_date date not null,
   bedtime time, waketime time,
-  psqi_q1 int, psqi_q2 int, psqi_q3 int
+  psqi_q1 int, psqi_q2 int, psqi_q3 int,
+  is_demo boolean not null default false
 );
 
 create table weekly_checkins (  -- 부록 B 임상척도 (추세용)
