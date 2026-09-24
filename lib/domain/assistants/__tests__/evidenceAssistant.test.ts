@@ -28,7 +28,7 @@ describe('runEvidenceAssistant', () => {
     const result = await runEvidenceAssistant(openai, supabase, { keyword: '존재하지 않는 개념' })
 
     expect(result.sources).toEqual([])
-    expect(result.answer).toContain('근거 살용은 찾을 촜을 시다')
+    expect(result.answer).toContain('제공된 자료에서 관련 내용을 찾을 수 없습니다.')
     expect(result.answer).toContain('⚠️ 이 내용은 자료 근거 인용이며 의료 자문이 아닙니다.')
     expect(openai.chat.completions.create).not.toHaveBeenCalled()
   })
