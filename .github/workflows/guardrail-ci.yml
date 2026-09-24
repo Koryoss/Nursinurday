@@ -1,0 +1,33 @@
+name: guardrail-ci
+
+# CF-REG-2026-001 비의료 4대 Red-Line 자동 검증 게이트.
+# 모든 PR과 main 계열 push에서 경계 카피 린터 + vitest 회귀를 실행한다.
+# 실패 시 머지를 막아 가드레일 위반 0건 원칙을 CI 레벨에서 강제한다.
+
+on:
+  pull_request:
+    branches: [main, develop]
+  push:
+    branches: [main, main-catchup]
+
+jobs:
+  guardrail:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Boundary lint (SPEC §0 / CF-REG-2026-001 §1 금지어)
+        run: npm run lint:boundary
+
+      - name: Vitest 회귀 (assistants 경계 가드 포함)
+        run: npm run test
