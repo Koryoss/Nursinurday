@@ -39,7 +39,12 @@ export function buildSummaryUserPrompt(entries: HealthRecordEntry[], keySymptoms
         .filter(a => typeof a.score === 'number')
         .map(a => `${a.affect} ${a.score}`)
         .join(', ') || '없음'
-      return `- ${entry.date} (${entry.bucket}): 증상[${symptomText}] 감정[${affectText}] 이해받음:${entry.understood ?? '미기록'}`
+      const sourceText = entry.isDemo
+        ? '제품 시연용 가상 기록'
+        : entry.recordSource === 'historical_weekly_recall'
+          ? `과거 주간 회고에서 옮긴 시간대별 대표값 ${entry.sourcePeriodStart ?? ''}~${entry.sourcePeriodEnd ?? ''}`
+          : '앱에서 직접 남긴 기록'
+      return `- ${entry.date} (${entry.bucket}, ${sourceText}): 증상[${symptomText}] 감정[${affectText}] 이해받음:${entry.understood ?? '미기록'}`
     })
     .join('\n')
 
@@ -95,6 +100,15 @@ export function extractRepeatedNotes(weeklyNotes: string[]): string[] {
 }
 
 // ─────────────────────────────────────────────────────
+/** entries 중 하나라도 증상 또는 감정에 숫자 점수가 기록되어 있으면 true. 전부 null이면 false. */
+export function hasScoredSignal(entries: HealthRecordEntry[]): boolean {
+  return entries.some(
+    entry =>
+      entry.symptoms.some(s => typeof s.score === 'number') ||
+      entry.affects.some(a => typeof a.score === 'number')
+  )
+}
+
 // SPEC §0 경계 가드: LLM이 규칙을 어긴 문장을 만들어내는 경우를 잡아내는 안전망.
 // 시스템 프롬프트만으로는 100% 보장되지 않으므로, 출력 사후 검증을 둔다.
 // ─────────────────────────────────────────────────────
@@ -135,6 +149,15 @@ export async function runSummaryAssistant(
   if (input.entries.length === 0) {
     return {
       summary: '아직 요약할 기록이 없어요. 오늘의 몸·감정·관계 신호를 먼저 기록해볼까요?',
+      keySymptoms,
+      keyNotes,
+      structuredRecord,
+    }
+  }
+
+  if (!hasScoredSignal(input.entries)) {
+    return {
+      summary: '기록은 있지만 아직 점수가 없어요. 오늘 몸과 마음 상태를 숫자로 남겨볼까요?',
       keySymptoms,
       keyNotes,
       structuredRecord,

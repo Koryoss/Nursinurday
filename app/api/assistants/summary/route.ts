@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/integrations/supabase/server'
-import { fetchHealthRecordEntries, fetchWeeklyNotes } from '@/lib/domain/assistants/fetchHealthRecords'
+import { fetchHealthRecordEntries, fetchWeeklyNotes, isValidDateRange } from '@/lib/domain/assistants/fetchHealthRecords'
 import { runSummaryAssistant } from '@/lib/domain/assistants/summaryAssistant'
 import { addDays, formatKstDate } from '@/lib/domain/socialReturnIndicators'
 import OpenAI from 'openai'
+import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 
 export const runtime = 'nodejs'
 export const maxDuration = 30
@@ -16,8 +17,24 @@ function getOpenAI() {
 
 // POST /api/assistants/summary — body: { from?: string, to?: string }
 export async function POST(req: NextRequest) {
-  const supabase = createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const cookieClient = createClient()
+  const authHeader = req.headers.get('authorization')
+  const bearerToken = authHeader?.toLowerCase().startsWith('bearer ')
+    ? authHeader.slice('bearer '.length).trim()
+    : null
+  const supabase = bearerToken
+    ? createSupabaseClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+        {
+          global: { headers: { Authorization: `Bearer ${bearerToken}` } },
+          auth: { persistSession: false, autoRefreshToken: false },
+        }
+      )
+    : cookieClient
+  const { data: { user } } = bearerToken
+    ? await supabase.auth.getUser(bearerToken)
+    : await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const openai = getOpenAI()
@@ -27,9 +44,15 @@ export async function POST(req: NextRequest) {
   const to = toInput || formatKstDate()
   const from = fromInput || addDays(to, -7)
 
+  const rangeError = isValidDateRange(from, to)
+  if (rangeError) return NextResponse.json({ error: rangeError }, { status: 400 })
+
   try {
     const [entries, weeklyNotes] = await Promise.all([
       fetchHealthRecordEntries(supabase, user.id, from, to),
+      // weeklyNotes는 entries 기간(from~to)보다 7일 더 이른 시점부터 조회한다.
+      // meaning_notes는 주 단위(week_start)로 저장되므로, from 직전 주에 기록된 메모가
+      // entries 기간과 겹칠 수 있어 여유 범위를 둔다 (의도된 동작).
       fetchWeeklyNotes(supabase, user.id, addDays(from, -7), to),
     ])
 

@@ -11,14 +11,16 @@
       },
       "env": {
         "EXPO_PUBLIC_SUPABASE_URL": "https://hevxhlanwmywcgntauyn.supabase.co",
-        "EXPO_PUBLIC_SUPABASE_ANON_KEY": "sb_publishable_T0Wa2tsoJR1iiUGsM9xm0Q_GyPwKLAH"
+        "EXPO_PUBLIC_SUPABASE_ANON_KEY": "sb_publishable_T0Wa2tsoJR1iiUGsM9xm0Q_GyPwKLAH",
+        "EXPO_PUBLIC_API_URL": "https://careflow-delta.vercel.app"
       }
     },
     "production": {
       "autoIncrement": true,
       "env": {
         "EXPO_PUBLIC_SUPABASE_URL": "https://hevxhlanwmywcgntauyn.supabase.co",
-        "EXPO_PUBLIC_SUPABASE_ANON_KEY": "sb_publishable_T0Wa2tsoJR1iiUGsM9xm0Q_GyPwKLAH"
+        "EXPO_PUBLIC_SUPABASE_ANON_KEY": "sb_publishable_T0Wa2tsoJR1iiUGsM9xm0Q_GyPwKLAH",
+        "EXPO_PUBLIC_API_URL": "https://careflow-delta.vercel.app"
       }
     }
   },

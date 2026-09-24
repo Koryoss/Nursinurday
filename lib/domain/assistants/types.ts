@@ -17,6 +17,7 @@ import type { Band, MetricKey } from '../socialReturnIndicators'
 // 공통: 하루 단위 건강 기록 (Assistant 입력 공통 단위)
 // ────────────────────────────────────────────────────
 export type TimeBucket = 'morning' | 'afternoon' | 'evening' | 'before_sleep' | 'attack'
+export type RecordSource = 'direct' | 'historical_weekly_recall'
 
 export type HealthRecordSymptom = {
   symptom: string // 'dizziness' | 'gait' | 'tinnitus' | 'headache' | 'floaters' | 'other'
@@ -52,6 +53,10 @@ export type HealthRecordEntry = {
   dailyLogId: string
   date: string // YYYY-MM-DD
   bucket: TimeBucket
+  recordSource?: RecordSource
+  sourcePeriodStart?: string | null
+  sourcePeriodEnd?: string | null
+  isDemo?: boolean
   symptoms: HealthRecordSymptom[]
   affects: HealthRecordAffect[]
   contextTags: HealthRecordContextTags
@@ -119,7 +124,7 @@ export type TimelineAssistantOutput = {
 export type ContextMatch = {
   entry: HealthRecordEntry
   overlapScore: number // 0~1, 증상·맥락 태그·관계 겹침 비율 (원인 분석 아님)
-  matchedOn: string[] // 예: ['symptom:dizziness', 'context:noise']
+  matchedOn: string[] // 예: ['symptom:dizziness', 'affect:anxiety', 'context:noise', 'bucket:morning', 'social:understood']
 }
 
 export type ContextAssistantInput = {

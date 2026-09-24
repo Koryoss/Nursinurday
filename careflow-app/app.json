@@ -27,7 +27,10 @@
     "ios": {
       "icon": "./assets/icon.png",
       "supportsTablet": true,
-      "bundleIdentifier": "com.koryoss.careflow"
+      "bundleIdentifier": "com.koryoss.careflow",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "icon": "./assets/icon.png",
