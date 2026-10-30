@@ -19,6 +19,7 @@ const NAV = [
   { href: '/study/claim', label: '주장 근거화' },
   { href: '/study/audit', label: '경계 검사' },
   { href: '/study/linknote', label: 'LinkNote 연동' },
+  { href: '/study/hub',   label: 'AX Hub' },
 ]
 
 export default function StudyLayout({ children }: { children: React.ReactNode }) {
